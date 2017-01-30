@@ -104,6 +104,7 @@ namespace ogonek {
         : base_type(std::move(rng))
         {}
     };
+
     template <typename Encoding, typename Rng>
     encoded_view<Encoding, Rng> encode(Rng rng) {
         return encoded_view<Encoding, Rng>(std::move(rng));
