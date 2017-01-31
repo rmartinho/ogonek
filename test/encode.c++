@@ -57,15 +57,13 @@ namespace test {
             }
         }
     };
+    CONCEPT_ASSERT(ogonek::EncodingForm<one_to_one_encoding>());
+    CONCEPT_ASSERT(ogonek::EncodingForm<one_to_many_encoding>());
+    CONCEPT_ASSERT(ogonek::EncodingForm<stateful_encoding>());
 } // namespace test
 
 using namespace test::string_literals;
 
-using cont = std::vector<char32_t>;
-using rng = ogonek::encoded_view<test::one_to_one_encoding, decltype(ranges::view::all(cont()))>;
-CONCEPT_ASSERT(ranges::Range<rng>());
-CONCEPT_ASSERT(ranges::detail::ConvertibleToContainer<rng, cont>());
-CONCEPT_ASSERT(!ranges::is_pipeable<rng>());
 TEST_CASE("encode", "Encoding") {
     SECTION("1to1", "Encoding one-to-one") {
         auto base = U"08AF"_s;
