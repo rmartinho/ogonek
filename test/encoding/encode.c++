@@ -13,34 +13,29 @@
 
 #include <ogonek/encode.h++>
 
+#include <catch.hpp>
+#include "util.h++"
+
+#include <range/v3/view/all.hpp>
 #include <range/v3/to_container.hpp>
-#include <range/v3/view/c_str.hpp>
-#include <range/v3/view/join.hpp>
-#include <range/v3/view/transform.hpp>
-#include <range/v3/view/iota.hpp>
-#include <range/v3/view/take.hpp>
+#include <range/v3/utility/functional.hpp>
 
 #include <vector>
-#include <utility>
 
 #include <cstddef>
-#include <cstdint>
-
-#include "util.h++"
-#include <catch.hpp>
 
 namespace test {
     struct one_to_one_encoding {
         using code_unit = char32_t;
         static constexpr std::size_t max_width = 1;
-        static std::vector<code_unit> encode_one(char32_t u) {
+        static std::vector<code_unit> encode_one(ogonek::code_point u) {
             return { u + 1 };
         }
     };
     struct one_to_many_encoding {
         using code_unit = char16_t;
         static constexpr std::size_t max_width = 1;
-        static std::vector<code_unit> encode_one(char32_t u) {
+        static std::vector<code_unit> encode_one(ogonek::code_point u) {
             return { static_cast<code_unit>(u / 0x10000), static_cast<code_unit>(u % 0x10000) };
         }
     };
@@ -48,7 +43,7 @@ namespace test {
         using code_unit = char32_t;
         struct state { bool bom_encoded = false; };
         static constexpr std::size_t max_width = 1;
-        static std::vector<code_unit> encode_one(char32_t u, state& s) {
+        static std::vector<code_unit> encode_one(ogonek::code_point u, state& s) {
             if(not s.bom_encoded) {
                 s.bom_encoded = true;
                 return { 0x1234, u };

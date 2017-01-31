@@ -2,8 +2,12 @@ cmake_minimum_required (VERSION 3.2)
 
 set (test_runner runner.c++)
 
-add_executable (ucd_test ${test_runner} ucd.c++)
-target_link_libraries (ucd_test ogonek_data Catch)
+macro (add_test_executable DIR)
+    file (GLOB_RECURSE ${DIR}_test_SRC ${DIR}/*.c++)
+    add_executable (${DIR}_test ${test_runner} ${${DIR}_test_SRC})
+    target_include_directories (${DIR}_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries (${DIR}_test Catch ${ARGN})
+endmacro ()
 
-add_executable (encoding_test ${test_runner} encode.c++)
-target_link_libraries (encoding_test Catch range-v3)
+add_test_executable (ucd ogonek_data)
+add_test_executable (encoding range-v3)

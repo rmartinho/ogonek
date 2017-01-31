@@ -13,9 +13,10 @@
 
 #include <ogonek/ucd.h++>
 
-#include <boost/optional/optional_io.hpp>
-#include "util.h++"
 #include <catch.hpp>
+#include "util.h++"
+
+#include <boost/optional/optional_io.hpp>
 
 namespace ucd = ogonek::ucd;
 
@@ -811,4 +812,3 @@ TEST_CASE("noncharacter code point", "Querying Noncharacter_Code_Point") {
             CHECK(ucd::is_noncharacter_code_point(u+2) == false);
     }
 }
-

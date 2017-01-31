@@ -68,18 +68,36 @@ namespace ogonek {
         };
     } // namespace concepts
 
+    //! Concept that represents encoding forms.
     template <typename T>
     using EncodingForm = concepts::models<concepts::EncodingForm, T>;
 
+    //! Gets the code unit type for an encoding.
     template <typename Encoding>
     using code_unit_t = typename concepts::EncodingForm::code_unit_t<Encoding>;
 
+    //! Gets the state type for an encoding. Stateless encodings have empty state types.
     template <typename Encoding>
     using encoding_state_t = typename concepts::EncodingForm::state_t<Encoding>;
 
+    //! Tests whether an encoding is stateless.
     template <typename Encoding>
-    auto encode_one(code_point u, encoding_state_t<Encoding>& s) {
-        return concepts::EncodingForm::encode_one<Encoding>(u, s);
+    using is_stateless = std::is_empty<encoding_state_t<Encoding>>;
+
+    //! Tests whether an encoding is stateless.
+    template <typename Encoding>
+    constexpr auto is_stateless_v = is_stateless<Encoding>::value;
+
+    //! Encodes one code point.
+    //!
+    //! :param u: the code point
+    //!
+    //! :param state: the current state; modified after encoding ``u``
+    //!
+    //! :return: the code units that encode ``u``
+    template <typename Encoding>
+    auto encode_one(code_point u, encoding_state_t<Encoding>& state) {
+        return concepts::EncodingForm::encode_one<Encoding>(u, state);
     }
 
     namespace detail {
@@ -138,6 +156,11 @@ namespace ogonek {
         };
     } // namespace detail
 
+    //! Encodes a range of code points.
+    //!
+    //! :param rng: the range.
+    //!
+    //! :return: a range of the code units that encode the code points in ``rng``
     template <typename Encoding, typename Rng,
               CONCEPT_REQUIRES_(ranges::Range<Rng>() && EncodingForm<Encoding>())>
     auto encode(Rng rng) {
