@@ -5,7 +5,7 @@ Ogonek
    :maxdepth: 2
    :caption: Contents:
 
-   quickstart
+   about
    motivation
    scope
    reference
