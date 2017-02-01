@@ -11,7 +11,8 @@ list (REMOVE_ITEM doc_SRC "CMakeLists.txt")
 
 add_custom_target(doc
     ${SPHINX_BUILD_TOOL}
-        -q -d "${SPHINX_CACHE_DIR}"
+        -q -a -E
+        -d "${SPHINX_CACHE_DIR}"
         -b ${DOC_FORMAT}
         "${CMAKE_CURRENT_SOURCE_DIR}"
         "${DOC_HTML_DIR}"

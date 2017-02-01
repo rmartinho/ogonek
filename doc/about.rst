@@ -63,6 +63,14 @@ Versioning
 Ogonek version numbers use the `semantic versioning 2.0.0
 <http://semver.org/spec/v2.0.0.html>`_ rules.
 
+Each Ogonek release is tied to a specific Unicode version. This is unavoidable
+because Unicode updates may require changes not only in the Unicode character
+data, but also in the algorithms. Because of this, arbitrarily mixing Ogonek
+versions and Unicode versions is not supported.
+
+At any given time, Ogonek supports the two latest released Unicode major
+versions, starting with Unicode 9.0.0.
+
 Licensing
 ---------
 
