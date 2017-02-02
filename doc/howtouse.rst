@@ -28,7 +28,10 @@ Requires
     undefined if the function is called and preconditions are not met.
 
 Effects
-    the results of calling that function.
+    the actions performed by the function
+
+Postconditions
+    the observable results established by the function
 
 Returns
     the value returned by that function.

@@ -156,11 +156,13 @@ namespace ogonek {
         };
     } // namespace detail
 
-    //! Encodes a range of code points.
-    //!
-    //! :param rng: the range.
-    //!
-    //! :return: a range of the code units that encode the code points in ``rng``
+    /**
+     * .. function:: template<EncodingForm Encoding, ranges::Range Rng>\
+     *               ranges::Range encode(Rng rng)
+     *
+     *      :returns: a range of the code units that encode the code points in ``rng``
+     *      :validation: as performed by the encoding form
+     */
     template <typename Encoding, typename Rng,
               CONCEPT_REQUIRES_(ranges::Range<Rng>() && EncodingForm<Encoding>())>
     auto encode(Rng rng) {
