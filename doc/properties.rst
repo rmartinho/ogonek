@@ -1,4 +1,4 @@
-Unicode character properties
+Character properties
 ============================
 
 Ogonek exposes the character properties described in the |unicode-standard| and
@@ -9,20 +9,25 @@ The types of these properties are mapped to C++ types as follows.
 =============  ========
 Unicode type   C++ type
 =============  ========
-Catalog        
+Catalog        specific scoped enum type
 -------------  --------
-Enumeration    
+Enumeration    specific scoped enum type
 -------------  --------
-Binary         
+Binary         ``bool``
 -------------  --------
-String         
+String         ``std::u32string``
 -------------  --------
-Numeric        
+Numeric        ``boost::rational<long>``
 -------------  --------
-Miscellaneous  
+Miscellaneous  varies
 =============  ========
+
+Properties that might not be set for all characters have ``boost::optional`` types.
+
+In general, property names and values match the Unicode standard names, except
+for being written in lowercase and with underscores instead of spaces (i.e. in
+the style of the C++ standard library).
 
 .. todo::
 
-    Write about character property retrieval.
-
+    Add examples

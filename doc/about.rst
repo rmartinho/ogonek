@@ -52,7 +52,11 @@ Ogonek depends on the following third-party libraries.
     Eric Niebler's range-v3 library provides machinery for implementing and
     using ranges.
 
-`Catch <https://github.com/philsquared/Catch>`_
+`Boost <https://boost.org/>`_
+    Boost.Optional, Boost.Rational and Boost.Tribool are used for certain
+    interface types.
+
+`Catch <https://github.com/philsquared/Catch/>`_
     Phil Nash's Catch library provides unit test support.
 
 
