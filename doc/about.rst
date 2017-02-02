@@ -2,8 +2,7 @@ About
 =====
 
 Ogonek is a C++ library for Unicode support. The goal is to support all the
-algorithms described in the `Unicode Standard
-<http://www.unicode.org/standard/>`_, with a focus on correctness and on the
+algorithms described in the |unicode-standard|, with a focus on correctness and on the
 use of modern C++.
 
 Design goals
@@ -78,6 +77,8 @@ The source code of Ogonek is dedicated to the public domain. Where not
 applicable, source code is licensed under the terms of the `CC0 1.0 Universal
 <https://creativecommons.org/publicdomain/zero/1.0/>`_ public domain
 dedication.
+
+.. note:: No Copyright
 
     The person who associated a work with this deed has dedicated the work to the
     public domain by waiving all of his or her rights to the work worldwide under

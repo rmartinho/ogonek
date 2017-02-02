@@ -7,7 +7,7 @@ Ogonek
 
    about
    howtouse
-   scope
+   core
    reference
 
 .. toctree::
