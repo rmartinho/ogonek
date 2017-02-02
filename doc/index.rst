@@ -6,7 +6,7 @@ Ogonek
    :caption: Contents:
 
    about
-   motivation
+   howtouse
    scope
    reference
 

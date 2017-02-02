@@ -6,6 +6,7 @@ import sphinx_rtd_theme
 
 # -- General configuration ------------------------------------------------
 
+primary_domain = 'cpp'
 extensions = ['sphinx.ext.todo']
 templates_path = ['_templates']
 source_suffix = '.rst'
@@ -20,6 +21,9 @@ exclude_patterns = []
 pygments_style = 'sphinx'
 todo_include_todos = True
 
+rst_prolog = """
+.. include:: include.txt
+"""
 
 # -- Options for HTML output ----------------------------------------------
 

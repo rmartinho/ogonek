@@ -1,0 +1,4 @@
+.. highlight:: c++
+.. namespace:: ::ogonek
+
+.. vim:ft=rst:
