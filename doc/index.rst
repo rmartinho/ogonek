@@ -8,6 +8,7 @@ Ogonek
    about
    howtouse
    core
+   properties
    reference
 
 .. toctree::

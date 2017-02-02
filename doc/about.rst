@@ -13,8 +13,8 @@ Ogonek’s design is driven by the following principles.
 validity and correctness
     Ogonek values validity and correctness above speed and other concerns.
     The semantics of operations are defined as much as possible by the Unicode
-    Standard and its annexes (UAX), technical standards (UTS), and technical
-    reports (UTR).
+    Standard and its standard annexes (UAX), technical standards (UTS), and
+    technical reports (UTR).
 
     Ideally it should be impossible to obtain invalid Unicode data after any
     operation provided by Ogonek.
@@ -48,7 +48,7 @@ Dependencies
 
 Ogonek depends on the following third-party libraries.
 
-`range-v3 <https://github.com/ericniebler/range-v3>`_
+|range-v3|
     Eric Niebler's range-v3 library provides machinery for implementing and
     using ranges.
 

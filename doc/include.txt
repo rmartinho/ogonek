@@ -5,4 +5,6 @@
 
 .. |range-v3| replace:: `range-v3 <https://github.com/ericniebler/range-v3/>`__
 
+.. |uax-44| replace:: `Unicode Standard Annex #44 <http://unicode.org/reports/tr44/>`__
+
 .. vim:ft=rst:
