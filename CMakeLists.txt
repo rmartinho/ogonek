@@ -1,4 +1,5 @@
 cmake_minimum_required (VERSION 3.2)
+
 project (Ogonek)
 include (deps/catch.cmake)
 include (deps/range-v3.cmake)
@@ -16,5 +17,6 @@ include_directories (${PROJECT_SOURCE_DIR}/include)
 
 add_subdirectory (src/ucd)
 add_subdirectory (test)
+add_subdirectory (doc)
 
 include (test/tests.cmake)
