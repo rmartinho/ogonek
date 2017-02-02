@@ -3,13 +3,20 @@ How to use this manual
 
 This manual follows certain conventions in the description of Ogonek.
 
+Other documents
+---------------
+
+This manual often makes reference to the |unicode-standard| and the terms
+described within. Familiarity with those terms is recommended before reading
+this manual.
+
 Namespaces
 ----------
 
 Unless otherwise mentioned, all entities described are in the namespace ``ogonek``.
 
-Reference
----------
+Reference sections
+------------------
 
 In reference pages, entities are described using following sections.
 
