@@ -74,39 +74,68 @@ namespace ogonek {
     /**
      * .. concept:: Type{E} EncodingForm
      * 
-     * An |encoding-form| type. It describes an encoding form's mapping between
-     * code points and code units, as well as a few specific properties of the
-     * encoding form, which are used for checking constraints and for
-     * performing optimizations.
+     *     An |encoding-form| type. It describes an encoding form's mapping
+     *     between |code-points| and |code-units|, as well as some extra
+     *     properties which are used for checking constraints and for
+     *     performing optimizations.
      *
      * .. todo:: Document requirements
      */
     template <typename T>
     using EncodingForm = concepts::models<concepts::EncodingForm, T>;
 
-    //! Gets the code unit type for an encoding.
+    /**
+     * .. type:: template <EncodingForm Encoding>\
+     *           code_unit_t
+     * 
+     *     The type of the |code-units| used by ``Encoding``.
+     */
     template <typename Encoding>
     using code_unit_t = typename concepts::EncodingForm::code_unit_t<Encoding>;
 
-    //! Gets the state type for an encoding. Stateless encodings have empty state types.
+    /**
+     * .. type:: template <EncodingForm Encoding>\
+     *           encoding_state_t
+     * 
+     *     The type of the state used by ``Encoding``. For stateless encoding forms
+     *     this is an empty type.
+     */
     template <typename Encoding>
     using encoding_state_t = typename concepts::EncodingForm::state_t<Encoding>;
 
-    //! Tests whether an encoding is stateless.
+    /**
+     * .. type:: template <EncodingForm Encoding>\
+     *           is_stateless
+     * 
+     *     Derives from ``std::true_type`` if ``Encoding`` is stateless; from
+     *     ``std::false_type`` otherwise.
+     */
     template <typename Encoding>
     using is_stateless = std::is_empty<encoding_state_t<Encoding>>;
 
-    //! Tests whether an encoding is stateless.
+    /**
+     * .. var:: template <EncodingForm Encoding>\
+     *          constexpr bool is_stateless_v
+     * 
+     *     True if ``Encoding`` is stateless; false otherwise.
+     */
     template <typename Encoding>
-    constexpr auto is_stateless_v = is_stateless<Encoding>::value;
+    constexpr bool is_stateless_v = is_stateless<Encoding>::value;
 
-    //! Encodes one code point.
-    //!
-    //! :param u: the code point
-    //!
-    //! :param state: the current state; modified after encoding ``u``
-    //!
-    //! :return: the code units that encode ``u``
+    /**
+     * .. function:: template <EncodingForm Encoding>\
+     *               code_unit_t<Encoding> encode_one(code_point u, encoding_state_t<Encoding>& state)
+     *
+     *     Encodes ``u`` according to ``Encoding``.
+     *
+     *     :param u: the |code-point| to be encoded
+     *
+     *     :param state: the current encoding state; it is modified according to the encoding performed
+     *
+     *     :returns: a range of the |code-units| that encode ``u``
+     *
+     *     :validation: as performed by ``Encoding``
+     */
     template <typename Encoding>
     auto encode_one(code_point u, encoding_state_t<Encoding>& state) {
         return concepts::EncodingForm::encode_one<Encoding>(u, state);
@@ -172,9 +201,9 @@ namespace ogonek {
      * .. function:: template<EncodingForm Encoding, ranges::Range rng>\
      *               auto encode(Rng rng)
      *
-     *      :returns: a range of the |code-units| that encode the |code-points| in ``rng``
+     *     :returns: a range of the |code-units| that encode the |code-points| in ``rng``
      *
-     *      :validation: as performed by ``Encoding``
+     *     :validation: as performed by ``Encoding``
      */
     template <typename Encoding, typename Rng,
               CONCEPT_REQUIRES_(ranges::Range<Rng>() && EncodingForm<Encoding>())>
