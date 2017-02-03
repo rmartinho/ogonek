@@ -22,8 +22,6 @@ Numeric        ``boost::rational<long>``
 Miscellaneous  varies
 =============  ========
 
-Properties that might not be set for all characters have ``boost::optional`` types.
-
 In general, property names and values match the Unicode standard names, except
 for being written in lowercase and with underscores instead of spaces (i.e. in
 the style of the C++ standard library).

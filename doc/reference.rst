@@ -1,8 +1,8 @@
 Reference
 =========
 
-.. include:: extracted/encode.g.txt
+.. toctree::
+   :maxdepth: 1
+   :glob:
 
-.. todo::
-
-    Extract documentation comments from code and include them here.
+   extracted/*

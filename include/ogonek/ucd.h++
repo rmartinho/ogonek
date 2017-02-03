@@ -9,7 +9,10 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-// Unicode character database
+/**
+ * Unicode character database ``<ogonek/ucd.h++>``
+ * ===============================================
+ */
 
 #ifndef OGONEK_UCD_HPP
 #define OGONEK_UCD_HPP
@@ -31,7 +34,11 @@
 #include <cstring>
 
 namespace ogonek {
-    //! An alternative name for ``boost::indeterminate``.
+    /**
+     * .. var:: constexpr auto maybe = boost::indeterminate
+     *
+     *     An alternative name for ``boost::indeterminate``.
+     */
     BOOST_TRIBOOL_THIRD_STATE(maybe)
 
     namespace ucd {
@@ -133,10 +140,18 @@ namespace ogonek {
         }\
         static_assert(true, "")
 
-        //! Retrieves a code point's ``Age`` property
+        /**
+         * .. function:: version get_age(code_point u)
+         *
+         *     :returns: the *Age* property of ``u``
+         */
         OGONEK_UCD_GETTER(version, age);
 
-        //! Retrieves a code point's ``Name`` property
+        /**
+         * .. function:: std::string get_name(code_point u)
+         *
+         *     :returns: the *Name* property of ``u``
+         */
         inline std::string get_name(code_point u) {
             auto value = detail::find_property_group(name_data, name_data_size, u).value;
             if(value[0] != '<') return value;
@@ -155,204 +170,524 @@ namespace ogonek {
             return {};
         }
 
-        //! Retrieves a code point's ``Block`` property
+        /**
+         * .. function:: block get_block(code_point u)
+         *
+         *     :returns: the *Block* property of ``u``
+         */
         OGONEK_UCD_GETTER(block, block);
-        //! Retrieves a code point's ``General_Category`` property
+        /**
+         * .. function:: block get_general_category(code_point u)
+         *
+         *     :returns: the *General_Category* property of ``u``
+         */
         OGONEK_UCD_GETTER(general_category, general_category);
-        //! Retrieves a code point's ``Canonical_Combining_Class`` property
+        /**
+         * .. function:: combining_class get_canonical_combining_class(code_point u)
+         *
+         *     :returns: the *Canonical_Combining_Class* property of ``u``
+         */
         OGONEK_UCD_GETTER(combining_class, canonical_combining_class);
-        //! Retrieves a code point's ``Bidi_Class`` property
+        /**
+         * .. function:: bidi_class get_bidi_class(code_point u)
+         *
+         *     :returns: the *Bidi_Class* property of ``u``
+         */
         OGONEK_UCD_GETTER(bidi_class, bidi_class);
-        //! Retrieves a code point's ``Bidi_Mirrored`` property
+        /**
+         * .. function:: bool is_bidi_mirrored(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Bidi_Mirrored* property; false otherwise
+         */
         OGONEK_UCD_TESTER(bidi_mirrored);
-        //! Retrieves a code point's ``Bidi_Mirroring_Glyph`` property
+        /**
+         * .. function:: code_point get_bidi_mirroring_glyph(code_point u)
+         *
+         *     :returns: the *Bidi_Mirroring_Glyph* property of ``u``
+         */
         OGONEK_UCD_CODE_POINT_GETTER(bidi_mirroring_glyph);
-        //! Retrieves a code point's ``Bidi_Control`` property
+        /**
+         * .. function:: bool is_bidi_control(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Bidi_Control* property; false otherwise
+         */
         OGONEK_UCD_TESTER(bidi_control);
-        //! Retrieves a code point's ``Bidi_Paired_Bracket`` property
+        /**
+         * .. function:: code_point get_bidi_paired_bracket(code_point u)
+         *
+         *     :returns: the *Bidi_Paired_Bracket* property of ``u``
+         */
         OGONEK_UCD_CODE_POINT_GETTER(bidi_paired_bracket);
-        //! Retrieves a code point's ``Bidi_Paired_Bracket_Type`` property
+        /**
+         * .. function:: bracket_type get_bidi_paired_bracket_type(code_point u)
+         *
+         *     :returns: the *Bidi_Paired_Bracket_Type* property of ``u``
+         */
         OGONEK_UCD_GETTER(bracket_type, bidi_paired_bracket_type);
-        //! Retrieves a code point's ``Decomposition_Type`` property
+        /**
+         * .. function:: decomposition_type get_decomposition_type(code_point u)
+         *
+         *     :returns: the *Decomposition_Type* property of ``u``
+         */
         OGONEK_UCD_GETTER(decomposition_type, decomposition_type);
 
-        //! Retrieves a code point's ``Decomposition_Mapping`` property
+        /**
+         * .. function:: std::u32string get_decomposition_mapping(code_point u)
+         *
+         *     :returns: the *Decomposition_Mapping* property of ``u``
+         */
         inline std::u32string get_decomposition_mapping(code_point u) {
             auto value = detail::find_property_group(decomposition_mapping_data, decomposition_mapping_data_size, u).value;
             if(value) return value;
             else return std::u32string(1, u);
         }
 
-        //! Retrieves a code point's ``Full_Composition_Exclusion`` property
+        /**
+         * .. function:: bool is_excluded_from_composition(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Full_Composition_Exclusion* property; false otherwise
+         */
         OGONEK_UCD_QUERY(bool, full_composition_exclusion, is_excluded_from_composition);
-        //! Retrieves a code point's ``NFC_Quick_Check`` property
+        /**
+         * .. function:: boost::tribool get_nfc_quick_check(code_point u)
+         *
+         *     :returns: the *NFC_Quick_Check* property of ``u``
+         */
         OGONEK_UCD_TESTER3(nfc_quick_check);
-        //! Retrieves a code point's ``NFD_Quick_Check`` property
+        /**
+         * .. function:: bool get_nfd_quick_check(code_point u)
+         *
+         *     :returns: the *NFD_Quick_Check* property of ``u``
+         */
         OGONEK_UCD_GETTER(bool, nfd_quick_check);
-        //! Retrieves a code point's ``NFKC_Quick_Check`` property
+        /**
+         * .. function:: boost::tribool get_nfkc_quick_check(code_point u)
+         *
+         *     :returns: the *NFKC_Quick_Check* property of ``u``
+         */
         OGONEK_UCD_TESTER3(nfkc_quick_check);
-        //! Retrieves a code point's ``NFKD_Quick_Check`` property
+        /**
+         * .. function:: bool get_nfkd_quick_check(code_point u)
+         *
+         *     :returns: the *NFKD_Quick_Check* property of ``u``
+         */
         OGONEK_UCD_GETTER(bool, nfkd_quick_check);
-        //! Retrieves a code point's ``Numeric_Type`` property
+        /**
+         * .. function:: numeric_type get_numeric_type(code_point u)
+         *
+         *     :returns: the *Numeric_Type* property of ``u``
+         */
         OGONEK_UCD_GETTER(numeric_type, numeric_type);
 
-        //! Retrieves a code point's ``Numeric_Value`` property
+        /**
+         * .. function:: boost::optional get_numeric_value(code_point u)
+         *
+         *     :returns: the *Numeric_Value* property of ``u``, if present; none otherwise
+         */
         inline boost::optional<boost::rational<long>> get_numeric_value(code_point u) {
             auto value = detail::find_property_group(numeric_value_data, numeric_value_data_size, u).value;
             return detail::to_rational(value);
         }
 
-        //! Retrieves a code point's ``Joining_Type`` property
+        /**
+         * .. function:: joining_type get_joining_type(code_point u)
+         *
+         *     :returns: the *Joining_Type* property of ``u``
+         */
         OGONEK_UCD_GETTER(joining_type, joining_type);
-        //! Retrieves a code point's ``Joining_Group`` property
+        /**
+         * .. function:: joining_group get_joining_group(code_point u)
+         *
+         *     :returns: the *Joining_Group* property of ``u``
+         */
         OGONEK_UCD_GETTER(joining_group, joining_group);
-        //! Retrieves a code point's ``Join_Control`` property
+        /**
+         * .. function:: bool is_join_control(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Join_Control* property; false otherwise
+         */
         OGONEK_UCD_TESTER(join_control);
-        //! Retrieves a code point's ``Line_Break`` property
+        /**
+         * .. function:: line_break get_line_break(code_point u)
+         *
+         *     :returns: the *Line_Break* property of ``u``
+         */
         OGONEK_UCD_GETTER(line_break, line_break);
-        //! Retrieves a code point's ``East_Asian_Width`` property
+        /**
+         * .. function:: east_asian_width get_east_asian_width(code_point u)
+         *
+         *     :returns: the *East_Asian_Width* property of ``u``
+         */
         OGONEK_UCD_GETTER(east_asian_width, east_asian_width);
-        //! Retrieves a code point's ``Uppercase`` property
+        /**
+         * .. function:: bool is_uppercase(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Uppercase* property; false otherwise
+         */
         OGONEK_UCD_TESTER(uppercase);
-        //! Retrieves a code point's ``Lowercase`` property
+        /**
+         * .. function:: bool is_lowercase(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Lowercase* property; false otherwise
+         */
         OGONEK_UCD_TESTER(lowercase);
-        //! Retrieves a code point's ``Simple_Uppercase_Mapping`` property
+        /**
+         * .. function:: code_point get_simple_uppercase_mapping(code_point u)
+         *
+         *     :returns: the *Simple_Uppercase_Mapping* property of ``u``
+         */
         OGONEK_UCD_CODE_POINT_GETTER(simple_uppercase_mapping);
-        //! Retrieves a code point's ``Simple_Lowercase_Mapping`` property
+        /**
+         * .. function:: code_point get_simple_lowercase_mapping(code_point u)
+         *
+         *     :returns: the *Simple_Lowercase_Mapping* property of ``u``
+         */
         OGONEK_UCD_CODE_POINT_GETTER(simple_lowercase_mapping);
-        //! Retrieves a code point's ``Simple_Titlecase_Mapping`` property
+        /**
+         * .. function:: code_point get_simple_titlecase_mapping(code_point u)
+         *
+         *     :returns: the *Simple_Titlecase_Mapping* property of ``u``
+         */
         OGONEK_UCD_CODE_POINT_GETTER(simple_titlecase_mapping);
 
-        //! Retrieves a code point's ``Uppercase_Mapping`` property
+        /**
+         * .. function:: std::u32string get_uppercase_mapping(code_point u)
+         *
+         *     :returns: the *Uppercase_Mapping* property of ``u``
+         */
         inline std::u32string get_uppercase_mapping(code_point u) {
             auto value = detail::find_property_group(uppercase_mapping_data, uppercase_mapping_data_size, u).value;
             if(value) return value;
             else return std::u32string(1, get_simple_uppercase_mapping(u));
         }
-        //! Retrieves a code point's ``Lowercase_Mapping`` property
+        /**
+         * .. function:: std::u32string get_lowercase_mapping(code_point u)
+         *
+         *     :returns: the *Lowercase_Mapping* property of ``u``
+         */
         inline std::u32string get_lowercase_mapping(code_point u) {
             auto value = detail::find_property_group(lowercase_mapping_data, lowercase_mapping_data_size, u).value;
             if(value) return value;
             else return std::u32string(1, get_simple_lowercase_mapping(u));
         }
-        //! Retrieves a code point's ``Titlecase_Mapping`` property
+        /**
+         * .. function:: std::u32string get_titlecase_mapping(code_point u)
+         *
+         *     :returns: the *Titlecase_Mapping* property of ``u``
+         */
         inline std::u32string get_titlecase_mapping(code_point u) {
             auto value = detail::find_property_group(titlecase_mapping_data, titlecase_mapping_data_size, u).value;
             if(value) return value;
             else return std::u32string(1, get_simple_titlecase_mapping(u));
         }
 
-        //! Retrieves a code point's ``Simple_Case_Folding`` property
+        /**
+         * .. function:: code_point get_simple_case_folding(code_point u)
+         *
+         *     :returns: the *Simple_Case_Folding* property of ``u``
+         */
         OGONEK_UCD_CODE_POINT_GETTER(simple_case_folding);
 
-        //! Retrieves a code point's ``Case_Folding`` property
+        /**
+         * .. function:: std::u32string get_case_folding(code_point u)
+         *
+         *     :returns: the *Case_Folding* property of ``u``
+         */
         inline std::u32string get_case_folding(code_point u) {
             auto value = detail::find_property_group(case_folding_data, case_folding_data_size, u).value;
             if(value) return value;
             else return std::u32string(1, get_simple_case_folding(u));
         }
 
-        //! Retrieves a code point's ``Case_Ignorable`` property
+        /**
+         * .. function:: bool is_case_ignorable(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Case_Ignorable* property; false otherwise
+         */
         OGONEK_UCD_TESTER(case_ignorable);
-        //! Retrieves a code point's ``Cased`` property
+        /**
+         * .. function:: bool is_cased(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Cased* property; false otherwise
+         */
         OGONEK_UCD_TESTER(cased);
-        //! Retrieves a code point's ``Changes_When_Lowercased`` property
+        /**
+         * .. function:: bool changes_when_lowercased(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Changes_When_Lowercased* property; false otherwise
+         */
         OGONEK_UCD_QUERY(bool, changes_when_lowercased, changes_when_lowercased);
-        //! Retrieves a code point's ``Changes_When_Uppercased`` property
+        /**
+         * .. function:: bool changes_when_uppercased(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Changes_When_Uppercased* property; false otherwise
+         */
         OGONEK_UCD_QUERY(bool, changes_when_uppercased, changes_when_uppercased);
-        //! Retrieves a code point's ``Changes_When_Titlecased`` property
+        /**
+         * .. function:: bool changes_when_titlecased(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Changes_When_Titlecased* property; false otherwise
+         */
         OGONEK_UCD_QUERY(bool, changes_when_titlecased, changes_when_titlecased);
-        //! Retrieves a code point's ``Changes_When_Casefolded`` property
+        /**
+         * .. function:: bool changes_when_casefolded(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Changes_When_Casefolded* property; false otherwise
+         */
         OGONEK_UCD_QUERY(bool, changes_when_casefolded, changes_when_casefolded);
-        //! Retrieves a code point's ``Changes_When_Casemapped`` property
+        /**
+         * .. function:: bool changes_when_casemapped(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Changes_When_Casemapped* property; false otherwise
+         */
         OGONEK_UCD_QUERY(bool, changes_when_casemapped, changes_when_casemapped);
-        //! Retrieves a code point's ``Changes_When_NFKC_Casefolded`` property
+        /**
+         * .. function:: bool changes_when_nfkc_casefolded(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Changes_When_NFKC_Casefolded* property; false otherwise
+         */
         OGONEK_UCD_QUERY(bool, changes_when_nfkc_casefolded, changes_when_nfkc_casefolded);
 
-        //! Retrieves a code point's ``NFKC_Casefold`` property
+        /**
+         * .. function:: std::u32string get_nfkc_casefold(code_point u)
+         *
+         *     :returns: the *NFKC_Casefold* property of ``u``
+         */
         inline std::u32string get_nfkc_casefold(code_point u) {
             auto value = detail::find_property_group(nfkc_casefold_data, nfkc_casefold_data_size, u).value;
             if(value) return value;
             else return std::u32string(1, u);
         }
 
-        //! Retrieves a code point's ``Script`` property
+        /**
+         * .. function:: script get_script(code_point u)
+         *
+         *     :returns: the *Script* property of ``u``
+         */
         OGONEK_UCD_GETTER(script, script);
-        //! Retrieves a code point's ``Hangul_Syllable_Type`` property
+        /**
+         * .. function:: hangul_syllable_type get_hangul_syllable_type(code_point u)
+         *
+         *     :returns: the *Hangul_Syllable_Type* property of ``u``
+         */
         OGONEK_UCD_GETTER(hangul_syllable_type, hangul_syllable_type);
 
-        //! Retrieves a code point's ``Jamo_Short_Name`` property
+        /**
+         * .. function:: std::string get_jamo_short_name(code_point u)
+         *
+         *     :returns: the *Jamo_Short_Name* property of ``u``
+         */
         inline std::string get_jamo_short_name(code_point u) { return detail::get_jamo_short_name(u); }
 
-        //! Retrieves a code point's ``Indic_Positional_Category`` property
+        /**
+         * .. function:: indic_positional_category get_indic_positional_category(code_point u)
+         *
+         *     :returns: the *Indic_Positional_Category* property of ``u``
+         */
         OGONEK_UCD_GETTER(indic_positional_category, indic_positional_category);
-        //! Retrieves a code point's ``Indic_Syllabic_Category`` property
+        /**
+         * .. function:: indic_syllabic_category get_indic_syllabic_category(code_point u)
+         *
+         *     :returns: the *Indic_Syllabic_Category* property of ``u``
+         */
         OGONEK_UCD_GETTER(indic_syllabic_category, indic_syllabic_category);
-        //! Retrieves a code point's ``ID_Start`` property
+        /**
+         * .. function:: bool is_id_start(code_point u)
+         *
+         *     :returns: true if ``u`` has the *ID_Start* property; false otherwise
+         */
         OGONEK_UCD_TESTER(id_start);
-        //! Retrieves a code point's ``ID_Continue`` property
+        /**
+         * .. function:: bool is_id_continue(code_point u)
+         *
+         *     :returns: true if ``u`` has the *ID_Continue* property; false otherwise
+         */
         OGONEK_UCD_TESTER(id_continue);
-        //! Retrieves a code point's ``XID_Start`` property
+        /**
+         * .. function:: bool is_xid_start(code_point u)
+         *
+         *     :returns: true if ``u`` has the *XID_Start* property; false otherwise
+         */
         OGONEK_UCD_TESTER(xid_start);
-        //! Retrieves a code point's ``XID_Continue`` property
+        /**
+         * .. function:: bool is_xid_continue(code_point u)
+         *
+         *     :returns: true if ``u`` has the *XID_Continue* property; false otherwise
+         */
         OGONEK_UCD_TESTER(xid_continue);
-        //! Retrieves a code point's ``Pattern_Syntax`` property
+        /**
+         * .. function:: bool is_pattern_syntax(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Pattern_Syntax* property; false otherwise
+         */
         OGONEK_UCD_TESTER(pattern_syntax);
-        //! Retrieves a code point's ``Pattern_White_Space`` property
+        /**
+         * .. function:: bool is_pattern_white_space(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Pattern_White_Space* property; false otherwise
+         */
         OGONEK_UCD_TESTER(pattern_white_space);
-        //! Retrieves a code point's ``Dash`` property
+        /**
+         * .. function:: bool is_dash(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Dash* property; false otherwise
+         */
         OGONEK_UCD_TESTER(dash);
-        //! Retrieves a code point's ``Quotation_Mark`` property
+        /**
+         * .. function:: bool is_quotation_mark(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Quotation_Mark* property; false otherwise
+         */
         OGONEK_UCD_TESTER(quotation_mark);
-        //! Retrieves a code point's ``Terminal_Punctuation`` property
+        /**
+         * .. function:: bool is_terminal_punctuation(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Terminal_Punctuation* property; false otherwise
+         */
         OGONEK_UCD_TESTER(terminal_punctuation);
-        //! Retrieves a code point's ``STerm`` property
+        /**
+         * .. function:: bool is_sterm(code_point u)
+         *
+         *     :returns: true if ``u`` has the *STerm* property; false otherwise
+         */
         OGONEK_UCD_TESTER(sterm);
-        //! Retrieves a code point's ``Diacritic`` property
+        /**
+         * .. function:: bool is_diacritic(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Diacritic* property; false otherwise
+         */
         OGONEK_UCD_TESTER(diacritic);
-        //! Retrieves a code point's ``Extender`` property
+        /**
+         * .. function:: bool is_extender(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Extender* property; false otherwise
+         */
         OGONEK_UCD_TESTER(extender);
-        //! Retrieves a code point's ``Soft_Dotted`` property
+        /**
+         * .. function:: bool is_soft_dotted(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Soft_Dotted* property; false otherwise
+         */
         OGONEK_UCD_TESTER(soft_dotted);
-        //! Retrieves a code point's ``Hex_Digit`` property
+        /**
+         * .. function:: bool is_hex_digit(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Hex_Digit* property; false otherwise
+         */
         OGONEK_UCD_TESTER(hex_digit);
-        //! Retrieves a code point's ``ASCII_Hex_Digit`` property
+        /**
+         * .. function:: bool is_ascii_hex_digit(code_point u)
+         *
+         *     :returns: true if ``u`` has the *ASCII_Hex_Digit* property; false otherwise
+         */
         OGONEK_UCD_TESTER(ascii_hex_digit);
-        //! Retrieves a code point's ``Logical_Order_Exception`` property
+        /**
+         * .. function:: bool is_logical_order_exception(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Logical_Order_Exception* property; false otherwise
+         */
         OGONEK_UCD_TESTER(logical_order_exception);
-        //! Retrieves a code point's ``White_Space`` property
+        /**
+         * .. function:: bool is_white_space(code_point u)
+         *
+         *     :returns: true if ``u`` has the *White_Space* property; false otherwise
+         */
         OGONEK_UCD_TESTER(white_space);
-        //! Retrieves a code point's ``Variation_Selector`` property
+        /**
+         * .. function:: bool is_variation_selector(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Variation_Selector* property; false otherwise
+         */
         OGONEK_UCD_TESTER(variation_selector);
-        //! Retrieves a code point's ``Alphabetic`` property
+        /**
+         * .. function:: bool is_alphabetic(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Alphabetic* property; false otherwise
+         */
         OGONEK_UCD_TESTER(alphabetic);
-        //! Retrieves a code point's ``Math`` property
+        /**
+         * .. function:: bool is_math(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Math* property; false otherwise
+         */
         OGONEK_UCD_TESTER(math);
-        //! Retrieves a code point's ``Default_Ignorable_Code_Point`` property
+        /**
+         * .. function:: bool is_default_ignorable_code_point(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Default_Ignorable_Code_Point* property; false otherwise
+         */
         OGONEK_UCD_TESTER(default_ignorable_code_point);
-        //! Retrieves a code point's ``Grapheme_Base`` property
+        /**
+         * .. function:: bool is_grapheme_base(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Grapheme_Base* property; false otherwise
+         */
         OGONEK_UCD_TESTER(grapheme_base);
-        //! Retrieves a code point's ``Grapheme_Extend`` property
+        /**
+         * .. function:: bool is_grapheme_extend(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Grapheme_Extend* property; false otherwise
+         */
         OGONEK_UCD_TESTER(grapheme_extend);
-        //! Retrieves a code point's ``Grapheme_Cluster_Break`` property
+        /**
+         * .. function:: grapheme_cluster_break get_grapheme_cluster_break(code_point u)
+         *
+         *     :returns: the *Grapheme_Cluster_Break* property of ``u``
+         */
         OGONEK_UCD_GETTER(grapheme_cluster_break, grapheme_cluster_break);
-        //! Retrieves a code point's ``Word_Break`` property
+        /**
+         * .. function:: word_break get_word_break(code_point u)
+         *
+         *     :returns: the *Word_Break* property of ``u``
+         */
         OGONEK_UCD_GETTER(word_break, word_break);
-        //! Retrieves a code point's ``Sentence_Break`` property
+        /**
+         * .. function:: sentence_break get_sentence_break(code_point u)
+         *
+         *     :returns: the *Sentence_Break* property of ``u``
+         */
         OGONEK_UCD_GETTER(sentence_break, sentence_break);
-        //! Retrieves a code point's ``Ideographic`` property
+        /**
+         * .. function:: bool is_ideographic(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Ideographic* property; false otherwise
+         */
         OGONEK_UCD_TESTER(ideographic);
-        //! Retrieves a code point's ``Unified_Ideograph`` property
+        /**
+         * .. function:: bool is_unified_ideograph(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Unified_Ideograph* property; false otherwise
+         */
         OGONEK_UCD_TESTER(unified_ideograph);
-        //! Retrieves a code point's ``IDS_Binary_Operator`` property
+        /**
+         * .. function:: bool is_ids_binary_operator(code_point u)
+         *
+         *     :returns: true if ``u`` has the *IDS_Binary_Operator* property; false otherwise
+         */
         OGONEK_UCD_TESTER(ids_binary_operator);
-        //! Retrieves a code point's ``IDS_Trinary_Operator`` property
+        /**
+         * .. function:: bool is_ids_trinary_operator(code_point u)
+         *
+         *     :returns: true if ``u`` has the *IDS_Trinary_Operator* property; false otherwise
+         */
         OGONEK_UCD_TESTER(ids_trinary_operator);
-        //! Retrieves a code point's ``Radical`` property
+        /**
+         * .. function:: bool is_radical(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Radical* property; false otherwise
+         */
         OGONEK_UCD_TESTER(radical);
-        //! Retrieves a code point's ``Deprecated`` property
+        /**
+         * .. function:: bool is_deprecated(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Deprecated* property; false otherwise
+         */
         OGONEK_UCD_TESTER(deprecated);
-        //! Retrieves a code point's ``Noncharacter_Code_Point`` property
+        /**
+         * .. function:: bool is_noncharacter_code_point(code_point u)
+         *
+         *     :returns: true if ``u`` has the *Noncharacter_Code_Point* property; false otherwise
+         */
         OGONEK_UCD_TESTER(noncharacter_code_point);
 
 #undef OGONEK_UCD_CODE_POINT_GETTER

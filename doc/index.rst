@@ -7,7 +7,7 @@ Ogonek
 
    about
    howtouse
-   core
+   ranges
    properties
    reference
 

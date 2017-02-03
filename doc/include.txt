@@ -11,5 +11,8 @@
 .. |code-point| replace:: :term:`code point`
 .. |code-points| replace:: :term:`code points <code point>`
 .. |codespace| replace:: :term:`codespace`
+.. |encoding-form| replace:: :term:`encoding form`
+
+.. |valid-code-point| replace:: in the range [0..10FFFF\ :sub:`16`]
 
 .. vim:ft=rst:

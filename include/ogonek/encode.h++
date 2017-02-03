@@ -9,7 +9,10 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-// Encode ranges
+/**
+ * Encoding ``<ogonek/encode.h++>``
+ * =========================================
+ */
 
 #ifndef OGONEK_ENCODE_HPP
 #define OGONEK_ENCODE_HPP
@@ -68,7 +71,16 @@ namespace ogonek {
         };
     } // namespace concepts
 
-    //! Concept that represents encoding forms.
+    /**
+     * .. concept:: Type{E} EncodingForm
+     * 
+     * An |encoding-form| type. It describes an encoding form's mapping between
+     * code points and code units, as well as a few specific properties of the
+     * encoding form, which are used for checking constraints and for
+     * performing optimizations.
+     *
+     * .. todo:: Document requirements
+     */
     template <typename T>
     using EncodingForm = concepts::models<concepts::EncodingForm, T>;
 
@@ -157,8 +169,8 @@ namespace ogonek {
     } // namespace detail
 
     /**
-     * .. function:: template<EncodingForm Encoding, ranges::Range Rng>\
-     *               ranges::Range encode(Rng rng)
+     * .. function:: template<EncodingForm Encoding, ranges::Range rng>\
+     *               auto encode(Rng rng)
      *
      *      :returns: a range of the |code-units| that encode the |code-points| in ``rng``
      *

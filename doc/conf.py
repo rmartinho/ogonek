@@ -22,7 +22,7 @@ pygments_style = 'sphinx'
 todo_include_todos = True
 
 rst_prolog = """
-.. include:: include.txt
+.. include:: /include.txt
 """
 
 # -- Options for HTML output ----------------------------------------------

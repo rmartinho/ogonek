@@ -12,15 +12,23 @@ file (GLOB_RECURSE doc_SRC ${DOC_SRC_DIR}/*.rst)
 
 file (GLOB_RECURSE headers_SRC ${INCLUDE_DIR}/*.h++)
 
+foreach (header ${headers_SRC})
+    file (RELATIVE_PATH short_header ${INCLUDE_DIR} ${header})
+    if ((${short_header} MATCHES "\\.g\\.h\\+\\+$") OR (${short_header} MATCHES "detail/"))
+        list (REMOVE_ITEM headers_SRC ${header})
+    endif ()
+endforeach ()
+
 function (extract_docs out_var)
     set (result)
     foreach (header ${ARGN})
         file (RELATIVE_PATH short_header ${INCLUDE_DIR} ${header})
         string (REGEX MATCH "^(.*)\\.[^.]*$" dummy ${short_header})
-        set (extracted ${CMAKE_CURRENT_SOURCE_DIR}/extracted/${CMAKE_MATCH_1}.g.txt)
+        set (extracted ${CMAKE_CURRENT_SOURCE_DIR}/extracted/${CMAKE_MATCH_1}.g.rst)
 
         add_custom_command (OUTPUT ${extracted}
             COMMAND awk -f ${AUTODOC_SCRIPT} ${header} > ${extracted}
+            COMMAND [ -s ${extracted} ] || rm -f ${extracted}
             DEPENDS ${header} ${AUTODOC_SCRIPT}
             COMMENT "Extracting inline documentation from ${short_header}"
         )

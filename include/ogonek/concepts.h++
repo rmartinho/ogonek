@@ -9,7 +9,14 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-// Unicode-related Concepts
+/**
+ * Concepts ``<ogonek/concepts.h++>``
+ * ==================================
+ */
+
+/**
+ * .. todo:: Put the concepts here
+ */
 
 #ifndef OGONEK_CONCEPTS_HPP
 #define OGONEK_CONCEPTS_HPP
