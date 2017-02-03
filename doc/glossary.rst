@@ -3,7 +3,7 @@ Glossary
 
 .. glossary::
     code point
-        A value in the Unicode :term:`codespace`.
+        A value in the Unicode |codespace|.
 
     code unit
         The minimal bit combination that can represent a unit of encoded text

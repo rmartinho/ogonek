@@ -160,8 +160,9 @@ namespace ogonek {
      * .. function:: template<EncodingForm Encoding, ranges::Range Rng>\
      *               ranges::Range encode(Rng rng)
      *
-     *      :returns: a range of the code units that encode the code points in ``rng``
-     *      :validation: as performed by the encoding form
+     *      :returns: a range of the |code-units| that encode the |code-points| in ``rng``
+     *
+     *      :validation: as performed by ``Encoding``
      */
     template <typename Encoding, typename Rng,
               CONCEPT_REQUIRES_(ranges::Range<Rng>() && EncodingForm<Encoding>())>
