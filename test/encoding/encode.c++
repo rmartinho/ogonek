@@ -9,53 +9,19 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-// Tests for <ogonek/encode.h++>
+// Tests for encoding functions
 
-#include <ogonek/encode.h++>
+#include <ogonek/encoding.h++>
 
 #include <catch.hpp>
 #include "util.h++"
+#include "test_encodings.h++"
 
 #include <range/v3/view/all.hpp>
 #include <range/v3/to_container.hpp>
 #include <range/v3/utility/functional.hpp>
 
-#include <vector>
-
-#include <cstddef>
-
-namespace test {
-    struct one_to_one_encoding {
-        using code_unit = char32_t;
-        static constexpr std::size_t max_width = 1;
-        static std::vector<code_unit> encode_one(ogonek::code_point u) {
-            return { u + 1 };
-        }
-    };
-    struct one_to_many_encoding {
-        using code_unit = char16_t;
-        static constexpr std::size_t max_width = 1;
-        static std::vector<code_unit> encode_one(ogonek::code_point u) {
-            return { static_cast<code_unit>(u / 0x10000), static_cast<code_unit>(u % 0x10000) };
-        }
-    };
-    struct stateful_encoding {
-        using code_unit = char32_t;
-        struct state { bool bom_encoded = false; };
-        static constexpr std::size_t max_width = 1;
-        static std::vector<code_unit> encode_one(ogonek::code_point u, state& s) {
-            if(not s.bom_encoded) {
-                s.bom_encoded = true;
-                return { 0x1234, u };
-            } else {
-                return { u };
-            }
-        }
-    };
-    CONCEPT_ASSERT(ogonek::EncodingForm<one_to_one_encoding>());
-    CONCEPT_ASSERT(ogonek::EncodingForm<one_to_many_encoding>());
-    CONCEPT_ASSERT(ogonek::EncodingForm<stateful_encoding>());
-} // namespace test
+#include <string>
 
 using namespace test::string_literals;
 

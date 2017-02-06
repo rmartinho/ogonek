@@ -14,10 +14,6 @@
  * ==================================
  */
 
-/**
- * .. todo:: Put the concepts here
- */
-
 #ifndef OGONEK_CONCEPTS_HPP
 #define OGONEK_CONCEPTS_HPP
 
@@ -25,10 +21,14 @@
 
 namespace ogonek {
     namespace concepts {
-        using ranges::concepts::valid_expr;
         using ranges::concepts::models;
+        using ranges::concepts::refines;
+
+        using ranges::concepts::valid_expr;
         using ranges::concepts::model_of;
         using ranges::concepts::is_true;
+
+        using ranges::concepts::DefaultConstructible;
         using ranges::concepts::Integral;
 
         struct EncodingForm {
@@ -62,12 +62,33 @@ namespace ogonek {
                 return T::encode_one(u);
             }
 
+            template <typename T, typename It, typename St>
+            static auto decode_one(It first, St last) { //, state_t<T>&) -> decltype(T::decode_one(first, last)) {
+                return T::decode_one(first, last);
+            }
+
             template<typename T>
             auto requires_(T&& t) -> decltype(
-                concepts::valid_expr(
-                    concepts::model_of<concepts::Integral, code_unit_t<T>>(),
-                    concepts::is_true(max_width_gt_zero_t<T>{}),
+                valid_expr(
+                    model_of<Integral, code_unit_t<T>>(),
+                    model_of<DefaultConstructible, state_t<T>>(),
+                    is_true(max_width_gt_zero_t<T>{}),
                     encode_one<T>(code_point(), std::declval<state_t<T>&>())
+                ));
+        };
+
+        struct StatelessEncodingForm
+            : refines<EncodingForm> {
+        public:
+            template <typename T>
+            static auto encode_one(code_point u) {
+                return T::encode_one(u);
+            }
+
+            template<typename T>
+            auto requires_(T&& t) -> decltype(
+                valid_expr(
+                    is_true(std::is_empty<state_t<T>>{})
                 ));
         };
     } // namespace concepts
@@ -80,10 +101,13 @@ namespace ogonek {
      *     properties which are used for checking constraints and for
      *     performing optimizations.
      *
-     * .. todo:: Document requirements
+     *     .. todo:: Document requirements
      */
     template <typename T>
     using EncodingForm = concepts::models<concepts::EncodingForm, T>;
+
+    template <typename T>
+    using StatelessEncodingForm = concepts::models<concepts::StatelessEncodingForm, T>;
 } // namespace ogonek
 
 #endif // OGONEK_CONCEPTS_HPP
