@@ -63,7 +63,12 @@ namespace test {
             }
         }
         template <typename It, typename St>
-        static std::pair<ogonek::code_point, It> decode_one(It first, St last) {
+        static std::pair<ogonek::code_point, It> decode_one(It first, St last, state& s) {
+            if(not s.bom_encoded) {
+                s.bom_encoded = true;
+                auto bom = *first++;
+                assert(bom == 0x1234);
+            }
             return { *first, ++first };
         }
     };

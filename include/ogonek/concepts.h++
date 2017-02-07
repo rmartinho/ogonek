@@ -63,8 +63,13 @@ namespace ogonek {
             }
 
             template <typename T, typename It, typename St>
-            static auto decode_one(It first, St last) { //, state_t<T>&) -> decltype(T::decode_one(first, last)) {
+            static auto decode_one(It first, St last, state_t<T>&) -> decltype(T::decode_one(first, last)) {
                 return T::decode_one(first, last);
+            }
+
+            template <typename T, typename It, typename St>
+            static auto decode_one(It first, St last, state_t<T>& s) -> decltype(T::decode_one(first, last, s)) {
+                return T::decode_one(first, last, s);
             }
 
             template<typename T>
@@ -73,7 +78,8 @@ namespace ogonek {
                     model_of<Integral, code_unit_t<T>>(),
                     model_of<DefaultConstructible, state_t<T>>(),
                     is_true(max_width_gt_zero_t<T>{}),
-                    encode_one<T>(code_point(), std::declval<state_t<T>&>())
+                    encode_one<T>(code_point(), std::declval<state_t<T>&>()),
+                    decode_one<T>(std::declval<code_unit_t<T> const*>(), std::declval<code_unit_t<T> const*>(), std::declval<state_t<T>&>())
                 ));
         };
 

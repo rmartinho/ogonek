@@ -149,7 +149,7 @@ namespace ogonek {
     } // namespace detail
 
     /**
-     * .. function:: template <EncodingForm Encoding, ranges::Range rng>\
+     * .. function:: template <EncodingForm Encoding, ranges::Range Rng>\
      *               auto encode(Rng rng)
      *
      *     :returns: a range of the |code-units| that encode the |code-points| in ``rng``
@@ -164,9 +164,25 @@ namespace ogonek {
         return detail::encoded_view<Encoding, Rng>(std::move(rng));
     }
 
+    /**
+     * .. function:: template <EncodingForm Encoding, Iterator It, Sentinel St>\
+     *               std::pair<code_point, It> decode_one(It first, St last, encoding_state_t<Encoding>& state)
+     *
+     *     Decodes the first |code-point| from the range [``first``, ``last``), according to ``Encoding``.
+     *
+     *     :param first: an iterator to the first |code-unit| to be decoded
+     *
+     *     :param last: an iterator/sentinel to the end of the range of |code-units|
+     *
+     *     :param state: the current decoding state; it is modified according to the decoding performed
+     *
+     *     :returns: a pair of the decoded |code-point| and an iterator to first |code-unit| of the next encoded |code-point|
+     *
+     *     :validation: as performed by ``Encoding``
+     */
     template <typename Encoding, typename It, typename St>
-    auto decode_one(It first, St last) {// , encoding_state_t<Encoding>& state) {
-        return concepts::EncodingForm::decode_one<Encoding>(first, last); //, state);
+    auto decode_one(It first, St last, encoding_state_t<Encoding>& state) {
+        return concepts::EncodingForm::decode_one<Encoding>(first, last, state);
     }
 
     namespace detail {
@@ -231,7 +247,7 @@ namespace ogonek {
 
             private:
                 void decode_next() const {
-                    std::tie(decoded, first) = decode_one<Encoding>(first, last);
+                    std::tie(decoded, first) = decode_one<Encoding>(first, last, state);
                 }
 
                 static constexpr code_point invalid = -1;
@@ -239,6 +255,7 @@ namespace ogonek {
 
                 mutable code_point decoded = invalid;
                 mutable ranges::range_iterator_t<Rng> first;
+                mutable encoding_state_t<Encoding> state {};
                 ranges::range_iterator_t<Rng> last;
             };
 
@@ -264,7 +281,7 @@ namespace ogonek {
     } // namespace detail
 
     /**
-     * .. function:: template <EncodingForm Encoding, ranges::Range rng>\
+     * .. function:: template <EncodingForm Encoding, ranges::Range Rng>\
      *               auto decode(Rng rng)
      *
      *     :returns: a range of the |code-points| that the |code-units| in ``rng`` represent

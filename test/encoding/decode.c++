@@ -11,9 +11,7 @@
 
 // Tests for decoding functions
 
-#define private public
 #include <ogonek/encoding.h++>
-#undef private
 
 #include <catch.hpp>
 #include "util.h++"

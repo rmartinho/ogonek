@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.2)
 
 set (DOC_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set (DOC_FORMAT html)
-set (DOC_HTML_DIR ${CMAKE_BINARY_DIR}/doc/html)
+set (DOC_HTML_DIR ${CMAKE_BINARY_DIR}/doc/${DOC_FORMAT})
 set (SPHINX_BUILD_TOOL sphinx-build)
 set (SPHINX_CACHE_DIR ${CMAKE_BINARY_DIR}/_doctrees)
 set (INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include/ogonek)
@@ -60,7 +60,7 @@ add_custom_command (OUTPUT ${docs_HTML}
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${DOC_HTML_DIR}
     DEPENDS ${doc_SRC} ${extracted_docs_SRC}
-    COMMENT "Building HTML documentation with Sphinx"
+    COMMENT "Building ${DOC_FORMAT} documentation with Sphinx"
 )
 
 add_custom_target (doc DEPENDS ${docs_HTML})
