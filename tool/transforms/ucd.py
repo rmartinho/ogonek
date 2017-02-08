@@ -843,7 +843,7 @@ def coalesce_props(props, defaults):
 def write_file_header(f, description):
     template = string.Template('''// Ogonek
 //
-// Written in 2016 by Martinho Fernandes <ogonek@rmf.io>
+// Written in 2017 by Martinho Fernandes <ogonek@rmf.io>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright and related
 // and neighboring rights to this software to the public domain worldwide. This software is

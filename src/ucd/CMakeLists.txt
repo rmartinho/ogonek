@@ -1,14 +1,11 @@
 cmake_minimum_required (VERSION 3.2)
 
-set (OGONEK_ABI abiv0)
 set (UCD_DIR ${PROJECT_SOURCE_DIR}/data/ucd)
 set (INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 set (UCD_SRC_DIR ${PROJECT_SOURCE_DIR}/src/ucd/gen)
 set (UCD_TRANSFORM_TOOL ${PROJECT_SOURCE_DIR}/tool/transforms/ucd.py)
 
 file (GLOB_RECURSE ucd_txt_SRC ${UCD_SRC_DIR}/*)
-
-file(GLOB_RECURSE ucd_txt_SRC ${UCD_SRC_DIR}/*)
 
 execute_process (
     COMMAND python ${UCD_TRANSFORM_TOOL} --files ${UCD_SRC_DIR}
@@ -20,4 +17,4 @@ add_custom_command (
     DEPENDS ${PROJECT_SOURCE_DIR}/tool/transforms/ucd.py
     COMMENT "Translating UCD")
 
-add_library (ogonek_data STATIC ${ucd_gen_SRC})
+add_library (ogonek_ucd STATIC ${ucd_gen_SRC})
