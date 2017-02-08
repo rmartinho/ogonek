@@ -11,6 +11,9 @@
 
 // Tests utilities
 
+#ifndef TEST_UTIL_HPP
+#define TEST_UTIL_HPP
+
 #include <ogonek/types.h++>
 
 #include <catch.hpp>
@@ -18,6 +21,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <type_traits>
 
 #include <cstddef>
 
@@ -27,7 +31,7 @@ namespace test {
         void format_code_unit(std::ostream& os, T u) {
             os.width(sizeof(T));
             os.fill('0');
-            os << std::hex << std::uppercase << static_cast<unsigned long long>(u);
+            os << std::hex << std::uppercase << static_cast<unsigned long long>(static_cast<std::make_unsigned_t<T>>(u));
         }
         template <typename T>
         void format_code_point(std::ostream& os, T u) {
@@ -97,3 +101,4 @@ namespace Catch {
     struct StringMaker<std::u32string> : ::test::detail::code_point_converter {};
 } // namespace Catch
 
+#endif // TEST_UTIL_HPP

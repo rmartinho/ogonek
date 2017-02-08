@@ -131,4 +131,3 @@ $from_str
 with open(impl, 'w') as impl_file:
     impl_file.write(copyright_tmpl.substitute(name=name))
     impl_file.write(impl_tmpl.substitute(header=os.path.basename(header), identifier=name_lower, from_str=from_str, to_str=to_str))
-

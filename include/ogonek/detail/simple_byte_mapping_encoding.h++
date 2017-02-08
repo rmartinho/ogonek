@@ -11,6 +11,9 @@
 
 // Codepage-style encodings
 
+#ifndef OGONEK_DETAIL_SIMPLE_BYTE_MAPPING
+#define OGONEK_DETAIL_SIMPLE_BYTE_MAPPING
+
 #include <ogonek/types.h++>
 
 #include <algorithm>
@@ -53,3 +56,4 @@ namespace ogonek {
     } // namespace detail
 } // namespace ogonek
 
+#endif // OGONEK_DETAIL_SIMPLE_BYTE_MAPPING

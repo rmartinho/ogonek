@@ -135,7 +135,7 @@ function (transform_codepages out_header_var out_impl_var)
         add_custom_command (OUTPUT ${header} ${impl}
             COMMAND python ${CODEPAGE_TRANSFORM_TOOL} ${codepage_src_fmt} ${codepage_src_file} ${header} ${impl} ${codepage_str_name}
             DEPENDS ${CODEPAGE_TRANSFORM_TOOL}
-            COMMENT "Transforming codepage ${codepage_str_name}"
+            COMMENT "Translating codepage ${codepage_str_name}"
         )
         list (APPEND headers ${header})
         list (APPEND impls ${impl})
