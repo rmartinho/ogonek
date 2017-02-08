@@ -13,8 +13,8 @@
 
 // CP 860 encoding form
 
-#ifndef OGONEK_CP860_HPP
-#define OGONEK_CP860_HPP
+#ifndef OGONEK_ENCODINGS_CP860_HPP
+#define OGONEK_ENCODINGS_CP860_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>

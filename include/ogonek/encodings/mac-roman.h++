@@ -13,8 +13,8 @@
 
 // Mac OS Roman encoding form
 
-#ifndef OGONEK_MAC_ROMAN_HPP
-#define OGONEK_MAC_ROMAN_HPP
+#ifndef OGONEK_ENCODINGS_MAC_ROMAN_HPP
+#define OGONEK_ENCODINGS_MAC_ROMAN_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>

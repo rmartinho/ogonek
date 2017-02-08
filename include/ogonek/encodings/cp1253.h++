@@ -13,8 +13,8 @@
 
 // CP 1253 encoding form
 
-#ifndef OGONEK_CP1253_HPP
-#define OGONEK_CP1253_HPP
+#ifndef OGONEK_ENCODINGS_CP1253_HPP
+#define OGONEK_ENCODINGS_CP1253_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>

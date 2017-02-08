@@ -13,8 +13,8 @@
 
 // AtariST encoding form
 
-#ifndef OGONEK_ATARI_ST_HPP
-#define OGONEK_ATARI_ST_HPP
+#ifndef OGONEK_ENCODINGS_ATARI_ST_HPP
+#define OGONEK_ENCODINGS_ATARI_ST_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>

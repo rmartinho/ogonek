@@ -13,8 +13,8 @@
 
 // CP 1257 encoding form
 
-#ifndef OGONEK_CP1257_HPP
-#define OGONEK_CP1257_HPP
+#ifndef OGONEK_ENCODINGS_CP1257_HPP
+#define OGONEK_ENCODINGS_CP1257_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>

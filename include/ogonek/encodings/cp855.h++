@@ -13,8 +13,8 @@
 
 // CP 855 encoding form
 
-#ifndef OGONEK_CP855_HPP
-#define OGONEK_CP855_HPP
+#ifndef OGONEK_ENCODINGS_CP855_HPP
+#define OGONEK_ENCODINGS_CP855_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>

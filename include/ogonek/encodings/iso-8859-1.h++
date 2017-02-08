@@ -13,8 +13,8 @@
 
 // ISO-8859-1 encoding form
 
-#ifndef OGONEK_ISO_8859_1_HPP
-#define OGONEK_ISO_8859_1_HPP
+#ifndef OGONEK_ENCODINGS_ISO_8859_1_HPP
+#define OGONEK_ENCODINGS_ISO_8859_1_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>

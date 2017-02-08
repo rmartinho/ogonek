@@ -13,8 +13,8 @@
 
 // CP 863 encoding form
 
-#ifndef OGONEK_CP863_HPP
-#define OGONEK_CP863_HPP
+#ifndef OGONEK_ENCODINGS_CP863_HPP
+#define OGONEK_ENCODINGS_CP863_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>

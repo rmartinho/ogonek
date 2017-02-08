@@ -13,8 +13,8 @@
 
 // KOI8-U encoding form
 
-#ifndef OGONEK_KOI8_U_HPP
-#define OGONEK_KOI8_U_HPP
+#ifndef OGONEK_ENCODINGS_KOI8_U_HPP
+#define OGONEK_ENCODINGS_KOI8_U_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>

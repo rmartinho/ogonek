@@ -13,8 +13,8 @@
 
 // CP 950 encoding form
 
-#ifndef OGONEK_CP950_HPP
-#define OGONEK_CP950_HPP
+#ifndef OGONEK_ENCODINGS_CP950_HPP
+#define OGONEK_ENCODINGS_CP950_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>

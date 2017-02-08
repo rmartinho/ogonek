@@ -13,8 +13,8 @@
 
 // CP 936 encoding form
 
-#ifndef OGONEK_CP936_HPP
-#define OGONEK_CP936_HPP
+#ifndef OGONEK_ENCODINGS_CP936_HPP
+#define OGONEK_ENCODINGS_CP936_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>

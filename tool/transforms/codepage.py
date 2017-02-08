@@ -93,8 +93,8 @@ copyright_tmpl = string.Template('''// Ogonek
 
 ''')
 
-header_tmpl = string.Template('''#ifndef OGONEK_${pp_symbol}_HPP
-#define OGONEK_${pp_symbol}_HPP
+header_tmpl = string.Template('''#ifndef OGONEK_ENCODINGS_${pp_symbol}_HPP
+#define OGONEK_ENCODINGS_${pp_symbol}_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>

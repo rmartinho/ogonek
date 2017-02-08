@@ -13,8 +13,8 @@
 
 // CP 932 encoding form
 
-#ifndef OGONEK_CP932_HPP
-#define OGONEK_CP932_HPP
+#ifndef OGONEK_ENCODINGS_CP932_HPP
+#define OGONEK_ENCODINGS_CP932_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>

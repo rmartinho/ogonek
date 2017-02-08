@@ -13,8 +13,8 @@
 
 // CP 424 encoding form
 
-#ifndef OGONEK_CP424_HPP
-#define OGONEK_CP424_HPP
+#ifndef OGONEK_ENCODINGS_CP424_HPP
+#define OGONEK_ENCODINGS_CP424_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>

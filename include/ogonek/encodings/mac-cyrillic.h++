@@ -13,8 +13,8 @@
 
 // Mac OS Cyrillic encoding form
 
-#ifndef OGONEK_MAC_CYRILLIC_HPP
-#define OGONEK_MAC_CYRILLIC_HPP
+#ifndef OGONEK_ENCODINGS_MAC_CYRILLIC_HPP
+#define OGONEK_ENCODINGS_MAC_CYRILLIC_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
