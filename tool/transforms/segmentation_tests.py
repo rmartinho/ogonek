@@ -20,7 +20,6 @@ import re
 import string
 import os
 import io
-from datetime import datetime
 
 if len(sys.argv) != 3:
     print('usage: ' + os.path.basename(sys.argv[0]) + ' <UCD folder> <output folder>')
@@ -52,7 +51,7 @@ def parsebreaks(line):
 
 copyrighttmpl = string.Template('''// Ogonek
 //
-// Written in 2016 by Martinho Fernandes <ogonek@rmf.io>
+// Written in 2017 by Martinho Fernandes <ogonek@rmf.io>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright and related
 // and neighboring rights to this software to the public domain worldwide. This software is
@@ -61,7 +60,7 @@ copyrighttmpl = string.Template('''// Ogonek
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-// This file was automatically generated on ${date}
+// This file was automatically generated.
 ''')
 
 impltmpl = string.Template('''
@@ -105,7 +104,7 @@ def writedata(file, kind, description, tests):
     breaks = list(map(parsebreaks, tests))
     breakstrings = list(', '.join(map(str, b)) for b in  breaks)
 
-    file.write(copyrighttmpl.substitute(date=datetime.utcnow().isoformat()+'Z'))
+    file.write(copyrighttmpl.substitute())
     entries = '\n        '.join('{{ {0}, {{ {1} }} }},'.format(*t) for t in zip(strings, breakstrings))
     file.write(impltmpl.substitute(kind=kind, description=description, entries=entries))
 
@@ -119,7 +118,7 @@ with io.open(os.path.join(ucd, 'auxiliary/LineBreakTest.txt'), 'r', encoding='ut
     lines = list(filtertests(linefile.readlines()))
 
 with open(os.path.join(output, 'segmentation.g.h++'), 'w') as headerfile:
-    headerfile.write(copyrighttmpl.substitute(date=datetime.utcnow().isoformat()+'Z'))
+    headerfile.write(copyrighttmpl.substitute())
     headerfile.write(headertmpl.substitute(graphemes=len(graphemes), words=len(words), sentences=len(sentences), lines=len(lines)))
 
 with open(os.path.join(output, 'grapheme_test_data.g.c++'), 'w') as graphemefile:

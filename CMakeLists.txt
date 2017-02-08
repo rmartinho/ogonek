@@ -13,9 +13,12 @@ set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS OFF)
 
+set (OGONEK_ABI abiv0)
+
 include_directories (${PROJECT_SOURCE_DIR}/include)
 
 add_subdirectory (src/ucd)
+add_subdirectory (src/encodings)
 add_subdirectory (test)
 add_subdirectory (doc)
 

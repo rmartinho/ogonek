@@ -9,5 +9,5 @@ macro (add_test_executable DIR)
     target_link_libraries (${DIR}_test Catch ${ARGN})
 endmacro ()
 
-add_test_executable (ucd ogonek_data)
-add_test_executable (encoding range-v3)
+add_test_executable (ucd ogonek_ucd)
+add_test_executable (encoding range-v3 ogonek_codepages)

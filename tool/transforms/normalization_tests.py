@@ -16,7 +16,6 @@
 import sys
 import os
 import string
-from datetime import datetime
 
 if len(sys.argv) != 3:
     print('usage: ' + os.path.basename(sys.argv[0]) + ' <UCD folder> <output folder>')
@@ -40,7 +39,7 @@ def parsetests(lines):
 
 copyrighttmpl = string.Template('''// Ogonek
 //
-// Written in 2016 by Martinho Fernandes <ogonek@rmf.io>
+// Written in 2017 by Martinho Fernandes <ogonek@rmf.io>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright and related
 // and neighboring rights to this software to the public domain worldwide. This software is
@@ -49,7 +48,7 @@ copyrighttmpl = string.Template('''// Ogonek
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-// This file was automatically generated on ${date}
+// This file was automatically generated.
 
 // Unicode normalization test data
 ''')
@@ -89,11 +88,11 @@ with open(os.path.join(ucd, 'NormalizationTest.txt'), 'r') as sourcefile:
     tests = list(parsetests(filtertests(sourcefile.readlines())))
 
 with open(os.path.join(destination, 'normalization.g.h++'), 'w') as headerfile:
-    headerfile.write(copyrighttmpl.substitute(date=datetime.utcnow().isoformat()+'Z'))
+    headerfile.write(copyrighttmpl.substitute())
     headerfile.write(headertmpl.substitute(count=len(tests)))
 
 with open(os.path.join(destination, 'normalization_test_data.g.c++'), 'w') as implfile:
-    implfile.write(copyrighttmpl.substitute(date=datetime.utcnow().isoformat()+'Z'))
+    implfile.write(copyrighttmpl.substitute())
     entries = '\n        '.join('{{ {0}, {1}, {2}, {3}, {4} }},'.format(*t) for t in tests)
     implfile.write(impltmpl.substitute(data=entries))
 
