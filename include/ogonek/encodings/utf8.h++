@@ -9,8 +9,6 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-// This file was automatically generated.
-
 // UTF-8 encoding form
 
 #ifndef OGONEK_ENCODINGS_UTF8_HPP
@@ -42,6 +40,8 @@ namespace ogonek {
         static constexpr auto continuation_mask      = 0b11'000000u;
         static constexpr auto continuation_signature = 0b10'000000u;
 
+        static constexpr auto continuation_shift     = 6;
+
         static constexpr auto start_2byte_mask       = 0b111'00000u;
         static constexpr auto start_2byte_signature  = 0b110'00000u;
 
@@ -62,19 +62,19 @@ namespace ogonek {
             return b0;
         }
         static constexpr code_point decode(byte b0, byte b1) {
-            return ((b0 & ~start_2byte_mask) << 6)
-                 |  (b1 & ~continuation_mask);
+            return ((b0 & ~start_2byte_mask ) << 1 * continuation_shift)
+                 | ((b1 & ~continuation_mask) << 0 * continuation_shift);
         }
         static constexpr code_point decode(byte b0, byte b1, byte b2) {
-            return ((b0 & ~start_3byte_mask)  << 12)
-                 | ((b1 & ~continuation_mask) << 6)
-                 |  (b2 & ~continuation_mask);
+            return ((b0 & ~start_3byte_mask ) << 2 * continuation_shift)
+                 | ((b1 & ~continuation_mask) << 1 * continuation_shift)
+                 | ((b2 & ~continuation_mask) << 0 * continuation_shift);
         }
         static constexpr code_point decode(byte b0, byte b1, byte b2, byte b3) {
-            return ((b0 & ~start_4byte_mask)  << 18)
-                 | ((b1 & ~continuation_mask) << 12)
-                 | ((b2 & ~continuation_mask) << 6)
-                 |  (b3 & ~continuation_mask);
+            return ((b0 & ~start_4byte_mask ) << 3 * continuation_shift)
+                 | ((b1 & ~continuation_mask) << 2 * continuation_shift)
+                 | ((b2 & ~continuation_mask) << 1 * continuation_shift)
+                 | ((b3 & ~continuation_mask) << 0 * continuation_shift);
         }
 
     public:
@@ -106,20 +106,20 @@ namespace ogonek {
 
         template <typename It, typename St>
         static std::pair<code_point, It> decode_one(It first, St) {
-            byte b0 = *first++;
+            auto b0 = *first++;
             auto length = sequence_length(b0);
             if(length == 1) {
                 return { static_cast<code_point>(b0), first };
             }
-            byte b1 = *first++;
+            auto b1 = *first++;
             if(length == 2) {
                 return { decode(b0, b1), first };
             }
-            byte b2 = *first++;
+            auto b2 = *first++;
             if(length == 3) {
                 return { decode(b0, b1, b2), first };
             }
-            byte b3 = *first++;
+            auto b3 = *first++;
             return { decode(b0, b1, b2, b3), first };
         }
     };
