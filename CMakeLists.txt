@@ -21,5 +21,3 @@ add_subdirectory (src/ucd)
 add_subdirectory (src/encodings)
 add_subdirectory (test)
 add_subdirectory (doc)
-
-include (test/tests.cmake)

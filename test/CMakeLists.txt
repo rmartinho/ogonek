@@ -1,13 +1,14 @@
 cmake_minimum_required (VERSION 3.2)
 
-set (test_runner runner.c++)
+include (tests.cmake)
 
-macro (add_test_executable DIR)
-    file (GLOB_RECURSE ${DIR}_test_SRC ${DIR}/*.c++)
-    add_executable (${DIR}_test ${test_runner} ${${DIR}_test_SRC})
-    target_include_directories (${DIR}_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries (${DIR}_test Catch ${ARGN})
-endmacro ()
+file (GLOB_RECURSE test_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.c++)
+add_executable (test_runner ${test_SRC})
+target_include_directories (test_runner PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries (test_runner Catch ogonek_ucd ogonek_codepages)
 
-add_test_executable (ucd ogonek_ucd)
-add_test_executable (encoding range-v3 ogonek_codepages)
+add_custom_target(check 
+    COMMAND test_runner
+    DEPENDS test_runner
+    COMMENT "Running all tests"
+    USES_TERMINAL)

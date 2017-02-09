@@ -78,5 +78,4 @@ namespace ogonek {
     CONCEPT_ASSERT(EncodingForm<utf16>());
 } // namespace ogonek
 
-#endif // OGONEK_UTF8_HPP
-
+#endif // OGONEK_UTF16_HPP

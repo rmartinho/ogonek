@@ -15,7 +15,7 @@
 
 #include <catch.hpp>
 #include "util.h++"
-#include "test_encodings.h++"
+#include "encoding/test_encodings.h++"
 
 #include <range/v3/view/all.hpp>
 #include <range/v3/to_container.hpp>
