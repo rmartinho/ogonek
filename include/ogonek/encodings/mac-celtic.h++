@@ -17,6 +17,7 @@
 #define OGONEK_ENCODINGS_MAC_CELTIC_HPP
 
 #include <ogonek/types.h++>
+#include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
 
 namespace ogonek {
@@ -26,6 +27,8 @@ namespace ogonek {
     };
 
     using mac_celtic = detail::simple_byte_mapping_encoding<mac_celtic_codepage>;
+
+    CONCEPT_ASSERT(EncodingForm<mac_celtic>());
 } // namespace ogonek
 
 #endif // OGONEK_MAC_CELTIC_HPP

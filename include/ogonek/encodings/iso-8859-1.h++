@@ -17,6 +17,7 @@
 #define OGONEK_ENCODINGS_ISO_8859_1_HPP
 
 #include <ogonek/types.h++>
+#include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
 
 namespace ogonek {
@@ -26,6 +27,8 @@ namespace ogonek {
     };
 
     using iso_8859_1 = detail::simple_byte_mapping_encoding<iso_8859_1_codepage>;
+
+    CONCEPT_ASSERT(EncodingForm<iso_8859_1>());
 } // namespace ogonek
 
 #endif // OGONEK_ISO_8859_1_HPP

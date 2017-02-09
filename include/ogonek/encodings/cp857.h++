@@ -17,6 +17,7 @@
 #define OGONEK_ENCODINGS_CP857_HPP
 
 #include <ogonek/types.h++>
+#include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
 
 namespace ogonek {
@@ -26,6 +27,8 @@ namespace ogonek {
     };
 
     using cp857 = detail::simple_byte_mapping_encoding<cp857_codepage>;
+
+    CONCEPT_ASSERT(EncodingForm<cp857>());
 } // namespace ogonek
 
 #endif // OGONEK_CP857_HPP

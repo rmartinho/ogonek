@@ -17,6 +17,7 @@
 #define OGONEK_ENCODINGS_MAC_CROATIAN_HPP
 
 #include <ogonek/types.h++>
+#include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
 
 namespace ogonek {
@@ -26,6 +27,8 @@ namespace ogonek {
     };
 
     using mac_croatian = detail::simple_byte_mapping_encoding<mac_croatian_codepage>;
+
+    CONCEPT_ASSERT(EncodingForm<mac_croatian>());
 } // namespace ogonek
 
 #endif // OGONEK_MAC_CROATIAN_HPP

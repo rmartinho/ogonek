@@ -15,6 +15,9 @@
 #include <ogonek/encoding.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
 
+#include <catch.hpp>
+#include "util.h++"
+
 #include <vector>
 #include <utility>
 
@@ -86,6 +89,22 @@ namespace test {
 
     CONCEPT_ASSERT(ogonek::EncodingForm<basic_codepage_encoding>());
     CONCEPT_ASSERT(ogonek::StatelessEncodingForm<basic_codepage_encoding>());
+
+    template <typename E, typename Dec, typename Enc>
+    void test_encoding(Dec dec, Enc enc) {
+        CONCEPT_ASSERT(ogonek::EncodingForm<E>());
+
+        SECTION("encode") {
+            auto str = ogonek::encode<E>(ranges::view::all(dec))
+                    | ranges::to_<Enc>();
+            REQUIRE(str == enc);
+        }
+        SECTION("decode") {
+            auto str = ogonek::decode<E>(ranges::view::all(enc))
+                    | ranges::to_<Dec>();
+            REQUIRE(str == dec);
+        }
+    }
 
     // TODO encodings that need flushing
 

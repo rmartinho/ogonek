@@ -17,6 +17,7 @@
 #define OGONEK_ENCODINGS_ATARI_ST_HPP
 
 #include <ogonek/types.h++>
+#include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
 
 namespace ogonek {
@@ -26,6 +27,8 @@ namespace ogonek {
     };
 
     using atari_st = detail::simple_byte_mapping_encoding<atari_st_codepage>;
+
+    CONCEPT_ASSERT(EncodingForm<atari_st>());
 } // namespace ogonek
 
 #endif // OGONEK_ATARI_ST_HPP

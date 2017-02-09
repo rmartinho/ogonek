@@ -9,9 +9,10 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-// Tests for the Windows-1252 encoding
+// Tests for the UTF-8 encoding
 
 #include <ogonek/encoding.h++>
+#include <ogonek/encodings/utf8.h++>
 
 #include <catch.hpp>
 #include "util.h++"
@@ -25,6 +26,10 @@
 
 using namespace test::string_literals;
 
-TEST_CASE("encoding and decoding codepages works as expected", "[encoding][codepage]") {
-    test::test_encoding<test::basic_codepage_encoding>(U"\u0001\u0002\u0003\u0100"_s, "\x0\x1\x2\xFF"_s);
+// Based on Markus Kuhn's UTF-8 decoder capability and stress test <http://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt>
+TEST_CASE("UTF-8 encoding works as expected", "[encoding]") {
+    SECTION("Correct") {
+        test::test_encoding<ogonek::utf8>(U"\u0000\u007F\u0080\u07FF\u0800\uD7FF\uE000\uFFFF\U00010000\U0010FFFF"_s,
+                                           "\x00" "\x7F" "\xC2\x80" "\xDF\xBF" "\xE0\xA0\x80" "\xED\x9F\xBF" "\xEE\x80\x80" "\xEF\xBF\xBF" "\xF0\x90\x80\x80" "\xF4\x8F\xBF\xBF"_s);
+    }
 }

@@ -17,6 +17,7 @@
 #define OGONEK_ENCODINGS_MAC_LATIN2_HPP
 
 #include <ogonek/types.h++>
+#include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
 
 namespace ogonek {
@@ -26,6 +27,8 @@ namespace ogonek {
     };
 
     using mac_latin2 = detail::simple_byte_mapping_encoding<mac_latin2_codepage>;
+
+    CONCEPT_ASSERT(EncodingForm<mac_latin2>());
 } // namespace ogonek
 
 #endif // OGONEK_MAC_LATIN2_HPP

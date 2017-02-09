@@ -17,6 +17,7 @@
 #define OGONEK_ENCODINGS_CP864_HPP
 
 #include <ogonek/types.h++>
+#include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
 
 namespace ogonek {
@@ -26,6 +27,8 @@ namespace ogonek {
     };
 
     using cp864 = detail::simple_byte_mapping_encoding<cp864_codepage>;
+
+    CONCEPT_ASSERT(EncodingForm<cp864>());
 } // namespace ogonek
 
 #endif // OGONEK_CP864_HPP

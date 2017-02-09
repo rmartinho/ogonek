@@ -97,6 +97,7 @@ header_tmpl = string.Template('''#ifndef OGONEK_ENCODINGS_${pp_symbol}_HPP
 #define OGONEK_ENCODINGS_${pp_symbol}_HPP
 
 #include <ogonek/types.h++>
+#include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
 
 namespace ogonek {
@@ -106,6 +107,8 @@ namespace ogonek {
     };
 
     using ${identifier} = detail::simple_byte_mapping_encoding<${identifier}_codepage>;
+
+    CONCEPT_ASSERT(EncodingForm<${identifier}>());
 } // namespace ogonek
 
 #endif // OGONEK_${pp_symbol}_HPP

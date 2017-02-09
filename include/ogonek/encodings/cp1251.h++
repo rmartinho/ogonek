@@ -17,6 +17,7 @@
 #define OGONEK_ENCODINGS_CP1251_HPP
 
 #include <ogonek/types.h++>
+#include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
 
 namespace ogonek {
@@ -26,6 +27,8 @@ namespace ogonek {
     };
 
     using cp1251 = detail::simple_byte_mapping_encoding<cp1251_codepage>;
+
+    CONCEPT_ASSERT(EncodingForm<cp1251>());
 } // namespace ogonek
 
 #endif // OGONEK_CP1251_HPP

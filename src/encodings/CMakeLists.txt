@@ -148,3 +148,4 @@ endfunction ()
 transform_codepages (codepage_INC codepage_IMPL ${codepage_SRC})
 
 add_library (ogonek_codepages STATIC ${codepage_IMPL})
+target_link_libraries (ogonek_codepages range-v3)

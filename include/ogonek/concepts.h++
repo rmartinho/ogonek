@@ -112,6 +112,14 @@ namespace ogonek {
     template <typename T>
     using EncodingForm = concepts::models<concepts::EncodingForm, T>;
 
+    /**
+     * .. concept:: Type{E} StatelessEncodingForm
+     * 
+     *     An |encoding-form| that requires no state for encoding/decoding
+     *     operations.
+     *
+     *     .. todo:: Document requirements
+     */
     template <typename T>
     using StatelessEncodingForm = concepts::models<concepts::StatelessEncodingForm, T>;
 } // namespace ogonek

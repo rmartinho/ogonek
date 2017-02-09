@@ -17,6 +17,7 @@
 #define OGONEK_ENCODINGS_KOI8_U_HPP
 
 #include <ogonek/types.h++>
+#include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
 
 namespace ogonek {
@@ -26,6 +27,8 @@ namespace ogonek {
     };
 
     using koi8_u = detail::simple_byte_mapping_encoding<koi8_u_codepage>;
+
+    CONCEPT_ASSERT(EncodingForm<koi8_u>());
 } // namespace ogonek
 
 #endif // OGONEK_KOI8_U_HPP

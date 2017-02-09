@@ -17,6 +17,7 @@
 #define OGONEK_ENCODINGS_KZ_1048_HPP
 
 #include <ogonek/types.h++>
+#include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
 
 namespace ogonek {
@@ -26,6 +27,8 @@ namespace ogonek {
     };
 
     using kz_1048 = detail::simple_byte_mapping_encoding<kz_1048_codepage>;
+
+    CONCEPT_ASSERT(EncodingForm<kz_1048>());
 } // namespace ogonek
 
 #endif // OGONEK_KZ_1048_HPP

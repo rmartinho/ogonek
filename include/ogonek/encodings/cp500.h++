@@ -17,6 +17,7 @@
 #define OGONEK_ENCODINGS_CP500_HPP
 
 #include <ogonek/types.h++>
+#include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
 
 namespace ogonek {
@@ -26,6 +27,8 @@ namespace ogonek {
     };
 
     using cp500 = detail::simple_byte_mapping_encoding<cp500_codepage>;
+
+    CONCEPT_ASSERT(EncodingForm<cp500>());
 } // namespace ogonek
 
 #endif // OGONEK_CP500_HPP
