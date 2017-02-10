@@ -18,8 +18,34 @@
 #define OGONEK_CONCEPTS_HPP
 
 #include <range/v3/utility/concepts.hpp>
+#include <range/v3/utility/functional.hpp>
+
+#include <iterator>
+
+#include <cstddef>
 
 namespace ogonek {
+    namespace archetypes {
+        template <typename T>
+        struct InputIterator {
+            using value_type = T;
+            using reference = T&;
+            using difference_type = std::ptrdiff_t;
+            using iterator_category = std::input_iterator_tag;
+
+            InputIterator& operator++();
+            void operator++(int);
+            T operator*() const;
+        };
+        template <typename T, typename I = InputIterator<T>>
+        struct Sentinel {
+            friend bool operator==(Sentinel const&, I const&);
+            friend bool operator!=(Sentinel const&, I const&);
+            friend bool operator==(I const&, Sentinel const&);
+            friend bool operator!=(I const&, Sentinel const&);
+        };
+    } // namespace archetypes
+
     namespace concepts {
         using ranges::concepts::models;
         using ranges::concepts::refines;
@@ -27,9 +53,13 @@ namespace ogonek {
         using ranges::concepts::valid_expr;
         using ranges::concepts::model_of;
         using ranges::concepts::is_true;
+        using ranges::concepts::has_type;
 
         using ranges::concepts::DefaultConstructible;
+        using ranges::concepts::SemiRegular;
+        using ranges::concepts::ConvertibleTo;
         using ranges::concepts::Integral;
+        using ranges::concepts::Invocable;
 
         struct EncodingForm {
         private:
@@ -76,10 +106,12 @@ namespace ogonek {
             auto requires_(T&& t) -> decltype(
                 valid_expr(
                     model_of<Integral, code_unit_t<T>>(),
-                    model_of<DefaultConstructible, state_t<T>>(),
+                    model_of<SemiRegular, state_t<T>>(),
                     is_true(max_width_gt_zero_t<T>{}),
                     encode_one<T>(code_point(), std::declval<state_t<T>&>()),
-                    decode_one<T>(std::declval<code_unit_t<T> const*>(), std::declval<code_unit_t<T> const*>(), std::declval<state_t<T>&>())
+                    decode_one<T>(archetypes::InputIterator<code_unit_t<T>>(),
+                                  archetypes::Sentinel<code_unit_t<T>>(),
+                                  std::declval<state_t<T>&>())
                 ));
         };
 
@@ -91,16 +123,38 @@ namespace ogonek {
                 return T::encode_one(u);
             }
 
+            template <typename T, typename It, typename St>
+            static auto decode_one(It it, St st) {
+                return T::decode_one(it, st);
+            }
+
             template<typename T>
             auto requires_(T&& t) -> decltype(
                 valid_expr(
                     is_true(std::is_empty<state_t<T>>{})
                 ));
         };
+
+        struct Optional {
+        public:
+            template <typename T>
+            using value_type_t = std::remove_reference_t<decltype(*std::declval<T const&>())>;
+
+            template<typename T>
+            auto requires_(T&& t) -> decltype(
+                valid_expr(
+                    model_of<DefaultConstructible, T>(),
+                    *std::declval<T const&>(),
+                    static_cast<bool>(std::declval<T const&>())
+                ));
+        };
     } // namespace concepts
 
+    using ranges::Invocable;
+
     /**
-     * .. concept:: Type{E} EncodingForm
+     * .. concept:: template <typename E>\
+     *              EncodingForm
      * 
      *     An |encoding-form| type. It describes an encoding form's mapping
      *     between |code-points| and |code-units|, as well as some extra
@@ -113,7 +167,8 @@ namespace ogonek {
     using EncodingForm = concepts::models<concepts::EncodingForm, T>;
 
     /**
-     * .. concept:: Type{E} StatelessEncodingForm
+     * .. concept:: template <typename E>\
+     *              StatelessEncodingForm
      * 
      *     An |encoding-form| that requires no state for encoding/decoding
      *     operations.
@@ -122,6 +177,17 @@ namespace ogonek {
      */
     template <typename T>
     using StatelessEncodingForm = concepts::models<concepts::StatelessEncodingForm, T>;
+
+    /**
+     * .. concept:: template <typename O>\
+     *              Optional
+     * 
+     *     A type of objects that contain an optional value.
+     *
+     *     .. todo:: Document requirements
+     */
+    template <typename T>
+    using Optional = concepts::models<concepts::Optional, T>;
 } // namespace ogonek
 
 #endif // OGONEK_CONCEPTS_HPP
