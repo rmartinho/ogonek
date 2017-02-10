@@ -14,8 +14,8 @@
  * ==================================
  */
 
-#ifndef OGONEK_ENCODE_HPP
-#define OGONEK_ENCODE_HPP
+#ifndef OGONEK_ENCODING_HPP
+#define OGONEK_ENCODING_HPP
 
 #include <ogonek/types.h++>
 #include <ogonek/concepts.h++>
@@ -298,4 +298,4 @@ namespace ogonek {
     }
 } // namespace ogonek
 
-#endif // OGONEK_ENCODE_HPP
+#endif // OGONEK_ENCODING_HPP
