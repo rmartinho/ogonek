@@ -17,14 +17,13 @@
 #ifndef OGONEK_ENCODE_HPP
 #define OGONEK_ENCODE_HPP
 
-#include "types.h++"
-#include "concepts.h++"
+#include <ogonek/types.h++>
+#include <ogonek/concepts.h++>
 
 #include <range/v3/view_adaptor.hpp>
 #include <range/v3/view_facade.hpp>
 
 #include <iostream>
-#include <vector>
 #include <type_traits>
 
 #include <cstddef>
@@ -131,7 +130,9 @@ namespace ogonek {
             private:
                 static constexpr std::ptrdiff_t invalid = -1;
 
-                mutable std::vector<typename Encoding::code_unit> encoded;
+                // TODO promote this?
+                using encoded_character_type = decltype(encode_one<Encoding>(code_point(), std::declval<encoding_state_t<Encoding>&>()));
+                mutable encoded_character_type encoded;
                 mutable std::ptrdiff_t position = invalid;
                 mutable encoding_state_t<Encoding> state {};
             };

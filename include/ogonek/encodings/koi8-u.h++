@@ -19,11 +19,12 @@
 #include <ogonek/types.h++>
 #include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
+#include <ogonek/detail/visibility.h++>
 
 namespace ogonek {
-    struct koi8_u_codepage {
-        static code_point to_unicode[256];
-        static detail::simple_byte_mapping from_unicode[256];
+    struct OGONEK_PUBLIC koi8_u_codepage {
+        static OGONEK_PUBLIC code_point to_unicode[256];
+        static OGONEK_PUBLIC detail::simple_byte_mapping from_unicode[256];
     };
 
     using koi8_u = detail::simple_byte_mapping_encoding<koi8_u_codepage>;

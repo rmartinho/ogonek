@@ -99,11 +99,12 @@ header_tmpl = string.Template('''#ifndef OGONEK_ENCODINGS_${pp_symbol}_HPP
 #include <ogonek/types.h++>
 #include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
+#include <ogonek/detail/visibility.h++>
 
 namespace ogonek {
-    struct ${identifier}_codepage {
-        static code_point to_unicode[256];
-        static detail::simple_byte_mapping from_unicode[${size}];
+    struct OGONEK_PUBLIC ${identifier}_codepage {
+        static OGONEK_PUBLIC code_point to_unicode[256];
+        static OGONEK_PUBLIC detail::simple_byte_mapping from_unicode[${size}];
     };
 
     using ${identifier} = detail::simple_byte_mapping_encoding<${identifier}_codepage>;

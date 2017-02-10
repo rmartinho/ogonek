@@ -19,11 +19,12 @@
 #include <ogonek/types.h++>
 #include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
+#include <ogonek/detail/visibility.h++>
 
 namespace ogonek {
-    struct mac_latin2_codepage {
-        static code_point to_unicode[256];
-        static detail::simple_byte_mapping from_unicode[223];
+    struct OGONEK_PUBLIC mac_latin2_codepage {
+        static OGONEK_PUBLIC code_point to_unicode[256];
+        static OGONEK_PUBLIC detail::simple_byte_mapping from_unicode[223];
     };
 
     using mac_latin2 = detail::simple_byte_mapping_encoding<mac_latin2_codepage>;

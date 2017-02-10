@@ -19,11 +19,12 @@
 #include <ogonek/types.h++>
 #include <ogonek/concepts.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
+#include <ogonek/detail/visibility.h++>
 
 namespace ogonek {
-    struct cp932_codepage {
-        static code_point to_unicode[256];
-        static detail::simple_byte_mapping from_unicode[7915];
+    struct OGONEK_PUBLIC cp932_codepage {
+        static OGONEK_PUBLIC code_point to_unicode[256];
+        static OGONEK_PUBLIC detail::simple_byte_mapping from_unicode[7915];
     };
 
     using cp932 = detail::simple_byte_mapping_encoding<cp932_codepage>;

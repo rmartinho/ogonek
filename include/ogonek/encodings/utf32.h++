@@ -16,6 +16,7 @@
 
 #include <ogonek/types.h++>
 #include <ogonek/concepts.h++>
+#include <ogonek/detail/encoded_character.h++>
 
 namespace ogonek {
     struct utf32 {
@@ -23,7 +24,7 @@ namespace ogonek {
         using code_unit = char32_t;
         static constexpr std::size_t max_width = 2;
 
-        static std::vector<code_unit> encode_one(code_point u) {
+        static detail::encoded_character<utf32> encode_one(code_point u) {
             return { static_cast<code_unit>(u) };
         }
 
