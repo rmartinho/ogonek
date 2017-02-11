@@ -41,12 +41,24 @@ htmlhelp_basename = 'Ogonekdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
+latex_engine = 'xelatex'
 latex_elements = {
-    # 'papersize': 'letterpaper',
-    # 'pointsize': '10pt',
-    # 'preamble': '',
-    # 'figure_align': 'htbp',
+    'fontenc': '\\usepackage{fontspec}',
+    'fontpkg': '''\
+\\setmainfont{Noto Serif}
+\\setsansfont{Noto Sans}
+\\setmonofont{Noto Mono}''',
+    'geometry': '\\usepackage[vmargin=2.5cm, hmargin=3cm]{geometry}',
+    'preamble': '''\
+\\usepackage[titles]{tocloft}
+\\cftsetpnumwidth {1.25cm}\\cftsetrmarg{1.5cm}
+\\setlength{\\cftchapnumwidth}{0.75cm}
+\\setlength{\\cftsecindent}{\\cftchapnumwidth}
+\\setlength{\\cftsecnumwidth}{1.25cm}''',
+    'fncychap': '\\usepackage[Bjornstrup]{fncychap}',
+    'printindex': '\\footnotesize\\raggedright\\printindex',
 }
+latex_show_urls = 'footnote'
 
 latex_documents = [
     (master_doc, 'Ogonek.tex', 'Ogonek Documentation',
