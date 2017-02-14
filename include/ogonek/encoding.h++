@@ -18,7 +18,9 @@
 #define OGONEK_ENCODING_HPP
 
 #include <ogonek/types.h++>
+#include <ogonek/error_fwd.h++>
 #include <ogonek/concepts.h++>
+#include <ogonek/detail/container/partial_array.h++>
 
 #include <range/v3/view_adaptor.hpp>
 #include <range/v3/view_facade.hpp>
@@ -88,21 +90,21 @@ namespace ogonek {
     }
 
     namespace detail {
-        template <typename Encoding, typename Rng>
+        template <typename Encoding, typename Rng, typename Handler>
         struct encoded_view
         : ranges::view_adaptor<
-            encoded_view<Encoding, Rng>,
+            encoded_view<Encoding, Rng, Handler>,
             Rng,
             ranges::is_finite<Rng>::value? ranges::finite : ranges::range_cardinality<Rng>::value> {
         private:
             using base_type = ranges::view_adaptor<
-                encoded_view<Encoding, Rng>,
+                encoded_view<Encoding, Rng, Handler>,
                 Rng,
                 ranges::is_finite<Rng>::value? ranges::finite : ranges::range_cardinality<Rng>::value>;
 
-            CONCEPT_ASSERT(ranges::Range<Rng>());
+            CONCEPT_ASSERT(InputRangeOf<code_point, Rng>());
             CONCEPT_ASSERT(EncodingForm<Encoding>());
-            CONCEPT_ASSERT(std::is_same<ranges::range_value_t<Rng>, code_point>());
+            CONCEPT_ASSERT(EncodeErrorHandler<Handler, Encoding, Rng>());
 
             friend ranges::range_access;
 
@@ -115,6 +117,7 @@ namespace ogonek {
                     }
                     return encoded[position];
                 }
+
                 void next(ranges::range_iterator_t<Rng>& it) {
                     // TODO next without get!
                     ++position;
@@ -123,6 +126,7 @@ namespace ogonek {
                         position = invalid;
                     }
                 }
+
                 bool equal(ranges::range_iterator_t<Rng> it0, ranges::range_iterator_t<Rng> it1, adaptor const & other) const {
                     return it0 == it1 && position == other.position;
                 }
@@ -143,26 +147,33 @@ namespace ogonek {
 
         public:
             encoded_view() = default;
-            explicit encoded_view(Rng rng)
-            : base_type(std::move(rng))
+            explicit encoded_view(Rng rng, Handler handler)
+            : base_type(std::move(rng)), handler(std::forward<Handler>(handler))
             {}
+
+        private:
+            std::decay_t<Handler> handler;
         };
     } // namespace detail
 
     /**
-     * .. function:: template <EncodingForm Encoding, ranges::Range Rng>\
-     *               auto encode(Rng rng)
+     * .. function:: template <EncodingForm Encoding, InputRange Rng, ErrorHandler Handler>\
+     *               auto encode(Rng rng, Handler handler)
+     *
+     *     :param rng: The range of |code-points| to encode
+     *
+     *     :param handler: The strategy for error handling
      *
      *     :returns: a range of the |code-units| that encode the |code-points| in ``rng``
      *
-     *     :validation: as performed by ``Encoding``
+     *     :validation: as performed by ``Encoding``; errors are handled by ``handler``
      */
-    template <typename Encoding, typename Rng,
-              CONCEPT_REQUIRES_(ranges::Range<Rng>()),
+    template <typename Encoding, typename Rng, typename Handler,
+              CONCEPT_REQUIRES_(InputRangeOf<code_point, Rng>()),
               CONCEPT_REQUIRES_(EncodingForm<Encoding>()),
-              CONCEPT_REQUIRES_(std::is_same<ranges::range_value_t<Rng>, code_point>())>
-    auto encode(Rng rng) {
-        return detail::encoded_view<Encoding, Rng>(std::move(rng));
+              CONCEPT_REQUIRES_(EncodeErrorHandler<Handler, Encoding, Rng>())>
+    auto encode(Rng rng, Handler&& handler) {
+        return detail::encoded_view<Encoding, Rng, Handler>(std::move(rng), std::forward<Handler>(handler));
     }
 
     /**
@@ -296,6 +307,19 @@ namespace ogonek {
     auto decode(Rng rng) {
         return detail::decoded_view<Encoding, Rng>(std::move(rng));
     }
+
+    /**
+     * .. type:: template <EncodingForm Encoding>\
+     *           encoded_character
+     *
+     *     A container type for the |code-units| that encode a single
+     *     |code-point| according to ``Encoding``.
+     */
+    template <typename Encoding>
+    struct encoded_character
+    : public detail::partial_array<code_unit_t<Encoding>, Encoding::max_width> {
+        using detail::partial_array<code_unit_t<Encoding>, Encoding::max_width>::partial_array;
+    };
 } // namespace ogonek
 
 #endif // OGONEK_ENCODING_HPP

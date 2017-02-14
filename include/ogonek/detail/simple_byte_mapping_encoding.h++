@@ -15,7 +15,7 @@
 #define OGONEK_DETAIL_SIMPLE_BYTE_MAPPING
 
 #include <ogonek/types.h++>
-#include <ogonek/detail/encoded_character.h++>
+#include <ogonek/encoding.h++>
 
 #include <algorithm>
 #include <iterator>
@@ -36,7 +36,7 @@ namespace ogonek {
             using code_unit = char;
             static constexpr std::size_t max_width = 1;
 
-            static detail::encoded_character<simple_byte_mapping_encoding<T>> encode_one(code_point u) {
+            static encoded_character<simple_byte_mapping_encoding<T>> encode_one(code_point u) {
                 auto it = std::find_if(std::begin(T::from_unicode), std::end(T::from_unicode), [u](auto&& m) {
                     return m.u == u;
                 });

@@ -9,17 +9,22 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-#ifndef OGONEK_DETAIL_ENCODED_CHARACTER_HPP
-#define OGONEK_DETAIL_ENCODED_CHARACTER_HPP
-
-#include <ogonek/encoding.h++>
-#include <ogonek/detail/container/partial_array.h++>
+#ifndef OGONEK_ERROR_FWD_HPP
+#define OGONEK_ERROR_FWD_HPP
 
 namespace ogonek {
-    namespace detail {
-        template <typename Encoding>
-        using encoded_character = partial_array<code_unit_t<Encoding>, Encoding::max_width>;
-    } // namespace detail
+
+    struct unicode_error;
+
+    template <typename Encoding, typename Rng>
+    struct encode_error;
+
+    template <typename Encoding, typename Rng>
+    struct decode_error;
+
+    template <typename Encoding>
+    struct encode_error_handler_result;
 } // namespace ogonek
 
-#endif //OGONEK_DETAIL_ENCODED_CHARACTER_HPP
+#endif // OGONEK_ERROR_HPP
+

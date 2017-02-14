@@ -16,7 +16,7 @@
 
 #include <ogonek/types.h++>
 #include <ogonek/concepts.h++>
-#include <ogonek/detail/encoded_character.h++>
+#include <ogonek/encoding.h++>
 
 namespace ogonek {
     struct utf16 {
@@ -53,7 +53,7 @@ namespace ogonek {
     public:
         static constexpr std::size_t max_width = 2;
 
-        static detail::encoded_character<utf16> encode_one(code_point u) {
+        static encoded_character<utf16> encode_one(code_point u) {
             if(u <= last_1word_value) {
                 return { static_cast<code_unit>(u) };
             }

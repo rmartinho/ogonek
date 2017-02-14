@@ -18,6 +18,8 @@
 #define OGONEK_ERROR_HPP
 
 #include <ogonek/concepts.h++>
+#include <ogonek/detail/encoded_character.h++>
+#include <ogonek/detail/container/optional.h++>
 
 #include <range/v3/range_concepts.hpp>
 #include <range/v3/range_traits.hpp>
@@ -77,5 +79,16 @@ namespace ogonek {
         ranges::range_iterator_t<Rng> it;
         ranges::range_sentinel_t<Rng> st;
     };
+
+    template <typename Encoding>
+    struct encode_error_handler_result {
+        detail::optional<encoded_character<Encoding>> character;
+
+        template <typename T> // TODO constrain?
+        explicit operator T() const {
+            return T(character.begin(), character.end());
+        }
+    };
 } // namespace ogonek
+
 #endif // OGONEK_ERROR_HPP

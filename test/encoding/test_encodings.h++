@@ -14,6 +14,7 @@
 #include <ogonek/types.h++>
 #include <ogonek/encoding.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
+#include <ogonek/detail/container/optional.h++>
 
 #include <catch.hpp>
 #include "util.h++"
@@ -95,7 +96,7 @@ namespace test {
         CONCEPT_ASSERT(ogonek::EncodingForm<E>());
 
         SECTION("encode") {
-            auto str = ogonek::encode<E>(ranges::view::all(dec))
+            auto str = ogonek::encode<E>(ranges::view::all(dec), [](auto& e) -> std::vector<ogonek::code_unit_t<E>>* { return {}; })
                     | ranges::to_<Enc>();
             REQUIRE(str == enc);
         }
