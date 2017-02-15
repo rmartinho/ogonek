@@ -34,7 +34,6 @@ namespace ogonek {
         template <typename T>
         struct simple_byte_mapping_encoding {
             using code_unit = char;
-            static constexpr std::size_t max_width = 1;
 
             static encoded_character<simple_byte_mapping_encoding<T>> encode_one(code_point u) {
                 auto it = std::find_if(std::begin(T::from_unicode), std::end(T::from_unicode), [u](auto&& m) {

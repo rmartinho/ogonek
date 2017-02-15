@@ -12,6 +12,7 @@
 // Test encodings
 
 #include <ogonek/types.h++>
+#include <ogonek/error.h++>
 #include <ogonek/encoding.h++>
 #include <ogonek/detail/simple_byte_mapping_encoding.h++>
 #include <ogonek/detail/container/optional.h++>
@@ -27,7 +28,6 @@
 namespace test {
     struct one_to_one_encoding {
         using code_unit = char32_t;
-        static constexpr std::size_t max_width = 1;
         static std::vector<code_unit> encode_one(ogonek::code_point u) {
             return { u + 1 };
         }
@@ -41,7 +41,6 @@ namespace test {
 
     struct one_to_many_encoding {
         using code_unit = char16_t;
-        static constexpr std::size_t max_width = 1;
         static std::vector<code_unit> encode_one(ogonek::code_point u) {
             return { static_cast<code_unit>(u / 0x10000), static_cast<code_unit>(u % 0x10000) };
         }
@@ -58,7 +57,6 @@ namespace test {
     struct stateful_encoding {
         using code_unit = char32_t;
         struct state { bool bom_encoded = false; };
-        static constexpr std::size_t max_width = 1;
         static std::vector<code_unit> encode_one(ogonek::code_point u, state& s) {
             if(not s.bom_encoded) {
                 s.bom_encoded = true;
@@ -96,13 +94,13 @@ namespace test {
         CONCEPT_ASSERT(ogonek::EncodingForm<E>());
 
         SECTION("encode") {
-            auto str = ogonek::encode<E>(ranges::view::all(dec), [](auto& e) -> std::vector<ogonek::code_unit_t<E>>* { return {}; })
-                    | ranges::to_<Enc>();
+            auto str = ogonek::encode<E>(ranges::view::all(dec), ogonek::discard_errors)
+                     | ranges::to_<Enc>();
             REQUIRE(str == enc);
         }
         SECTION("decode") {
             auto str = ogonek::decode<E>(ranges::view::all(enc))
-                    | ranges::to_<Dec>();
+                     | ranges::to_<Dec>();
             REQUIRE(str == dec);
         }
     }

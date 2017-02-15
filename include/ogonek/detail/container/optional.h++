@@ -25,54 +25,32 @@ namespace ogonek {
         template <typename T>
         struct optional;
 
+        // trivial specializations that use unused representation bits for nullopt
         template <>
         struct optional<code_point> {
-        public:
-            optional()
-            : u(0xFFFFFFFF) {}
+        private:
+            static constexpr code_point invalid = 0xFFFFFFFF;
 
-            optional(code_point u)
+        public:
+            constexpr optional()
+            : u(invalid) {}
+
+            constexpr optional(code_point u)
             : u(u) {
-                assert(u != 0xFFFFFFFF);
+                assert(u != invalid);
             }
 
-            code_point operator*() const {
-                assert(u != 0xFFFFFFFF);
+            constexpr code_point operator*() const {
+                assert(u != invalid);
                 return u;
             }
 
-            explicit operator bool() const {
-                return u != 0xFFFFFFFF;
+            explicit constexpr operator bool() const {
+                return u != invalid;
             }
 
         private:
             code_point u;
-        };
-
-        CONCEPT_ASSERT(Optional<optional<code_point>>());
-
-        template <typename Encoding>
-        struct optional<encoded_character<Encoding>> {
-        public:
-            optional()
-            : e() {}
-
-            optional(encoded_character<Encoding> e)
-            : e(e) {
-                assert(e.size() > 0);
-            }
-
-            encoded_character<Encoding> const& operator*() const {
-                assert(e.size() > 0);
-                return e;
-            }
-
-            explicit operator bool() const {
-                return e.size() > 0;
-            }
-
-        private:
-            encoded_character<Encoding> e;
         };
 
         CONCEPT_ASSERT(Optional<optional<code_point>>());

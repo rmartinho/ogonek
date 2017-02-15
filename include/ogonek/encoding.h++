@@ -25,6 +25,7 @@
 #include <range/v3/view_adaptor.hpp>
 #include <range/v3/view_facade.hpp>
 
+#include <functional>
 #include <iostream>
 #include <type_traits>
 
@@ -40,6 +41,18 @@ namespace ogonek {
      */
     template <typename Encoding>
     using code_unit_t = typename concepts::EncodingForm::code_unit_t<Encoding>;
+
+    /**
+     * .. todo:: ``max_width_v``
+     */
+    template <typename Encoding>
+    constexpr auto max_width_v = concepts::EncodingForm::max_width_v<Encoding>;
+
+    /**
+     * .. todo:: ``replacement_character_v``
+     */
+    template <typename Encoding>
+    constexpr auto replacement_character_v = concepts::EncodingForm::replacement_character_v<Encoding>;
 
     /**
      * .. type:: template <EncodingForm Encoding>\
@@ -104,7 +117,7 @@ namespace ogonek {
 
             CONCEPT_ASSERT(InputRangeOf<code_point, Rng>());
             CONCEPT_ASSERT(EncodingForm<Encoding>());
-            CONCEPT_ASSERT(EncodeErrorHandler<Handler, Encoding, Rng>());
+            CONCEPT_ASSERT(EncodeErrorHandler<Handler>());
 
             friend ranges::range_access;
 
@@ -131,6 +144,11 @@ namespace ogonek {
                     return it0 == it1 && position == other.position;
                 }
 
+                adaptor() = default;
+
+                adaptor(Handler const& handler)
+                : handler(&handler) {}
+
             private:
                 static constexpr std::ptrdiff_t invalid = -1;
 
@@ -138,11 +156,12 @@ namespace ogonek {
                 using encoded_character_type = decltype(encode_one<Encoding>(code_point(), std::declval<encoding_state_t<Encoding>&>()));
                 mutable encoded_character_type encoded;
                 mutable std::ptrdiff_t position = invalid;
+                std::decay_t<Handler> const* handler = nullptr;
                 mutable encoding_state_t<Encoding> state {};
             };
 
             adaptor begin_adaptor() const {
-                return {};
+                return { handler };
             }
 
         public:
@@ -171,7 +190,7 @@ namespace ogonek {
     template <typename Encoding, typename Rng, typename Handler,
               CONCEPT_REQUIRES_(InputRangeOf<code_point, Rng>()),
               CONCEPT_REQUIRES_(EncodingForm<Encoding>()),
-              CONCEPT_REQUIRES_(EncodeErrorHandler<Handler, Encoding, Rng>())>
+              CONCEPT_REQUIRES_(EncodeErrorHandler<Handler>())>
     auto encode(Rng rng, Handler&& handler) {
         return detail::encoded_view<Encoding, Rng, Handler>(std::move(rng), std::forward<Handler>(handler));
     }
@@ -208,9 +227,8 @@ namespace ogonek {
                 decoded_view<Encoding, Rng>,
                 ranges::is_finite<Rng>::value? ranges::finite : ranges::range_cardinality<Rng>::value>;
 
-            CONCEPT_ASSERT(ranges::Range<Rng>());
+            CONCEPT_ASSERT(InputRangeOf<code_unit_t<Encoding>, Rng>());
             CONCEPT_ASSERT(EncodingForm<Encoding>());
-            CONCEPT_ASSERT(std::is_same<ranges::range_value_t<Rng>, code_unit_t<Encoding>>());
 
             friend ranges::range_access;
 
@@ -301,9 +319,8 @@ namespace ogonek {
      *     :validation: as performed by ``Encoding``
      */
     template <typename Encoding, typename Rng,
-              CONCEPT_REQUIRES_(ranges::Range<Rng>()),
-              CONCEPT_REQUIRES_(EncodingForm<Encoding>()),
-              CONCEPT_REQUIRES_(std::is_same<ranges::range_value_t<Rng>, code_unit_t<Encoding>>())>
+              CONCEPT_REQUIRES_(InputRangeOf<code_unit_t<Encoding>, Rng>()),
+              CONCEPT_REQUIRES_(EncodingForm<Encoding>())>
     auto decode(Rng rng) {
         return detail::decoded_view<Encoding, Rng>(std::move(rng));
     }
@@ -317,8 +334,8 @@ namespace ogonek {
      */
     template <typename Encoding>
     struct encoded_character
-    : public detail::partial_array<code_unit_t<Encoding>, Encoding::max_width> {
-        using detail::partial_array<code_unit_t<Encoding>, Encoding::max_width>::partial_array;
+    : public detail::partial_array<code_unit_t<Encoding>, max_width_v<Encoding>> {
+        using detail::partial_array<code_unit_t<Encoding>, max_width_v<Encoding>>::partial_array;
     };
 } // namespace ogonek
 

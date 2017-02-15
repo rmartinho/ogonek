@@ -15,15 +15,8 @@
 namespace ogonek {
 
     struct unicode_error;
-
-    template <typename Encoding, typename Rng>
     struct encode_error;
-
-    template <typename Encoding, typename Rng>
     struct decode_error;
-
-    template <typename Encoding>
-    struct encode_error_handler_result;
 } // namespace ogonek
 
 #endif // OGONEK_ERROR_HPP

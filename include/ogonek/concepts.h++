@@ -71,7 +71,22 @@ namespace ogonek {
         struct EncodingForm {
         private:
             template <typename T>
-            using max_width_gt_zero_t = std::integral_constant<bool, (T::max_width > 0)>;
+            struct max_width {
+                template <typename U = T>
+                static std::integral_constant<std::size_t, U::max_width> test(int);
+                static std::integral_constant<std::size_t, 1> test(...);
+                using type = decltype(test(0));
+                static constexpr std::size_t value = type::value;
+            };
+
+            template <typename T>
+            struct replacement_character {
+                template <typename U = T>
+                static std::integral_constant<char32_t, U::replacement_character> test(int);
+                static std::integral_constant<char32_t, U'\uFFFD'> test(...);
+                using type = decltype(test(0));
+                static constexpr std::size_t value = type::value;
+            };
 
             template <typename T>
             struct state {
@@ -85,6 +100,12 @@ namespace ogonek {
         public:
             template <typename T>
             using code_unit_t = typename T::code_unit;
+
+            template <typename T>
+            static constexpr std::size_t max_width_v = max_width<T>::value;
+
+            template <typename T>
+            static constexpr char32_t replacement_character_v = replacement_character<T>::value;
 
             template <typename T>
             using state_t = typename state<T>::type;
@@ -114,7 +135,7 @@ namespace ogonek {
                 valid_expr(
                     model_of<Integral, code_unit_t<T>>(),
                     model_of<SemiRegular, state_t<T>>(),
-                    is_true(max_width_gt_zero_t<T>{}),
+                    is_true(std::integral_constant<bool, (max_width_v<T> > 0)>{}),
                     encode_one<T>(code_point(), std::declval<state_t<T>&>()),
                     decode_one<T>(archetypes::InputIterator<code_unit_t<T>>(),
                                   archetypes::Sentinel<code_unit_t<T>>(),
@@ -168,13 +189,13 @@ namespace ogonek {
 
         struct EncodeErrorHandler {
         public:
-            template<typename H, typename E, typename R,
-                     typename HandlerResult = Invocable::result_t<H&, encode_error<E, R>&>>
-            auto requires_(H&&, E&&, R&&) -> decltype(
+            template<typename H,
+                     typename HandlerResult = Invocable::result_t<H&, encode_error>>
+            auto requires_(H&&) -> decltype(
                 valid_expr(
-                    model_of<Invocable, H&, encode_error<E, R>&>(),
-                    model_of<Optional, HandlerResult>(),
-                    model_of<InputRangeOf, EncodingForm::code_unit_t<E>, Optional::value_t<HandlerResult>>()
+                    model_of<Invocable, H&, encode_error>()
+                    //model_of<Optional, HandlerResult>()
+                    //model_of<InputRangeOf, code_point, Optional::value_t<HandlerResult>>()
                 ));
         };
     } // namespace concepts
@@ -223,9 +244,11 @@ namespace ogonek {
     template <typename T>
     using Optional = concepts::models<concepts::Optional, T>;
 
-    // TODO docs
-    template <typename H, typename E, typename R>
-    using EncodeErrorHandler = concepts::models<concepts::EncodeErrorHandler, H, E, R>;
+    /**
+     * .. todo:: ``EncodeErrorHandler``
+     */
+    template <typename H>
+    using EncodeErrorHandler = concepts::models<concepts::EncodeErrorHandler, H>;
 } // namespace ogonek
 
 #endif // OGONEK_CONCEPTS_HPP

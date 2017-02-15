@@ -50,7 +50,7 @@ formats = {
     #'0x_indic'      : parse_0x_indic,
     #'0x_ascii'      : parse_0x_ascii,
     #'0x_var_mult'   : parse_0x_var_mult,
-    #'inverse'   : parse_inverse,
+    #'inverse'       : parse_inverse,
 }
 
 if fmt not in formats:

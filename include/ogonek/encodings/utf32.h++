@@ -22,7 +22,6 @@ namespace ogonek {
     struct utf32 {
     public:
         using code_unit = char32_t;
-        static constexpr std::size_t max_width = 2;
 
         static encoded_character<utf32> encode_one(code_point u) {
             return { static_cast<code_unit>(u) };

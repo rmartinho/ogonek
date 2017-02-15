@@ -17,8 +17,9 @@
 #ifndef OGONEK_ERROR_HPP
 #define OGONEK_ERROR_HPP
 
+#include <ogonek/error_fwd.h++>
+
 #include <ogonek/concepts.h++>
-#include <ogonek/detail/encoded_character.h++>
 #include <ogonek/detail/container/optional.h++>
 
 #include <range/v3/range_concepts.hpp>
@@ -45,19 +46,11 @@ namespace ogonek {
      *
      *     :thrown: when an error occurs during an encoding operation.
      */
-    template <typename Encoding, typename Rng>
     struct encode_error
     : virtual unicode_error {
-    public:
-        encode_error(ranges::range_iterator_t<Rng> it, ranges::range_sentinel_t<Rng> st)
-        : it(std::move(it)), st(std::move(st)) {}
-
         char const* what() const noexcept override {
             return u8"encoding failed";
         }
-
-        ranges::range_iterator_t<Rng> it;
-        ranges::range_sentinel_t<Rng> st;
     };
 
     /**
@@ -65,30 +58,50 @@ namespace ogonek {
      *
      *     :thrown: when an error occurs during a decoding operation.
      */
-    template <typename Encoding, typename Rng>
     struct decode_error
     : virtual unicode_error {
-    public:
-        decode_error(ranges::range_iterator_t<Rng> it, ranges::range_sentinel_t<Rng> st)
-        : it(std::move(it)), st(std::move(st)) {}
-
         char const* what() const noexcept override {
             return u8"decoding failed";
         }
-
-        ranges::range_iterator_t<Rng> it;
-        ranges::range_sentinel_t<Rng> st;
     };
 
-    template <typename Encoding>
-    struct encode_error_handler_result {
-        detail::optional<encoded_character<Encoding>> character;
+    /**
+     * .. todo:: ``assume_valid``
+     */
+    struct {} constexpr assume_valid {};
 
-        template <typename T> // TODO constrain?
-        explicit operator T() const {
-            return T(character.begin(), character.end());
+    /**
+     * .. todo:: ``discard_errors``
+     */
+    struct {
+        detail::optional<code_point> operator()(encode_error) const {
+            return {};
         }
-    };
+    } constexpr discard_errors {};
+
+    CONCEPT_ASSERT(EncodeErrorHandler<decltype(discard_errors)>());
+
+    /**
+     * .. todo:: ``replace_errors``
+     */
+    //struct {
+    //    detail::optional<code_point> operator()(encode_error) const {
+    //        return replacement_character_v<Encoding>;
+    //    }
+    //} constexpr replace_errors {};
+
+    //CONCEPT_ASSERT(EncodeErrorHandler<decltype(replace_errors)>());
+
+    /**
+     * .. todo:: ``throw_error``
+     */
+    struct {
+        detail::optional<code_point> operator()(encode_error e) const {
+            throw e;
+        }
+    } constexpr throw_error {};
+
+    CONCEPT_ASSERT(EncodeErrorHandler<decltype(throw_error)>());
 } // namespace ogonek
 
 #endif // OGONEK_ERROR_HPP
