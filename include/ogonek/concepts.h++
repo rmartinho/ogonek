@@ -20,11 +20,12 @@
 #include <ogonek/types.h++>
 #include <ogonek/error_fwd.h++>
 
-#include <range/v3/range_traits.hpp>
+#include <range/v3/range_concepts.hpp>
 #include <range/v3/utility/concepts.hpp>
 #include <range/v3/utility/functional.hpp>
 
 #include <iterator>
+#include <array>
 
 #include <cstddef>
 
@@ -48,6 +49,13 @@ namespace ogonek {
             friend bool operator==(I const&, Sentinel const&);
             friend bool operator!=(I const&, Sentinel const&);
         };
+
+        struct EncodingForm {
+            using code_unit = int;
+            static std::array<code_unit, 1> encode_one(code_point);
+            template <typename It, typename St>
+            static std::pair<code_point, It> decode_one(It, St);
+        };
     } // namespace archetypes
 
     namespace concepts {
@@ -65,6 +73,9 @@ namespace ogonek {
         using ranges::concepts::ConvertibleTo;
         using ranges::concepts::Integral;
         using ranges::concepts::Invocable;
+
+        using ranges::concepts::_1;
+        using ranges::concepts::_2;
 
         using ranges::concepts::InputRange;
 
@@ -178,24 +189,33 @@ namespace ogonek {
         };
 
         struct InputRangeOf
-        : refines<InputRange(ranges::concepts::_2)> {
+        : refines<InputRange(_2)> {
         public:
             template<typename V, typename T>
             auto requires_(V&&, T&&) -> decltype(
                 valid_expr(
-                    is_true(std::is_same<V, ranges::range_value_t<T>>())
+                    is_true(std::is_same<V, InputRange::value_t<T>>())
+                ));
+        };
+
+        struct OptionalOf
+        : refines<Optional(_2)> {
+        public:
+            template<typename V, typename T>
+            auto requires_(V&&, T&&) -> decltype(
+                valid_expr(
+                    is_true(std::is_same<V, Optional::value_t<T>>())
                 ));
         };
 
         struct EncodeErrorHandler {
         public:
-            template<typename H,
-                     typename HandlerResult = Invocable::result_t<H&, encode_error>>
-            auto requires_(H&&) -> decltype(
+            template<typename H, typename E,
+                     typename HandlerResult = Invocable::result_t<H&, encode_error<E>>>
+            auto requires_(H&&, E&&) -> decltype(
                 valid_expr(
-                    model_of<Invocable, H&, encode_error>()
-                    //model_of<Optional, HandlerResult>()
-                    //model_of<InputRangeOf, code_point, Optional::value_t<HandlerResult>>()
+                    model_of<Invocable, H&, encode_error<E>>(),
+                    model_of<OptionalOf, code_point, HandlerResult>()
                 ));
         };
     } // namespace concepts
@@ -203,7 +223,7 @@ namespace ogonek {
     using ranges::Invocable;
     using ranges::InputRange;
 
-    // TODO docs
+    // TODO docs?
     template <typename V, typename T>
     using InputRangeOf = concepts::models<concepts::InputRangeOf, V, T>;
 
@@ -247,8 +267,8 @@ namespace ogonek {
     /**
      * .. todo:: ``EncodeErrorHandler``
      */
-    template <typename H>
-    using EncodeErrorHandler = concepts::models<concepts::EncodeErrorHandler, H>;
+    template <typename H, typename E>
+    using EncodeErrorHandler = concepts::models<concepts::EncodeErrorHandler, H, E>;
 } // namespace ogonek
 
 #endif // OGONEK_CONCEPTS_HPP

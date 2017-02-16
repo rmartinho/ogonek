@@ -117,7 +117,7 @@ namespace ogonek {
 
             CONCEPT_ASSERT(InputRangeOf<code_point, Rng>());
             CONCEPT_ASSERT(EncodingForm<Encoding>());
-            CONCEPT_ASSERT(EncodeErrorHandler<Handler>());
+            CONCEPT_ASSERT(EncodeErrorHandler<Handler, Encoding>());
 
             friend ranges::range_access;
 
@@ -188,9 +188,9 @@ namespace ogonek {
      *     :validation: as performed by ``Encoding``; errors are handled by ``handler``
      */
     template <typename Encoding, typename Rng, typename Handler,
-              CONCEPT_REQUIRES_(InputRangeOf<code_point, Rng>()),
               CONCEPT_REQUIRES_(EncodingForm<Encoding>()),
-              CONCEPT_REQUIRES_(EncodeErrorHandler<Handler>())>
+              CONCEPT_REQUIRES_(InputRangeOf<code_point, Rng>()),
+              CONCEPT_REQUIRES_(EncodeErrorHandler<Handler, Encoding>())>
     auto encode(Rng rng, Handler&& handler) {
         return detail::encoded_view<Encoding, Rng, Handler>(std::move(rng), std::forward<Handler>(handler));
     }
@@ -319,8 +319,8 @@ namespace ogonek {
      *     :validation: as performed by ``Encoding``
      */
     template <typename Encoding, typename Rng,
-              CONCEPT_REQUIRES_(InputRangeOf<code_unit_t<Encoding>, Rng>()),
-              CONCEPT_REQUIRES_(EncodingForm<Encoding>())>
+              CONCEPT_REQUIRES_(EncodingForm<Encoding>()),
+              CONCEPT_REQUIRES_(InputRangeOf<code_unit_t<Encoding>, Rng>())>
     auto decode(Rng rng) {
         return detail::decoded_view<Encoding, Rng>(std::move(rng));
     }

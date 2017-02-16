@@ -15,7 +15,9 @@
 namespace ogonek {
 
     struct unicode_error;
+    template <typename Encoding>
     struct encode_error;
+    template <typename Encoding>
     struct decode_error;
 } // namespace ogonek
 

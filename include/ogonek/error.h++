@@ -42,24 +42,32 @@ namespace ogonek {
     };
 
     /**
-     * .. class:: encode_error : virtual unicode_error
+     * .. class:: template <EncodingForm Encoding>\
+     *            encode_error : virtual unicode_error
      *
      *     :thrown: when an error occurs during an encoding operation.
      */
+    template <typename Encoding>
     struct encode_error
     : virtual unicode_error {
+        CONCEPT_ASSERT(EncodingForm<Encoding>());
+
         char const* what() const noexcept override {
             return u8"encoding failed";
         }
     };
 
     /**
-     * .. class:: decode_error : virtual unicode_error
+     * .. class:: template <EncodingForm Encoding>\
+     *            decode_error : virtual unicode_error
      *
      *     :thrown: when an error occurs during a decoding operation.
      */
+    template <typename Encoding>
     struct decode_error
     : virtual unicode_error {
+        CONCEPT_ASSERT(EncodingForm<Encoding>());
+
         char const* what() const noexcept override {
             return u8"decoding failed";
         }
@@ -74,34 +82,40 @@ namespace ogonek {
      * .. todo:: ``discard_errors``
      */
     struct {
-        detail::optional<code_point> operator()(encode_error) const {
+        template <typename Encoding,
+                  CONCEPT_REQUIRES_(EncodingForm<Encoding>())>
+        detail::optional<code_point> operator()(encode_error<Encoding>) const {
             return {};
         }
     } constexpr discard_errors {};
 
-    CONCEPT_ASSERT(EncodeErrorHandler<decltype(discard_errors)>());
+    CONCEPT_ASSERT(EncodeErrorHandler<decltype(discard_errors), archetypes::EncodingForm>());
 
     /**
      * .. todo:: ``replace_errors``
      */
-    //struct {
-    //    detail::optional<code_point> operator()(encode_error) const {
-    //        return replacement_character_v<Encoding>;
-    //    }
-    //} constexpr replace_errors {};
+    struct {
+        template <typename Encoding,
+                  CONCEPT_REQUIRES_(EncodingForm<Encoding>())>
+        detail::optional<code_point> operator()(encode_error<Encoding>) const {
+            return replacement_character_v<Encoding>;
+        }
+    } constexpr replace_errors {};
 
-    //CONCEPT_ASSERT(EncodeErrorHandler<decltype(replace_errors)>());
+    CONCEPT_ASSERT(EncodeErrorHandler<decltype(replace_errors), archetypes::EncodingForm>());
 
     /**
      * .. todo:: ``throw_error``
      */
     struct {
-        detail::optional<code_point> operator()(encode_error e) const {
+        template <typename Encoding,
+                  CONCEPT_REQUIRES_(EncodingForm<Encoding>())>
+        detail::optional<code_point> operator()(encode_error<Encoding> e) const {
             throw e;
         }
     } constexpr throw_error {};
 
-    CONCEPT_ASSERT(EncodeErrorHandler<decltype(throw_error)>());
+    CONCEPT_ASSERT(EncodeErrorHandler<decltype(throw_error), archetypes::EncodingForm>());
 } // namespace ogonek
 
 #endif // OGONEK_ERROR_HPP

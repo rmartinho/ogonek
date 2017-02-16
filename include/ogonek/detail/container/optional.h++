@@ -18,9 +18,6 @@
 #include <cassert>
 
 namespace ogonek {
-    template <typename Encoding>
-    struct encoded_character;
-
     namespace detail {
         template <typename T>
         struct optional;
