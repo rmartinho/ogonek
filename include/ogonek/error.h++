@@ -74,12 +74,23 @@ namespace ogonek {
     };
 
     /**
-     * .. todo:: ``assume_valid``
+     * .. var:: auto assume_valid
+     *
+     *     A tag used to request that encoding/decoding functions assume the
+     *     input has been validated before.
+     *
+     *     .. warning::
+     *
+     *         Using this tag with input that isn't actually valid yields
+     *         undefined behavior.
      */
     struct {} constexpr assume_valid {};
 
     /**
-     * .. todo:: ``discard_errors``
+     * .. var:: auto discard_errors
+     *
+     *     An error handler for encoding/decoding functions that simply
+     *     discards the portions of the input that have errors.
      */
     struct {
         template <typename Encoding,
@@ -92,7 +103,13 @@ namespace ogonek {
     CONCEPT_ASSERT(EncodeErrorHandler<decltype(discard_errors), archetypes::EncodingForm>());
 
     /**
-     * .. todo:: ``replace_errors``
+     * .. var:: auto replace_errors
+     *
+     *     An error handler for encoding/decoding functions that replaces
+     *     portions of the input that have errors with a replacement character.
+     *     When decoding, this is |u-fffd|, but when encoding and the target
+     *     doesn't support it, some encoding-specific character is used
+     *     instead.
      */
     struct {
         template <typename Encoding,
@@ -105,7 +122,10 @@ namespace ogonek {
     CONCEPT_ASSERT(EncodeErrorHandler<decltype(replace_errors), archetypes::EncodingForm>());
 
     /**
-     * .. todo:: ``throw_error``
+     * .. var:: auto replace_errors
+     *
+     *     An error handler for encoding/decoding functions that throws when an
+     *     error is found in the input.
      */
     struct {
         template <typename Encoding,

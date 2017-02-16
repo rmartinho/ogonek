@@ -13,6 +13,8 @@
 .. |codespace| replace:: :term:`codespace`
 .. |encoding-form| replace:: :term:`encoding form`
 
+.. |u-fffd| replace:: U+FFFD ʀᴇᴘʟᴀᴄᴇᴍᴇɴᴛ ᴄʜᴀʀᴀᴄᴛᴇʀ
+
 .. |valid-code-point| replace:: in the range [0..10FFFF\ :sub:`16`]
 
 .. vim:ft=rst:

@@ -265,7 +265,12 @@ namespace ogonek {
     using Optional = concepts::models<concepts::Optional, T>;
 
     /**
-     * .. todo:: ``EncodeErrorHandler``
+     * .. concept:: template <typename H, typename E>\
+     *              EncodeErrorHandler
+     *
+     *     ``H`` is an error handler that can handle errors when encoding with ``E``.
+     *
+     *     .. todo:: Document requirements
      */
     template <typename H, typename E>
     using EncodeErrorHandler = concepts::models<concepts::EncodeErrorHandler, H, E>;
