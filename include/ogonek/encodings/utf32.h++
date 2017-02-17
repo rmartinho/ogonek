@@ -23,13 +23,12 @@ namespace ogonek {
     public:
         using code_unit = char32_t;
 
-        template <typename Handler>
-        static encoded_character<utf32> encode_one(code_point u, Handler const&) {
+        static encoded_character<utf32> encode_one(code_point u) {
             return { static_cast<code_unit>(u) };
         }
 
-        template <typename It, typename St, typename Handler>
-        static std::pair<code_point, It> decode_one(It first, St, Handler const&) {
+        template <typename It, typename St>
+        static std::pair<code_point, It> decode_one(It first, St) {
             return { static_cast<code_point>(*first), ++first };
         }
     };

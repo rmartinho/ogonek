@@ -16,6 +16,7 @@
 
 #include <ogonek/types.h++>
 #include <ogonek/encoding.h++>
+#include <ogonek/error.h++>
 
 #include <algorithm>
 #include <iterator>
@@ -35,17 +36,19 @@ namespace ogonek {
         struct simple_byte_mapping_encoding {
             using code_unit = char;
 
-            template <typename Handler>
-            static encoded_character<simple_byte_mapping_encoding<T>> encode_one(code_point u, Handler const&) {
+            static encoded_character<simple_byte_mapping_encoding> encode_one(code_point u) {
                 auto it = std::find_if(std::begin(T::from_unicode), std::end(T::from_unicode), [u](auto&& m) {
                     return m.u == u;
                 });
-                // TODO handle errors
-                return { it->b };
+                if(it != std::end(T::from_unicode)) {
+                    return { it->b };
+                } else {
+                    throw encode_error<simple_byte_mapping_encoding>();
+                }
             }
 
-            template <typename It, typename St, typename Handler>
-            static std::pair<code_point, It> decode_one(It first, St, Handler const&) {
+            template <typename It, typename St>
+            static std::pair<code_point, It> decode_one(It first, St) {
                 auto it = std::find_if(std::begin(T::from_unicode), std::end(T::from_unicode), [b = *first](auto&& m) {
                     return m.b == b;
                 });

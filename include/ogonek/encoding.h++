@@ -94,8 +94,8 @@ namespace ogonek {
     constexpr bool is_stateless_v = is_stateless<Encoding>::value;
 
     /**
-     * .. function:: template <EncodingForm Encoding, EncodeErrorHandler Handler>\
-     *               auto encode_one(code_point u, encoding_state_t<Encoding>& state, Handler handler)
+     * .. function:: template <EncodingForm Encoding>\
+     *               auto encode_one(code_point u, encoding_state_t<Encoding>& state)
      *
      *     Encodes ``u`` according to ``Encoding``.
      *
@@ -103,17 +103,14 @@ namespace ogonek {
      *
      *     :param state: the current encoding state; it is modified according to the encoding performed
      *
-     *     :param handler: The strategy for error handling
-     *
      *     :returns: a range of the |code-units| that encode ``u``
      *
-     *     :validation: as performed by ``Encoding``; errors are handled by ``handler``
+     *     :throws: :type:`encode_error` when the input cannot be encoded by ``Encoding``
      */
-    template <typename Encoding, typename Handler,
-              CONCEPT_REQUIRES_(EncodingForm<Encoding>()),
-              CONCEPT_REQUIRES_(EncodeErrorHandler<Handler, Encoding>())>
-    auto encode_one(code_point u, encoding_state_t<Encoding>& state, Handler const& handler) {
-        return concepts::EncodingForm::encode_one<Encoding>(u, state, handler);
+    template <typename Encoding,
+              CONCEPT_REQUIRES_(EncodingForm<Encoding>())>
+    auto encode_one(code_point u, encoding_state_t<Encoding>& state) {
+        return concepts::EncodingForm::encode_one<Encoding>(u, state);
     }
 
     namespace detail {
@@ -139,7 +136,14 @@ namespace ogonek {
             public:
                 typename Encoding::code_unit read(ranges::range_iterator_t<Rng> it) const {
                     if(position == invalid) {
-                        encoded = encode_one<Encoding>(*it, state, *handler);
+                        try {
+                            encoded = encode_one<Encoding>(*it, state);
+                        } catch(encode_error<Encoding> const& e) {
+                            auto rep = (*handler)(e);
+                            if(rep) {
+                                encoded = encode_one<Encoding>(*rep, state);
+                            }
+                        }
                         position = 0;
                     }
                     return encoded[position];
@@ -167,7 +171,7 @@ namespace ogonek {
                 static constexpr std::ptrdiff_t invalid = -1;
 
                 // TODO promote this?
-                using encoded_character_type = decltype(encode_one<Encoding>(code_point(), std::declval<encoding_state_t<Encoding>&>(), std::declval<Handler&>()));
+                using encoded_character_type = decltype(encode_one<Encoding>(code_point(), std::declval<encoding_state_t<Encoding>&>()));
                 mutable encoded_character_type encoded;
                 mutable std::ptrdiff_t position = invalid;
                 std::decay_t<Handler> const* handler = nullptr;
@@ -210,8 +214,8 @@ namespace ogonek {
     }
 
     /**
-     * .. function:: template <EncodingForm Encoding, Iterator It, Sentinel St, DecodeErrorHandler Handler>\
-     *               std::pair<code_point, It> decode_one(It first, St last, encoding_state_t<Encoding>& state, Handler const& handler)
+     * .. function:: template <EncodingForm Encoding, Iterator It, Sentinel St>\
+     *               std::pair<code_point, It> decode_one(It first, St last, encoding_state_t<Encoding>& state)
      *
      *     Decodes the first |code-point| from the range [``first``, ``last``), according to ``Encoding``.
      *
@@ -221,15 +225,13 @@ namespace ogonek {
      *
      *     :param state: the current decoding state; it is modified according to the decoding performed
      *
-     *     :param handler: The strategy for error handling
-     *
      *     :returns: a pair of the decoded |code-point| and an iterator to first |code-unit| of the next encoded |code-point|
      *
-     *     :validation: as performed by ``Encoding``; errors are handled by ``handler``
+     *     :throws: :type:`decode_error` when the input cannot be decoded by ``Encoding``
      */
-    template <typename Encoding, typename It, typename St, typename Handler>
-    auto decode_one(It first, St last, encoding_state_t<Encoding>& state, Handler const& handler) {
-        return concepts::EncodingForm::decode_one<Encoding>(first, last, state, handler);
+    template <typename Encoding, typename It, typename St>
+    auto decode_one(It first, St last, encoding_state_t<Encoding>& state) {
+        return concepts::EncodingForm::decode_one<Encoding>(first, last, state);
     }
 
     namespace detail {
@@ -294,7 +296,8 @@ namespace ogonek {
 
             private:
                 void decode_next() const {
-                    std::tie(decoded, first) = decode_one<Encoding>(first, last, state, *handler);
+                    std::tie(decoded, first) = decode_one<Encoding>(first, last, state);
+                    // TODO handle errors
                 }
 
                 static constexpr code_point invalid = -1;
