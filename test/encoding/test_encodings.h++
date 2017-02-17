@@ -28,11 +28,12 @@
 namespace test {
     struct one_to_one_encoding {
         using code_unit = char32_t;
-        static std::vector<code_unit> encode_one(ogonek::code_point u) {
+        template <typename Handler>
+        static std::vector<code_unit> encode_one(ogonek::code_point u, Handler const&) {
             return { u + 1 };
         }
-        template <typename It, typename St>
-        static std::pair<ogonek::code_point, It> decode_one(It first, St last) {
+        template <typename It, typename St, typename Handler>
+        static std::pair<ogonek::code_point, It> decode_one(It first, St last, Handler const&) {
             return { *first - 1, ++first };
         }
     };
@@ -41,11 +42,12 @@ namespace test {
 
     struct one_to_many_encoding {
         using code_unit = char16_t;
-        static std::vector<code_unit> encode_one(ogonek::code_point u) {
+        template <typename Handler>
+        static std::vector<code_unit> encode_one(ogonek::code_point u, Handler const&) {
             return { static_cast<code_unit>(u / 0x10000), static_cast<code_unit>(u % 0x10000) };
         }
-        template <typename It, typename St>
-        static std::pair<ogonek::code_point, It> decode_one(It first, St last) {
+        template <typename It, typename St, typename Handler>
+        static std::pair<ogonek::code_point, It> decode_one(It first, St last, Handler const&) {
             ogonek::code_point u = *first++ * 0x10000;
             u += *first++;
             return { u, first };
@@ -57,7 +59,8 @@ namespace test {
     struct stateful_encoding {
         using code_unit = char32_t;
         struct state { bool bom_encoded = false; };
-        static std::vector<code_unit> encode_one(ogonek::code_point u, state& s) {
+        template <typename Handler>
+        static std::vector<code_unit> encode_one(ogonek::code_point u, state& s, Handler const&) {
             if(not s.bom_encoded) {
                 s.bom_encoded = true;
                 return { 0x1234, u };
@@ -65,8 +68,8 @@ namespace test {
                 return { u };
             }
         }
-        template <typename It, typename St>
-        static std::pair<ogonek::code_point, It> decode_one(It first, St last, state& s) {
+        template <typename It, typename St, typename Handler>
+        static std::pair<ogonek::code_point, It> decode_one(It first, St last, state& s, Handler const&) {
             if(not s.bom_encoded) {
                 s.bom_encoded = true;
                 auto bom = *first++;
@@ -77,6 +80,20 @@ namespace test {
     };
     CONCEPT_ASSERT(ogonek::EncodingForm<stateful_encoding>());
     CONCEPT_ASSERT(not ogonek::StatelessEncodingForm<stateful_encoding>());
+
+    struct custom_replacement_encoding {
+        using code_unit = char32_t;
+        static constexpr auto replacement_character = U'\uE001';
+        template <typename Handler>
+        static std::vector<code_unit> encode_one(ogonek::code_point u, Handler const&) {
+            return { u };
+        }
+        template <typename It, typename St, typename Handler>
+        static std::pair<ogonek::code_point, It> decode_one(It first, St last, Handler const&) {
+            return { *first, ++first };
+        }
+    };
+    CONCEPT_ASSERT(ogonek::EncodingForm<custom_replacement_encoding>());
 
     template <typename T = void>
     struct basic_codepage {
@@ -94,12 +111,12 @@ namespace test {
         CONCEPT_ASSERT(ogonek::EncodingForm<E>());
 
         SECTION("encode") {
-            auto str = ogonek::encode<E>(ranges::view::all(dec), ogonek::discard_errors)
+            auto str = ogonek::encode<E>(ranges::view::all(dec), ogonek::throw_error)
                      | ranges::to_<Enc>();
             REQUIRE(str == enc);
         }
         SECTION("decode") {
-            auto str = ogonek::decode<E>(ranges::view::all(enc))
+            auto str = ogonek::decode<E>(ranges::view::all(enc), ogonek::throw_error)
                      | ranges::to_<Dec>();
             REQUIRE(str == dec);
         }

@@ -43,13 +43,23 @@ namespace ogonek {
     using code_unit_t = typename concepts::EncodingForm::code_unit_t<Encoding>;
 
     /**
-     * .. todo:: ``max_width_v``
+     * .. var:: template <EncodingForm Encoding>\
+     *          constexpr auto max_width_v
+     * 
+     *     The maximum number of |code-units| needed by ``Encoding`` to
+     *     represent one |code-point|.
      */
     template <typename Encoding>
     constexpr auto max_width_v = concepts::EncodingForm::max_width_v<Encoding>;
 
     /**
-     * .. todo:: ``replacement_character_v``
+     * .. var:: template <EncodingForm Encoding>\
+     *          constexpr auto replacement_character_v
+     * 
+     *     The character used to replace invalid input when
+     *     :var:`replace_errors` is used for an encoding operation.
+     *
+     *     .. note:: Decoding always uses |u-fffd| to replace errors.
      */
     template <typename Encoding>
     constexpr auto replacement_character_v = concepts::EncodingForm::replacement_character_v<Encoding>;
@@ -84,8 +94,8 @@ namespace ogonek {
     constexpr bool is_stateless_v = is_stateless<Encoding>::value;
 
     /**
-     * .. function:: template <EncodingForm Encoding>\
-     *               auto encode_one(code_point u, encoding_state_t<Encoding>& state)
+     * .. function:: template <EncodingForm Encoding, EncodeErrorHandler Handler>\
+     *               auto encode_one(code_point u, encoding_state_t<Encoding>& state, Handler handler)
      *
      *     Encodes ``u`` according to ``Encoding``.
      *
@@ -93,13 +103,17 @@ namespace ogonek {
      *
      *     :param state: the current encoding state; it is modified according to the encoding performed
      *
+     *     :param handler: The strategy for error handling
+     *
      *     :returns: a range of the |code-units| that encode ``u``
      *
-     *     :validation: as performed by ``Encoding``
+     *     :validation: as performed by ``Encoding``; errors are handled by ``handler``
      */
-    template <typename Encoding>
-    auto encode_one(code_point u, encoding_state_t<Encoding>& state) {
-        return concepts::EncodingForm::encode_one<Encoding>(u, state);
+    template <typename Encoding, typename Handler,
+              CONCEPT_REQUIRES_(EncodingForm<Encoding>()),
+              CONCEPT_REQUIRES_(EncodeErrorHandler<Handler, Encoding>())>
+    auto encode_one(code_point u, encoding_state_t<Encoding>& state, Handler const& handler) {
+        return concepts::EncodingForm::encode_one<Encoding>(u, state, handler);
     }
 
     namespace detail {
@@ -117,7 +131,7 @@ namespace ogonek {
 
             CONCEPT_ASSERT(InputRangeOf<code_point, Rng>());
             CONCEPT_ASSERT(EncodingForm<Encoding>());
-            CONCEPT_ASSERT(EncodeErrorHandler<Handler, Encoding>());
+            CONCEPT_ASSERT(EncodeErrorHandler<std::decay_t<Handler>, Encoding>());
 
             friend ranges::range_access;
 
@@ -125,7 +139,7 @@ namespace ogonek {
             public:
                 typename Encoding::code_unit read(ranges::range_iterator_t<Rng> it) const {
                     if(position == invalid) {
-                        encoded = encode_one<Encoding>(*it, state);
+                        encoded = encode_one<Encoding>(*it, state, *handler);
                         position = 0;
                     }
                     return encoded[position];
@@ -153,7 +167,7 @@ namespace ogonek {
                 static constexpr std::ptrdiff_t invalid = -1;
 
                 // TODO promote this?
-                using encoded_character_type = decltype(encode_one<Encoding>(code_point(), std::declval<encoding_state_t<Encoding>&>()));
+                using encoded_character_type = decltype(encode_one<Encoding>(code_point(), std::declval<encoding_state_t<Encoding>&>(), std::declval<Handler&>()));
                 mutable encoded_character_type encoded;
                 mutable std::ptrdiff_t position = invalid;
                 std::decay_t<Handler> const* handler = nullptr;
@@ -176,8 +190,8 @@ namespace ogonek {
     } // namespace detail
 
     /**
-     * .. function:: template <EncodingForm Encoding, InputRange Rng, ErrorHandler Handler>\
-     *               auto encode(Rng rng, Handler handler)
+     * .. function:: template <EncodingForm Encoding, InputRange Rng, EncodeErrorHandler Handler>\
+     *               auto encode(Rng rng, Handler&& handler)
      *
      *     :param rng: The range of |code-points| to encode
      *
@@ -190,14 +204,14 @@ namespace ogonek {
     template <typename Encoding, typename Rng, typename Handler,
               CONCEPT_REQUIRES_(EncodingForm<Encoding>()),
               CONCEPT_REQUIRES_(InputRangeOf<code_point, Rng>()),
-              CONCEPT_REQUIRES_(EncodeErrorHandler<Handler, Encoding>())>
+              CONCEPT_REQUIRES_(EncodeErrorHandler<std::decay_t<Handler>, Encoding>())>
     auto encode(Rng rng, Handler&& handler) {
         return detail::encoded_view<Encoding, Rng, Handler>(std::move(rng), std::forward<Handler>(handler));
     }
 
     /**
-     * .. function:: template <EncodingForm Encoding, Iterator It, Sentinel St>\
-     *               std::pair<code_point, It> decode_one(It first, St last, encoding_state_t<Encoding>& state)
+     * .. function:: template <EncodingForm Encoding, Iterator It, Sentinel St, DecodeErrorHandler Handler>\
+     *               std::pair<code_point, It> decode_one(It first, St last, encoding_state_t<Encoding>& state, Handler const& handler)
      *
      *     Decodes the first |code-point| from the range [``first``, ``last``), according to ``Encoding``.
      *
@@ -207,28 +221,31 @@ namespace ogonek {
      *
      *     :param state: the current decoding state; it is modified according to the decoding performed
      *
+     *     :param handler: The strategy for error handling
+     *
      *     :returns: a pair of the decoded |code-point| and an iterator to first |code-unit| of the next encoded |code-point|
      *
-     *     :validation: as performed by ``Encoding``
+     *     :validation: as performed by ``Encoding``; errors are handled by ``handler``
      */
-    template <typename Encoding, typename It, typename St>
-    auto decode_one(It first, St last, encoding_state_t<Encoding>& state) {
-        return concepts::EncodingForm::decode_one<Encoding>(first, last, state);
+    template <typename Encoding, typename It, typename St, typename Handler>
+    auto decode_one(It first, St last, encoding_state_t<Encoding>& state, Handler const& handler) {
+        return concepts::EncodingForm::decode_one<Encoding>(first, last, state, handler);
     }
 
     namespace detail {
-        template <typename Encoding, typename Rng>
+        template <typename Encoding, typename Rng, typename Handler>
         struct decoded_view
         : ranges::view_facade<
-            decoded_view<Encoding, Rng>,
+            decoded_view<Encoding, Rng, Handler>,
             ranges::is_finite<Rng>::value? ranges::finite : ranges::range_cardinality<Rng>::value> {
         private:
             using base_type = ranges::view_facade<
-                decoded_view<Encoding, Rng>,
+                decoded_view<Encoding, Rng, Handler>,
                 ranges::is_finite<Rng>::value? ranges::finite : ranges::range_cardinality<Rng>::value>;
 
             CONCEPT_ASSERT(InputRangeOf<code_unit_t<Encoding>, Rng>());
             CONCEPT_ASSERT(EncodingForm<Encoding>());
+            CONCEPT_ASSERT(DecodeErrorHandler<std::decay_t<Handler>, Encoding>());
 
             friend ranges::range_access;
 
@@ -277,7 +294,7 @@ namespace ogonek {
 
             private:
                 void decode_next() const {
-                    std::tie(decoded, first) = decode_one<Encoding>(first, last, state);
+                    std::tie(decoded, first) = decode_one<Encoding>(first, last, state, *handler);
                 }
 
                 static constexpr code_point invalid = -1;
@@ -285,6 +302,7 @@ namespace ogonek {
 
                 mutable code_point decoded = invalid;
                 mutable ranges::range_iterator_t<Rng> first;
+                std::decay_t<Handler> const* handler = nullptr;
                 mutable encoding_state_t<Encoding> state {};
                 ranges::range_iterator_t<Rng> last;
             };
@@ -299,14 +317,15 @@ namespace ogonek {
 
         public:
             decoded_view() = default;
-            explicit decoded_view(Rng rng)
-            : rng(std::move(rng))
+            decoded_view(Rng rng, Handler&& handler)
+            : rng(std::move(rng)), handler(std::move(handler))
             {}
 
         private:
             friend struct cursor;
 
             Rng rng;
+            std::decay_t<Handler> handler;
         };
     } // namespace detail
 
@@ -314,15 +333,20 @@ namespace ogonek {
      * .. function:: template <EncodingForm Encoding, ranges::Range Rng>\
      *               auto decode(Rng rng)
      *
+     *     :param rng: The range of |code-points| to encode
+     *
+     *     :param handler: The strategy for error handling
+     *
      *     :returns: a range of the |code-points| that the |code-units| in ``rng`` represent
      *
-     *     :validation: as performed by ``Encoding``
+     *     :validation: as performed by ``Encoding``; errors are handled by ``handler``
      */
-    template <typename Encoding, typename Rng,
+    template <typename Encoding, typename Rng, typename Handler,
               CONCEPT_REQUIRES_(EncodingForm<Encoding>()),
-              CONCEPT_REQUIRES_(InputRangeOf<code_unit_t<Encoding>, Rng>())>
-    auto decode(Rng rng) {
-        return detail::decoded_view<Encoding, Rng>(std::move(rng));
+              CONCEPT_REQUIRES_(InputRangeOf<code_unit_t<Encoding>, Rng>()),
+              CONCEPT_REQUIRES_(DecodeErrorHandler<std::decay_t<Handler>, Encoding>())>
+    auto decode(Rng rng, Handler&& handler) {
+        return detail::decoded_view<Encoding, Rng, Handler>(std::move(rng), std::forward<Handler>(handler));
     }
 
     /**

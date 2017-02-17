@@ -19,6 +19,11 @@ namespace ogonek {
     struct encode_error;
     template <typename Encoding>
     struct decode_error;
+
+    struct assume_valid_t;
+    struct discard_errors_t;
+    struct replace_errors_t;
+    struct throw_error_t;
 } // namespace ogonek
 
 #endif // OGONEK_ERROR_HPP

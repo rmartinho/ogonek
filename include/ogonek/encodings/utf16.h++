@@ -53,7 +53,8 @@ namespace ogonek {
     public:
         static constexpr std::size_t max_width = 2;
 
-        static encoded_character<utf16> encode_one(code_point u) {
+        template <typename Handler>
+        static encoded_character<utf16> encode_one(code_point u, Handler const&) {
             if(u <= last_1word_value) {
                 return { static_cast<code_unit>(u) };
             }
@@ -64,8 +65,8 @@ namespace ogonek {
             };
         }
 
-        template <typename It, typename St>
-        static std::pair<code_point, It> decode_one(It first, St) {
+        template <typename It, typename St, typename Handler>
+        static std::pair<code_point, It> decode_one(It first, St, Handler const&) {
             code_unit w0 = *first++;
             auto length = sequence_length(w0);
             if(length == 1) {

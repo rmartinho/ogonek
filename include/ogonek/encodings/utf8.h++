@@ -82,7 +82,8 @@ namespace ogonek {
         using code_unit = char;
         static constexpr std::size_t max_width = 4;
 
-        static encoded_character<utf8> encode_one(code_point u) {
+        template <typename Handler>
+        static encoded_character<utf8> encode_one(code_point u, Handler) {
             if(u <= last_1byte_value) {
                 return { static_cast<code_unit>(u) };
             } else if(u <= last_2byte_value) {
@@ -105,8 +106,8 @@ namespace ogonek {
             };
         }
 
-        template <typename It, typename St>
-        static std::pair<code_point, It> decode_one(It first, St) {
+        template <typename It, typename St, typename Handler>
+        static std::pair<code_point, It> decode_one(It first, St, Handler const&) {
             auto b0 = *first++;
             auto length = sequence_length(b0);
             if(length == 1) {

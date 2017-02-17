@@ -20,6 +20,7 @@
 #include <ogonek/error_fwd.h++>
 
 #include <ogonek/concepts.h++>
+#include <ogonek/encoding.h++>
 #include <ogonek/detail/container/optional.h++>
 
 #include <range/v3/range_concepts.hpp>
@@ -84,7 +85,7 @@ namespace ogonek {
      *         Using this tag with input that isn't actually valid yields
      *         undefined behavior.
      */
-    struct {} constexpr assume_valid {};
+    struct assume_valid_t {} constexpr assume_valid {};
 
     /**
      * .. var:: auto discard_errors
@@ -92,15 +93,15 @@ namespace ogonek {
      *     An error handler for encoding/decoding functions that simply
      *     discards the portions of the input that have errors.
      */
-    struct {
-        template <typename Encoding,
-                  CONCEPT_REQUIRES_(EncodingForm<Encoding>())>
-        detail::optional<code_point> operator()(encode_error<Encoding>) const {
+    struct discard_errors_t {
+        template <typename E>
+        detail::optional<code_point> operator()(E) const {
             return {};
         }
     } constexpr discard_errors {};
 
-    CONCEPT_ASSERT(EncodeErrorHandler<decltype(discard_errors), archetypes::EncodingForm>());
+    CONCEPT_ASSERT(EncodeErrorHandler<discard_errors_t, archetypes::EncodingForm>());
+    CONCEPT_ASSERT(DecodeErrorHandler<discard_errors_t, archetypes::EncodingForm>());
 
     /**
      * .. var:: auto replace_errors
@@ -111,15 +112,21 @@ namespace ogonek {
      *     doesn't support it, some encoding-specific character is used
      *     instead.
      */
-    struct {
+    struct replace_errors_t {
         template <typename Encoding,
                   CONCEPT_REQUIRES_(EncodingForm<Encoding>())>
         detail::optional<code_point> operator()(encode_error<Encoding>) const {
             return replacement_character_v<Encoding>;
         }
+        template <typename Encoding,
+                  CONCEPT_REQUIRES_(EncodingForm<Encoding>())>
+        detail::optional<code_point> operator()(decode_error<Encoding>) const {
+            return { U'\uFFFD' };
+        }
     } constexpr replace_errors {};
 
-    CONCEPT_ASSERT(EncodeErrorHandler<decltype(replace_errors), archetypes::EncodingForm>());
+    CONCEPT_ASSERT(EncodeErrorHandler<replace_errors_t, archetypes::EncodingForm>());
+    CONCEPT_ASSERT(DecodeErrorHandler<replace_errors_t, archetypes::EncodingForm>());
 
     /**
      * .. var:: auto replace_errors
@@ -127,15 +134,15 @@ namespace ogonek {
      *     An error handler for encoding/decoding functions that throws when an
      *     error is found in the input.
      */
-    struct {
-        template <typename Encoding,
-                  CONCEPT_REQUIRES_(EncodingForm<Encoding>())>
-        detail::optional<code_point> operator()(encode_error<Encoding> e) const {
+    struct throw_error_t {
+        template <typename E>
+        detail::optional<code_point> operator()(E e) const {
             throw e;
         }
     } constexpr throw_error {};
 
-    CONCEPT_ASSERT(EncodeErrorHandler<decltype(throw_error), archetypes::EncodingForm>());
+    CONCEPT_ASSERT(EncodeErrorHandler<throw_error_t, archetypes::EncodingForm>());
+    CONCEPT_ASSERT(DecodeErrorHandler<throw_error_t, archetypes::EncodingForm>());
 } // namespace ogonek
 
 #endif // OGONEK_ERROR_HPP

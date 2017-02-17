@@ -50,11 +50,23 @@ namespace ogonek {
             friend bool operator!=(I const&, Sentinel const&);
         };
 
+        template <typename Encoding>
+        struct EncodeErrorHandler {
+            code_point* operator()(encode_error<Encoding>) const;
+        };
+
+        template <typename Encoding>
+        struct DecodeErrorHandler {
+            code_point* operator()(decode_error<Encoding>) const;
+        };
+
         struct EncodingForm {
             using code_unit = int;
-            static std::array<code_unit, 1> encode_one(code_point);
-            template <typename It, typename St>
-            static std::pair<code_point, It> decode_one(It, St);
+            using state = int;
+            template <typename Handler>
+            static std::array<code_unit, 1> encode_one(code_point, state&, Handler const&);
+            template <typename It, typename St, typename Handler>
+            static std::pair<code_point, It> decode_one(It, St, state&, Handler const&);
         };
     } // namespace archetypes
 
@@ -121,24 +133,24 @@ namespace ogonek {
             template <typename T>
             using state_t = typename state<T>::type;
 
-            template <typename T>
-            static auto encode_one(code_point u, state_t<T>& s) -> decltype(T::encode_one(u, s)) {
-                return T::encode_one(u, s);
+            template <typename T, typename Handler>
+            static auto encode_one(code_point u, state_t<T>& s, Handler const& h) -> decltype(T::encode_one(u, s, h)) {
+                return T::encode_one(u, s, h);
             }
 
-            template <typename T>
-            static auto encode_one(code_point u, state_t<T>&) -> decltype(T::encode_one(u)) {
-                return T::encode_one(u);
+            template <typename T, typename Handler>
+            static auto encode_one(code_point u, state_t<T>&, Handler const& h) -> decltype(T::encode_one(u, h)) {
+                return T::encode_one(u, h);
             }
 
-            template <typename T, typename It, typename St>
-            static auto decode_one(It first, St last, state_t<T>&) -> decltype(T::decode_one(first, last)) {
-                return T::decode_one(first, last);
+            template <typename T, typename It, typename St, typename Handler>
+            static auto decode_one(It it, St st, state_t<T>& s, Handler const& h) -> decltype(T::decode_one(it, st, s, h)) {
+                return T::decode_one(it, st, s, h);
             }
 
-            template <typename T, typename It, typename St>
-            static auto decode_one(It first, St last, state_t<T>& s) -> decltype(T::decode_one(first, last, s)) {
-                return T::decode_one(first, last, s);
+            template <typename T, typename It, typename St, typename Handler>
+            static auto decode_one(It it, St st, state_t<T>&, Handler const& h) -> decltype(T::decode_one(it, st, h)) {
+                return T::decode_one(it, st, h);
             }
 
             template<typename T>
@@ -147,10 +159,16 @@ namespace ogonek {
                     model_of<Integral, code_unit_t<T>>(),
                     model_of<SemiRegular, state_t<T>>(),
                     is_true(std::integral_constant<bool, (max_width_v<T> > 0)>{}),
-                    encode_one<T>(code_point(), std::declval<state_t<T>&>()),
+                    encode_one<T>(code_point(), std::declval<state_t<T>&>(), archetypes::EncodeErrorHandler<T>()),
+                    //encode_one<T>(code_point(), std::declval<state_t<T>&>(), std::declval<assume_valid_t>()),
                     decode_one<T>(archetypes::InputIterator<code_unit_t<T>>(),
                                   archetypes::Sentinel<code_unit_t<T>>(),
-                                  std::declval<state_t<T>&>())
+                                  std::declval<state_t<T>&>(),
+                                  archetypes::DecodeErrorHandler<T>())
+                    //decode_one<T>(archetypes::InputIterator<code_unit_t<T>>(),
+                    //              archetypes::Sentinel<code_unit_t<T>>(),
+                    //              std::declval<state_t<T>&>(),
+                    //              std::declval<assume_valid_t>())
                 ));
         };
 
@@ -211,10 +229,21 @@ namespace ogonek {
         struct EncodeErrorHandler {
         public:
             template<typename H, typename E,
-                     typename HandlerResult = Invocable::result_t<H&, encode_error<E>>>
+                     typename HandlerResult = Invocable::result_t<H const&, encode_error<E>>>
             auto requires_(H&&, E&&) -> decltype(
                 valid_expr(
-                    model_of<Invocable, H&, encode_error<E>>(),
+                    model_of<Invocable, H const&, encode_error<E>>(),
+                    model_of<OptionalOf, code_point, HandlerResult>()
+                ));
+        };
+
+        struct DecodeErrorHandler {
+        public:
+            template<typename H, typename E,
+                     typename HandlerResult = Invocable::result_t<H const&, decode_error<E>>>
+            auto requires_(H&&, E&&) -> decltype(
+                valid_expr(
+                    model_of<Invocable, H const&, decode_error<E>>(),
                     model_of<OptionalOf, code_point, HandlerResult>()
                 ));
         };
@@ -274,6 +303,17 @@ namespace ogonek {
      */
     template <typename H, typename E>
     using EncodeErrorHandler = concepts::models<concepts::EncodeErrorHandler, H, E>;
+
+    /**
+     * .. concept:: template <typename H, typename E>\
+     *              DecodeErrorHandler
+     *
+     *     ``H`` is an error handler that can handle errors when encoding with ``E``.
+     *
+     *     .. todo:: Document requirements
+     */
+    template <typename H, typename E>
+    using DecodeErrorHandler = concepts::models<concepts::DecodeErrorHandler, H, E>;
 } // namespace ogonek
 
 #endif // OGONEK_CONCEPTS_HPP
