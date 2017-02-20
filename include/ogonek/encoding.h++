@@ -139,7 +139,7 @@ namespace ogonek {
                         try {
                             encoded = encode_one<Encoding>(*it, state);
                         } catch(encode_error<Encoding> const& e) {
-                            auto rep = (*handler)(e);
+                            auto rep = (*handler)(encode_error<Encoding>());
                             if(rep) {
                                 encoded = encode_one<Encoding>(*rep, state);
                             }

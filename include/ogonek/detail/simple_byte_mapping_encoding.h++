@@ -32,9 +32,10 @@ namespace ogonek {
             char b;
             char32_t u;
         };
-        template <typename T>
+        template <typename T, char32_t Replacement = U'\uFFFD'>
         struct simple_byte_mapping_encoding {
             using code_unit = char;
+            static constexpr auto replacement_character = Replacement;
 
             static encoded_character<simple_byte_mapping_encoding> encode_one(code_point u) {
                 auto it = std::find_if(std::begin(T::from_unicode), std::end(T::from_unicode), [u](auto&& m) {

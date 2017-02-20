@@ -97,10 +97,7 @@ namespace test {
         static ogonek::detail::simple_byte_mapping from_unicode[128];
     };
 
-    struct basic_codepage_encoding : public ogonek::detail::simple_byte_mapping_encoding<basic_codepage<>> {
-    public:
-        static constexpr auto replacement_character = U'\u0080';
-    };
+    using basic_codepage_encoding = ogonek::detail::simple_byte_mapping_encoding<basic_codepage<>, U'\u0080'>;
 
     CONCEPT_ASSERT(ogonek::EncodingForm<basic_codepage_encoding>());
     CONCEPT_ASSERT(ogonek::StatelessEncodingForm<basic_codepage_encoding>());
