@@ -21,6 +21,7 @@
 #include <ogonek/error_fwd.h++>
 #include <ogonek/concepts.h++>
 #include <ogonek/detail/container/partial_array.h++>
+#include <ogonek/detail/range/deferred.h++>
 
 #include <range/v3/view_adaptor.hpp>
 #include <range/v3/view_facade.hpp>

@@ -119,22 +119,32 @@ namespace test {
     }
 
     template <typename E, typename Dec, typename Enc>
-    void test_encode_with_error(Dec dec, Enc enc) {
+    void test_encode_with_error(Dec dec, Enc replaced, Enc ignored) {
         CONCEPT_ASSERT(ogonek::EncodingForm<E>());
 
-        SECTION("encode with error") {
+        SECTION("encode, replace error") {
             auto str = ogonek::encode<E>(ranges::view::all(dec), ogonek::replace_errors)
                      | ranges::to_<Enc>();
-            REQUIRE(str == enc);
+            REQUIRE(str == replaced);
+        }
+        SECTION("encode, ignore error") {
+            auto str = ogonek::encode<E>(ranges::view::all(dec), ogonek::discard_errors)
+                     | ranges::to_<Enc>();
+            REQUIRE(str == ignored);
         }
     }
 
     template <typename E, typename Enc, typename Dec>
-    void test_decode_with_error(Enc enc, Dec dec) {
-        SECTION("decode with error") {
+    void test_decode_with_error(Enc enc, Dec replaced, Dec ignored) {
+        SECTION("decode, replace error") {
             auto str = ogonek::decode<E>(ranges::view::all(enc), ogonek::replace_errors)
                      | ranges::to_<Dec>();
-            REQUIRE(str == dec);
+            REQUIRE(str == replaced);
+        }
+        SECTION("decode, ignore error") {
+            auto str = ogonek::decode<E>(ranges::view::all(enc), ogonek::discard_errors)
+                     | ranges::to_<Dec>();
+            REQUIRE(str == ignored);
         }
     }
 

@@ -31,7 +31,7 @@ TEST_CASE("encoding and decoding codepages works as expected", "[encoding][codep
         test::test_encoding<test::basic_codepage_encoding>(U"\u0001\u0002\u0003\u0080"_s, "\x0\x1\x2\x7F"_s);
     }
     SECTION("with errors") {
-        test::test_encode_with_error<test::basic_codepage_encoding>(U"\u0001\u0002\u0003\u1000\u007F\u0080"_s, "\x0\x1\x2\x7F\x7E\x7F"_s);
+        test::test_encode_with_error<test::basic_codepage_encoding>(U"\u0001\u0002\u0003\u1000\u007F\u0080"_s, "\x0\x1\x2\x7F\x7E\x7F"_s, "\x0\x1\x2\x7E\x7F"_s);
 
         //test::test_decode_with_error<test::basic_codepage_encoding>("\x0\x1\x2\x80\x7E\x7F"_s, U"\u0001\u0002\u0003\uFFFD\u007F\u0080"_s);
     }

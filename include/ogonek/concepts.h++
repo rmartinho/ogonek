@@ -88,6 +88,7 @@ namespace ogonek {
         using ranges::concepts::_1;
         using ranges::concepts::_2;
 
+        using ranges::concepts::Range;
         using ranges::concepts::InputRange;
 
         struct EncodingForm {
@@ -248,6 +249,8 @@ namespace ogonek {
     } // namespace concepts
 
     using ranges::Invocable;
+
+    using ranges::Range;
     using ranges::InputRange;
 
     // TODO docs?
