@@ -106,12 +106,12 @@ namespace test {
     void test_encoding(Dec dec, Enc enc) {
         CONCEPT_ASSERT(ogonek::EncodingForm<E>());
 
-        SECTION("encode") {
+        {
             auto str = ogonek::encode<E>(ranges::view::all(dec), ogonek::throw_error)
                      | ranges::to_<Enc>();
             CHECK(str == enc);
         }
-        SECTION("decode") {
+        {
             auto str = ogonek::decode<E>(ranges::view::all(enc), ogonek::throw_error)
                      | ranges::to_<Dec>();
             CHECK(str == dec);
@@ -122,17 +122,17 @@ namespace test {
     void test_encode_with_error(Dec dec, Enc replaced, Enc ignored) {
         CONCEPT_ASSERT(ogonek::EncodingForm<E>());
 
-        SECTION("encode, replace error") {
+        {
             auto str = ogonek::encode<E>(ranges::view::all(dec), ogonek::replace_errors)
                      | ranges::to_<Enc>();
             CHECK(str == replaced);
         }
-        SECTION("encode, ignore error") {
+        {
             auto str = ogonek::encode<E>(ranges::view::all(dec), ogonek::discard_errors)
                      | ranges::to_<Enc>();
             CHECK(str == ignored);
         }
-        SECTION("encode, throw error") {
+        {
             CHECK_THROWS_AS(ogonek::encode<E>(ranges::view::all(dec), ogonek::throw_error)
                             | ranges::to_<Enc>(),
                             ogonek::encode_error<E>);
@@ -141,6 +141,8 @@ namespace test {
 
     template <typename E, typename Enc, typename Dec>
     void test_decode_with_error(Enc enc, Dec replaced, Dec ignored) {
+        CONCEPT_ASSERT(ogonek::EncodingForm<E>());
+
         {
             auto str = ogonek::decode<E>(ranges::view::all(enc), ogonek::replace_errors)
                      | ranges::to_<Dec>();
