@@ -27,7 +27,7 @@
 namespace ogonek {
     namespace detail {
         // This is in a detail namespace because the interface uses invalid
-        // code point values
+        // code point values TODO replace all such misuses with optional<code_point>
         struct simple_byte_mapping {
             char b;
             char32_t u;
@@ -53,8 +53,11 @@ namespace ogonek {
                 auto it = std::find_if(std::begin(T::from_unicode), std::end(T::from_unicode), [b = *first](auto&& m) {
                     return m.b == b;
                 });
-                // TODO handle errors
-                return std::make_pair(it->u, ++first);
+                if(it != std::end(T::from_unicode)) {
+                    return std::make_pair(it->u, ++first);
+                } else {
+                    throw decode_error<simple_byte_mapping_encoding>();
+                }
             }
         };
     } // namespace detail

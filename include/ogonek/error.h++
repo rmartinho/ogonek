@@ -54,8 +54,7 @@ namespace ogonek {
         CONCEPT_ASSERT(EncodingForm<Encoding>());
 
         char const* what() const noexcept override {
-            static std::string name = typeid(Encoding).name();
-            return (u8"encoding failed " + name).data();
+            return u8"encoding failed ";
         }
     };
 

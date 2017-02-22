@@ -126,9 +126,8 @@ namespace ogonek {
     namespace detail {
         template <typename Encoding, typename Rng, typename Handler>
         struct encoded_view
-        : ranges::view_adaptor<
+        : ranges::view_facade<
             encoded_view<Encoding, Rng, Handler>,
-            Rng,
             ranges::is_finite<Rng>::value? ranges::finite : ranges::range_cardinality<Rng>::value> {
         private:
             using base_type = ranges::view_adaptor<
@@ -142,61 +141,92 @@ namespace ogonek {
 
             friend ranges::range_access;
 
-            struct adaptor : public ranges::adaptor_base {
+            struct sentinel {
+                sentinel() = default;
+                sentinel(encoded_view const&, ranges::end_tag) {}
+            };
+
+            struct cursor {
+            private:
+                using code_unit = code_unit_t<Encoding>;
+                using iterator = ranges::range_iterator_t<Rng>;
+
             public:
-                typename Encoding::code_unit read(ranges::range_iterator_t<Rng> it) const {
-                    if(position == invalid) {
-                        try {
-                            encoded = encode_one<Encoding>(*it, state);
-                        } catch(encode_error<Encoding> const& e) {
-                            auto rep = (*handler)(encode_error<Encoding>());
-                            if(rep) {
-                                encoded = encode_one<Encoding>(*rep, state);
-                            }
-                        }
-                        position = 0;
-                    }
+                using reference = code_unit;
+                using difference_type = ranges::range_difference_t<Rng>;
+                using single_pass = ranges::SinglePass<iterator>;
+
+                cursor() = default;
+                cursor(encoded_view const& rng, ranges::begin_tag)
+                : first(ranges::begin(rng.rng)), last(ranges::end(rng.rng)) {
+                    encode_next();
+                }
+
+                reference read() const {
                     return encoded[position];
                 }
 
-                void next(ranges::range_iterator_t<Rng>& it) {
-                    // TODO next without get!
+                void next() {
                     ++position;
-                    if(position == static_cast<ptrdiff_t>(encoded.size())) {
-                        ++it;
-                        position = invalid;
+                    if(position == static_cast<std::ptrdiff_t>(encoded.size())) {
+                        ++first;
+
+                        encode_next();
                     }
                 }
 
-                bool equal(ranges::range_iterator_t<Rng> it0, ranges::range_iterator_t<Rng> it1, adaptor const & other) const {
-                    return it0 == it1 && position == other.position;
+                bool equal(cursor const& pos) const {
+                    return first == pos.first;
                 }
 
-                adaptor() = default;
-
-                adaptor(Handler const& handler)
-                : handler(&handler) {}
+                bool equal(sentinel const&) const {
+                    return first == last;
+                }
 
             private:
-                static constexpr std::ptrdiff_t invalid = -1;
+                void encode_next() {
+                    while (first != last && position != 0) {
+                        try {
+                            encoded = encode_one<Encoding>(*first, state);
+                            position = 0;
+                        } catch(encode_error<Encoding> const& e) {
+                            auto rep = (*handler)(e);
+                            if(rep) {
+                                encoded = encode_one<Encoding>(*rep, state);
+                                position = 0;
+                            } else {
+                                ++first;
+                            }
+                        }
+                    }
+                }
 
-                mutable encoded_character_t<Encoding> encoded;
-                mutable std::ptrdiff_t position = invalid;
+                iterator first;
+                iterator last;
+                encoded_character_t<Encoding> encoded;
+                std::ptrdiff_t position = max_width_v<Encoding>;
                 std::decay_t<Handler> const* handler = nullptr;
-                mutable encoding_state_t<Encoding> state {};
+                encoding_state_t<Encoding> state {};
             };
 
-            adaptor begin_adaptor() const {
-                return { handler };
+            cursor begin_cursor() const {
+                return { *this, ranges::begin_tag{} };
+            }
+
+            sentinel end_cursor() const {
+                return { *this, ranges::end_tag{} };
             }
 
         public:
             encoded_view() = default;
-            explicit encoded_view(Rng rng, Handler handler)
-            : base_type(std::move(rng)), handler(std::forward<Handler>(handler))
+            encoded_view(Rng rng, Handler&& handler)
+            : rng(std::move(rng)), handler(std::move(handler))
             {}
 
         private:
+            friend struct cursor;
+
+            Rng rng;
             std::decay_t<Handler> handler;
         };
     } // namespace detail
@@ -259,63 +289,70 @@ namespace ogonek {
 
             friend ranges::range_access;
 
-            struct cursor;
-
             struct sentinel {
                 sentinel() = default;
                 sentinel(decoded_view const&, ranges::end_tag) {}
             };
 
             struct cursor {
+            private:
+                using iterator = ranges::range_iterator_t<Rng>;
+
             public:
                 using reference = code_point;
                 using difference_type = ranges::range_difference_t<Rng>;
-                using single_pass = ranges::SinglePass<ranges::range_iterator_t<Rng>>;
+                using single_pass = ranges::SinglePass<iterator>;
 
                 cursor() = default;
                 cursor(decoded_view const& rng, ranges::begin_tag)
-                : first(ranges::begin(rng.rng)), last(ranges::end(rng.rng))
-                {}
+                : first(ranges::begin(rng.rng)), last(ranges::end(rng.rng)) {
+                    decode_next();
+                }
 
                 reference read() const {
-                    if(decoded == invalid) {
-                        decode_next();
-                    }
-                    assert(decoded != depleted);
+                    assert(decoded != invalid);
                     return decoded;
                 }
 
                 void next() {
-                    if(first == last) {
-                        decoded = depleted;
-                    } else {
+                    decoded = invalid;
+                    if(first != last) {
                         decode_next();
                     }
                 }
 
                 bool equal(cursor const& pos) const {
                     assert(last == pos.last);
-                    return first == pos.first;
+                    return first == pos.first && (decoded == invalid) == (pos.decoded == invalid);
                 }
 
                 bool equal(sentinel const&) const {
-                    return decoded == depleted;
+                    return decoded == invalid;
                 }
 
             private:
-                void decode_next() const {
-                    std::tie(decoded, first) = decode_one<Encoding>(first, last, state);
-                    // TODO handle errors
+                void decode_next() {
+                    while(first != last && decoded == invalid) {
+                        try {
+                            std::tie(decoded, first) = decode_one<Encoding>(first, last, state);
+                        } catch(decode_error<Encoding> const& e) {
+                            auto rep = (*handler)(e);
+                            if(rep) {
+                                decoded = *rep;
+                            }
+                            ++first; // TODO advance this from encoding itself?
+                        }
+                    }
+                    std::cout << "done decoding\n";
                 }
 
-                static constexpr code_point invalid = -1;
-                static constexpr code_point depleted = -2;
+                static constexpr code_point invalid = -1; // TODO replace with optional
 
-                mutable code_point decoded = invalid;
-                mutable ranges::range_iterator_t<Rng> first;
+                iterator first;
+                iterator last;
+                code_point decoded = invalid;
                 std::decay_t<Handler> const* handler = nullptr;
-                mutable encoding_state_t<Encoding> state {};
-                ranges::range_iterator_t<Rng> last;
+                encoding_state_t<Encoding> state {};
             };
 
             cursor begin_cursor() const {
