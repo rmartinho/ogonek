@@ -70,6 +70,8 @@ namespace test {
     struct u8string : std::string {
         using std::string::string;
     };
+    using std::u16string;
+    using std::u32string;
 
     namespace string_literals {
         inline u8string operator ""_s(const char *str, std::size_t len) {

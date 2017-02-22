@@ -109,12 +109,12 @@ namespace test {
         SECTION("encode") {
             auto str = ogonek::encode<E>(ranges::view::all(dec), ogonek::throw_error)
                      | ranges::to_<Enc>();
-            REQUIRE(str == enc);
+            CHECK(str == enc);
         }
         SECTION("decode") {
             auto str = ogonek::decode<E>(ranges::view::all(enc), ogonek::throw_error)
                      | ranges::to_<Dec>();
-            REQUIRE(str == dec);
+            CHECK(str == dec);
         }
     }
 
@@ -125,12 +125,17 @@ namespace test {
         SECTION("encode, replace error") {
             auto str = ogonek::encode<E>(ranges::view::all(dec), ogonek::replace_errors)
                      | ranges::to_<Enc>();
-            REQUIRE(str == replaced);
+            CHECK(str == replaced);
         }
         SECTION("encode, ignore error") {
             auto str = ogonek::encode<E>(ranges::view::all(dec), ogonek::discard_errors)
                      | ranges::to_<Enc>();
-            REQUIRE(str == ignored);
+            CHECK(str == ignored);
+        }
+        SECTION("encode, throw error") {
+            CHECK_THROWS_AS(ogonek::encode<E>(ranges::view::all(dec), ogonek::throw_error)
+                            | ranges::to_<Enc>(),
+                            ogonek::encode_error<E>);
         }
     }
 
@@ -139,12 +144,17 @@ namespace test {
         SECTION("decode, replace error") {
             auto str = ogonek::decode<E>(ranges::view::all(enc), ogonek::replace_errors)
                      | ranges::to_<Dec>();
-            REQUIRE(str == replaced);
+            CHECK(str == replaced);
         }
         SECTION("decode, ignore error") {
             auto str = ogonek::decode<E>(ranges::view::all(enc), ogonek::discard_errors)
                      | ranges::to_<Dec>();
-            REQUIRE(str == ignored);
+            CHECK(str == ignored);
+        }
+        SECTION("decode, throw error") {
+            CHECK_THROWS_AS(ogonek::decode<E>(ranges::view::all(enc), ogonek::throw_error)
+                            | ranges::to_<Dec>(),
+                            ogonek::decode_error<E>);
         }
     }
 

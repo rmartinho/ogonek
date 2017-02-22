@@ -17,6 +17,7 @@
 #include <ogonek/types.h++>
 #include <ogonek/concepts.h++>
 #include <ogonek/encoding.h++>
+#include <ogonek/error.h++>
 
 namespace ogonek {
     struct utf16 {
@@ -37,8 +38,14 @@ namespace ogonek {
         static constexpr auto surrogate_delta           = 0x10000u;
         static constexpr auto surrogate_shift           = 10;
 
+        static constexpr bool is_lead_surrogate(code_unit w) {
+            return (w & surrogate_mask) == lead_surrogate_signature;
+        }
+        static constexpr bool is_trail_surrogate(code_unit w) {
+            return (w & surrogate_mask) == trail_surrogate_signature;
+        }
         static constexpr int sequence_length(code_unit w) {
-            return (w & surrogate_mask) == lead_surrogate_signature? 2 : 1;
+            return is_lead_surrogate(w)? 2 : is_trail_surrogate(w)? 0 : 1;
         }
 
         static constexpr code_point decode(code_unit w0) {
@@ -65,13 +72,19 @@ namespace ogonek {
         }
 
         template <typename It, typename St>
-        static std::pair<code_point, It> decode_one(It first, St) {
+        static std::pair<code_point, It> decode_one(It first, St last) {
             code_unit w0 = *first++;
             auto length = sequence_length(w0);
             if(length == 1) {
                 return { static_cast<code_point>(w0), first };
             }
+            if(is_trail_surrogate(w0) || first == last) {
+                throw decode_error<utf16>();
+            }
             code_unit w1 = *first++;
+            if(!is_trail_surrogate(w1)) {
+                throw decode_error<utf16>();
+            }
             return { decode(w0, w1), first };
         }
     };

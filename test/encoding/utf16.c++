@@ -27,8 +27,17 @@
 using namespace test::string_literals;
 
 TEST_CASE("UTF-16 encoding works as expected", "[encoding]") {
-    SECTION("Correct") {
+    SECTION("without errors") {
         test::test_encoding<ogonek::utf16>(U"\u0000\uD7FF\uE000\uFFFF\U00010000\U0010FFFF"_s,
                                            u"\u0000\uD7FF\uE000\uFFFF\U00010000\U0010FFFF"_s);
+    }
+    SECTION("with errors") {
+        SECTION("lone surrogates") {
+            test::test_decode_with_error<ogonek::utf16>(u"\u1234\xd800\u4321"_s, U"\u1234\uFFFD\u4321"_s, U"\u1234\u4321"_s);
+            test::test_decode_with_error<ogonek::utf16>(u"\u1234\xdc00\u4321"_s, U"\u1234\uFFFD\u4321"_s, U"\u1234\u4321"_s);
+        }
+        SECTION("inverted surrogates") {
+            test::test_decode_with_error<ogonek::utf16>(u"\u1234\xdc00\xd800\u4321"_s, U"\u1234\uFFFD\uFFFD\u4321"_s, U"\u1234\u4321"_s);
+        }
     }
 }
