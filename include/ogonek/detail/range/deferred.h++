@@ -79,7 +79,7 @@ namespace ogonek {
                 using iterator = ranges::range_iterator_t<Rng>;
                 using sentinel = ranges::range_sentinel_t<Rng>;
                
-                Rng const* rng;
+                Rng const* rng = nullptr;
                 mutable iterator first;
                 mutable sentinel last;
                 mutable bool started = false;

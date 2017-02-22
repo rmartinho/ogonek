@@ -160,11 +160,11 @@ namespace ogonek {
                     model_of<SemiRegular, state_t<T>>(),
                     is_true(std::integral_constant<bool, (max_width_v<T> > 0)>{}),
                     encode_one<T>(code_point(), std::declval<state_t<T>&>()),
-                    //encode_one<T>(code_point(), std::declval<state_t<T>&>(), std::declval<assume_valid_t>()),
+                    // TODO encode_one<T>(code_point(), std::declval<state_t<T>&>(), std::declval<assume_valid_t>()),
                     decode_one<T>(archetypes::InputIterator<code_unit_t<T>>(),
                                   archetypes::Sentinel<code_unit_t<T>>(),
                                   std::declval<state_t<T>&>())
-                    //decode_one<T>(archetypes::InputIterator<code_unit_t<T>>(),
+                    // TODO decode_one<T>(archetypes::InputIterator<code_unit_t<T>>(),
                     //              archetypes::Sentinel<code_unit_t<T>>(),
                     //              std::declval<state_t<T>&>(),
                     //              std::declval<assume_valid_t>())
