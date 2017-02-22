@@ -80,7 +80,6 @@ TEST_CASE("UTF-8 encoding works as expected", "[encoding]") {
             test::test_decode_with_error<ogonek::utf8>(all_continuation_bytes, n_replacements(64), U""_s);
         }
         SECTION("lonely start characters") {
-
             auto all_2byte_starters_followed_by_space = intersperse_bytes_with_space(0xC0, 32);
             test::test_decode_with_error<ogonek::utf8>(all_2byte_starters_followed_by_space, intersperse_replacements_with_space(32), std::u32string(32, ' '));
 
@@ -88,7 +87,7 @@ TEST_CASE("UTF-8 encoding works as expected", "[encoding]") {
             test::test_decode_with_error<ogonek::utf8>(all_3byte_starters_followed_by_space, intersperse_replacements_with_space(16), std::u32string(16, ' '));
 
             auto all_4byte_starters_followed_by_space = intersperse_bytes_with_space(0xF0, 5);
-            test::test_decode_with_error<ogonek::utf8>(all_4byte_starters_followed_by_space, intersperse_replacements_with_space(8), std::u32string(8, ' '));
+            test::test_decode_with_error<ogonek::utf8>(all_4byte_starters_followed_by_space, intersperse_replacements_with_space(5), std::u32string(5, ' '));
         }
         SECTION("last continuation missing") {
             // TODO review number of replacement characters
@@ -109,28 +108,29 @@ TEST_CASE("UTF-8 encoding works as expected", "[encoding]") {
                              + miss_last_byte(u8"\U0010FFFF"_s);
             test::test_decode_with_error<ogonek::utf8>(incompletes, n_replacements(12), U""_s);
         }
-        SECTION("impossible bytes") {
-            test::test_decode_with_error<ogonek::utf8>(u8"\xC0"_s, n_replacements(1), U""_s);
-            test::test_decode_with_error<ogonek::utf8>(u8"\xC1"_s, n_replacements(1), U""_s);
-            for(unsigned b = 0xF5; b < 0x100; ++b) {
-                test::test_decode_with_error<ogonek::utf8>(std::string(1, b), n_replacements(1), U""_s);
-            }
-            test::test_decode_with_error<ogonek::utf8>(u8"\xC0\xC1\xF5\xF6\xF7\xF8\xF9\xFA\xFB\xFC\xFD\xFE\xFF"_s, n_replacements(13), U""_s);
-        }
         SECTION("out-of-range sequences") {
             // TODO review number of replacement characters
             test::test_decode_with_error<ogonek::utf8>(u8"\xF4\x90\x80\x80"_s, n_replacements(4), U""_s);
             test::test_decode_with_error<ogonek::utf8>(u8"\xF4\xBF\xBF\xBF"_s, n_replacements(4), U""_s);
             test::test_decode_with_error<ogonek::utf8>(u8"\xF5\x80\x80\x80"_s, n_replacements(4), U""_s);
+            test::test_decode_with_error<ogonek::utf8>(u8"\xF7\xBF\xBF\xBF"_s, n_replacements(4), U""_s);
+            test::test_decode_with_error<ogonek::utf8>(u8"\xF8\x80\x80\x80\x80"_s, n_replacements(5), U""_s);
+            test::test_decode_with_error<ogonek::utf8>(u8"\xFB\xBF\xBF\xBF\xBF"_s, n_replacements(5), U""_s);
+            test::test_decode_with_error<ogonek::utf8>(u8"\xFC\x80\x80\x80\x80\x80"_s, n_replacements(6), U""_s);
+            test::test_decode_with_error<ogonek::utf8>(u8"\xFD\xBF\xBF\xBF\xBF\xBF"_s, n_replacements(6), U""_s);
+            test::test_decode_with_error<ogonek::utf8>(u8"\xFE\x80\x80\x80\x80\x80\x80"_s, n_replacements(7), U""_s);
+            test::test_decode_with_error<ogonek::utf8>(u8"\xFE\xBF\xBF\xBF\xBF\xBF\xBF"_s, n_replacements(7), U""_s);
+            test::test_decode_with_error<ogonek::utf8>(u8"\xFF\x80\x80\x80\x80\x80\x80\x80"_s, n_replacements(8), U""_s);
+            test::test_decode_with_error<ogonek::utf8>(u8"\xFF\xBF\xBF\xBF\xBF\xBF\xBF\xBF"_s, n_replacements(8), U""_s);
         }
         SECTION("overlong sequences") {
             // TODO review number of replacement characters
             test::test_decode_with_error<ogonek::utf8>(u8"\xc0\x80"_s, n_replacements(2), U""_s);
             test::test_decode_with_error<ogonek::utf8>(u8"\xc1\xBF"_s, n_replacements(2), U""_s);
-            test::test_decode_with_error<ogonek::utf8>(u8"\xE0\x80\x80"_s, n_replacements(2), U""_s);
-            test::test_decode_with_error<ogonek::utf8>(u8"\xE0\x9F\xBF"_s, n_replacements(2), U""_s);
-            test::test_decode_with_error<ogonek::utf8>(u8"\xF0\x80\x80\x80"_s, n_replacements(2), U""_s);
-            test::test_decode_with_error<ogonek::utf8>(u8"\xF0\x8F\xBF\xBF"_s, n_replacements(2), U""_s);
+            test::test_decode_with_error<ogonek::utf8>(u8"\xE0\x80\x80"_s, n_replacements(3), U""_s);
+            test::test_decode_with_error<ogonek::utf8>(u8"\xE0\x9F\xBF"_s, n_replacements(3), U""_s);
+            test::test_decode_with_error<ogonek::utf8>(u8"\xF0\x80\x80\x80"_s, n_replacements(4), U""_s);
+            test::test_decode_with_error<ogonek::utf8>(u8"\xF0\x8F\xBF\xBF"_s, n_replacements(4), U""_s);
         }
         SECTION("surrogates") {
             // TODO review number of replacement characters

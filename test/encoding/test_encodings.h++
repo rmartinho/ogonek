@@ -141,17 +141,17 @@ namespace test {
 
     template <typename E, typename Enc, typename Dec>
     void test_decode_with_error(Enc enc, Dec replaced, Dec ignored) {
-        SECTION("decode, replace error") {
+        {
             auto str = ogonek::decode<E>(ranges::view::all(enc), ogonek::replace_errors)
                      | ranges::to_<Dec>();
             CHECK(str == replaced);
         }
-        SECTION("decode, ignore error") {
+        {
             auto str = ogonek::decode<E>(ranges::view::all(enc), ogonek::discard_errors)
                      | ranges::to_<Dec>();
             CHECK(str == ignored);
         }
-        SECTION("decode, throw error") {
+        {
             CHECK_THROWS_AS(ogonek::decode<E>(ranges::view::all(enc), ogonek::throw_error)
                             | ranges::to_<Dec>(),
                             ogonek::decode_error<E>);
