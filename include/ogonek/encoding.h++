@@ -96,7 +96,7 @@ namespace ogonek {
 
     /**
      * .. function:: template <EncodingForm Encoding>\
-     *               auto encode_one(code_point u, encoding_state_t<Encoding>& state)
+     *               encoded_character_t<Encoding> encode_one(code_point u, encoding_state_t<Encoding>& state)
      *
      *     Encodes ``u`` according to ``Encoding``.
      *
@@ -113,6 +113,15 @@ namespace ogonek {
     auto encode_one(code_point u, encoding_state_t<Encoding>& state) {
         return concepts::EncodingForm::encode_one<Encoding>(u, state);
     }
+
+    /**
+     * .. type:: template <EncodingForm Encoding>\
+     *           encoded_character_t
+     * 
+     *     Range of the |code-units| that encode one |code-point|.
+     */
+    template <typename Encoding>
+    using encoded_character_t = decltype(encode_one<Encoding>(std::declval<code_point>(), std::declval<encoding_state_t<Encoding>&>()));
 
     namespace detail {
         template <typename Encoding, typename Rng, typename Handler>
@@ -171,9 +180,7 @@ namespace ogonek {
             private:
                 static constexpr std::ptrdiff_t invalid = -1;
 
-                // TODO promote this?
-                using encoded_character_type = decltype(encode_one<Encoding>(code_point(), std::declval<encoding_state_t<Encoding>&>()));
-                mutable encoded_character_type encoded;
+                mutable encoded_character_t<Encoding> encoded;
                 mutable std::ptrdiff_t position = invalid;
                 std::decay_t<Handler> const* handler = nullptr;
                 mutable encoding_state_t<Encoding> state {};
