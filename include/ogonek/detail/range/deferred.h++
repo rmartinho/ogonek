@@ -26,8 +26,6 @@ namespace ogonek {
             deferred_view<Rng>,
             ranges::is_finite<Rng>::value? ranges::finite : ranges::range_cardinality<Rng>::value> {
         private:
-            //using base_type = deferred_view::view_facade_t;
-
             CONCEPT_ASSERT(Range<Rng>());
 
             friend ranges::range_access;
