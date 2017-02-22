@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 3.2)
 
 project (Ogonek)
 include (deps/catch.cmake)
+include (deps/range-v3.cmake)
 
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -12,10 +13,11 @@ set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS OFF)
 
+set (OGONEK_ABI abiv0)
+
 include_directories (${PROJECT_SOURCE_DIR}/include)
 
 add_subdirectory (src/ucd)
+add_subdirectory (src/encodings)
 add_subdirectory (test)
 add_subdirectory (doc)
-
-include (test/tests.cmake)

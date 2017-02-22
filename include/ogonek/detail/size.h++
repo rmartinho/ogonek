@@ -1,6 +1,6 @@
 // Ogonek
 //
-// Written in 2016 by Martinho Fernandes <martinho.fernandes@gmail.com>
+// Written in 2016 by Martinho Fernandes <ogonek@rmf.io>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright and related
 // and neighboring rights to this software to the public domain worldwide. This software is
@@ -20,8 +20,8 @@ namespace ogonek {
     namespace detail {
         template <typename T, std::size_t N>
         constexpr std::size_t size(T(&)[N]) { return N; }
-    }
-}
+    } // namespace detail
+} // namespace ogonek
 
 #endif // OGONEK_DETAIL_SIZE_HPP
 

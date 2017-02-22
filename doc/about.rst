@@ -112,9 +112,6 @@ repertoire as a combining character (U+0328 ᴄᴏᴍʙɪɴɪɴɢ ᴏɢᴏɴᴇ�
 character (U+02DB ᴏɢᴏɴᴇᴋ), or precomposed with Latin alphabet letters (like
 U+01EA ʟᴀᴛɪɴ ᴄᴀᴘɪᴛᴀʟ ʟᴇᴛᴛᴇʀ ᴏ ᴡɪᴛʜ ᴏɢᴏɴᴇᴋ).
 
-In Russian (огонёк) it can mean "little flame", which arguably makes it sound
-cooler than "little tail".
-
 The name was picked randomly and it has absolutely no special meaning as the
 name of this project. It is just a label the author appropriated for it. In
 English it is pronounced /ˈoʊɡənɛk/.

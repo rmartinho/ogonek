@@ -1,6 +1,8 @@
 Reference
 =========
 
-.. todo::
+.. toctree::
+   :maxdepth: 1
+   :glob:
 
-    Extract documentation comments from code and include them here.
+   extracted/*

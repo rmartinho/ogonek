@@ -3,7 +3,7 @@ Glossary
 
 .. glossary::
     code point
-        A value in the Unicode :term:`codespace`.
+        A value in the Unicode |codespace|.
 
     code unit
         The minimal bit combination that can represent a unit of encoded text
@@ -15,3 +15,7 @@ Glossary
         A range of numerical values available for encoding characters. For the
         Unicode Standard, this is the range of integers from 0 to 10FFFF\
         :sub:`16`.
+
+    encoding form
+        Mapping that determines how each |code-point| for  a  Unicode character
+        is to be expressed as a sequence of one or more |code-units|.

@@ -1,10 +1,20 @@
 .. highlight:: c++
 .. namespace:: ::ogonek
 
-.. |unicode-standard| replace:: `Unicode Standard <http://www.unicode.org/standard/>`__
-
 .. |range-v3| replace:: `range-v3 <https://github.com/ericniebler/range-v3/>`__
 
+.. |unicode-standard| replace:: `Unicode Standard <http://www.unicode.org/standard/>`__
 .. |uax-44| replace:: `Unicode Standard Annex #44 <http://unicode.org/reports/tr44/>`__
+
+.. |code-unit| replace:: :term:`code unit`
+.. |code-units| replace:: :term:`code units <code unit>`
+.. |code-point| replace:: :term:`code point`
+.. |code-points| replace:: :term:`code points <code point>`
+.. |codespace| replace:: :term:`codespace`
+.. |encoding-form| replace:: :term:`encoding form`
+
+.. |u-fffd| replace:: U+FFFD ʀᴇᴘʟᴀᴄᴇᴍᴇɴᴛ ᴄʜᴀʀᴀᴄᴛᴇʀ
+
+.. |valid-code-point| replace:: in the range [0..10FFFF\ :sub:`16`]
 
 .. vim:ft=rst:

@@ -13,20 +13,22 @@
 
 #include <ogonek/ucd.h++>
 
-#include <boost/optional/optional_io.hpp>
-#include "util.h++"
 #include <catch.hpp>
-#include <iomanip>
+#include "util.h++"
+
+#include <boost/optional/optional_io.hpp>
 
 namespace ucd = ogonek::ucd;
 
-TEST_CASE("age", "Querying Age") {
+using namespace test::string_literals;
+
+TEST_CASE("Age can be queried", "[properties]") {
     CHECK(ucd::get_age(U'\x0041') == ucd::version::v1_1);
     CHECK(ucd::get_age(U'\x00C5') == ucd::version::v1_1);
     CHECK(ucd::get_age(U'\x1EA0') == ucd::version::v1_1);
     CHECK(ucd::get_age(U'\x1F4A9') == ucd::version::v6_0);
 }
-TEST_CASE("name", "Querying Name") {
+TEST_CASE("Name can be queried", "[properties]") {
     SECTION("explicit", "some characters have explicit names") {
         CHECK(ucd::get_name(U'\x0041') == u8"LATIN CAPITAL LETTER A");
         CHECK(ucd::get_name(U'\x00C5') == u8"LATIN CAPITAL LETTER A WITH RING ABOVE");
@@ -62,14 +64,14 @@ TEST_CASE("name", "Querying Name") {
         CHECK(ucd::get_name(U'\xD7A3') == u8"HANGUL SYLLABLE HIH");
     }
 }
-TEST_CASE("block", "Querying Block") {
+TEST_CASE("Block can be queried", "[properties]") {
     CHECK(ucd::get_block(U'\x0041') == ucd::block::ascii);
     CHECK(ucd::get_block(U'\x00C5') == ucd::block::latin_1_sup);
     CHECK(ucd::get_block(U'\x1EA0') == ucd::block::latin_ext_additional);
     CHECK(ucd::get_block(U'\x1F4A9') == ucd::block::misc_pictographs);
     CHECK(ucd::get_block(U'\x0860') == ucd::block::no_block);
 }
-TEST_CASE("general category", "Querying General_Category") {
+TEST_CASE("General_Category can be queried", "[properties]") {
     CHECK(ucd::get_general_category(U'\x000A') == ucd::general_category::cc);
     CHECK(ucd::get_general_category(U'\x00C5') == ucd::general_category::lu);
     CHECK(ucd::get_general_category(U'\x1EA0') == ucd::general_category::lu);
@@ -78,42 +80,42 @@ TEST_CASE("general category", "Querying General_Category") {
     CHECK(ucd::get_general_category(U'\xD800') == ucd::general_category::cs);
     CHECK(ucd::get_general_category(U'\xE042') == ucd::general_category::co);
 }
-TEST_CASE("canonical combining class", "Querying Canonical_Combining_Class") {
+TEST_CASE("Canonical_Combining_Class can be queried", "[properties]") {
     CHECK(ucd::get_canonical_combining_class(U'\x0041') == 0);
     CHECK(ucd::get_canonical_combining_class(U'\x0300') == 230);
     CHECK(ucd::get_canonical_combining_class(U'\x0334') == 1);
     CHECK(ucd::get_canonical_combining_class(U'\x0618') == 30);
     CHECK(ucd::get_canonical_combining_class(U'\xFFFF') == 0);
 }
-TEST_CASE("bidi class", "Querying Bidi_Class") {
+TEST_CASE("Bidi_Class can be queried", "[properties]") {
     CHECK(ucd::get_bidi_class(U'\x0041') == ucd::bidi_class::l);
     CHECK(ucd::get_bidi_class(U'\x0600') == ucd::bidi_class::an);
     CHECK(ucd::get_bidi_class(U'\x0610') == ucd::bidi_class::nsm);
     CHECK(ucd::get_bidi_class(U'\x1F4A9') == ucd::bidi_class::on);
     CHECK(ucd::get_bidi_class(U'\xFFFF') == ucd::bidi_class::bn);
 }
-TEST_CASE("bidi mirrored", "Querying Bidi_Mirrored") {
+TEST_CASE("Bidi_Mirrored can be queried", "[properties]") {
     CHECK(ucd::is_bidi_mirrored(U'\x0041') == false);
     CHECK(ucd::is_bidi_mirrored(U'\x0F3A') == true);
     CHECK(ucd::is_bidi_mirrored(U'\x222B') == true);
     CHECK(ucd::is_bidi_mirrored(U'\x1F4A9') == false);
     CHECK(ucd::is_bidi_mirrored(U'\xFFFF') == false);
 }
-TEST_CASE("bidi mirroring glyph", "Querying Bidi_Mirroring_Glyph") {
+TEST_CASE("Bidi_Mirroring_Glyph can be queried", "[properties]") {
     CHECK(ucd::get_bidi_mirroring_glyph(U'\x0041') == U'\x0041');
     CHECK(ucd::get_bidi_mirroring_glyph(U'\x222B') == U'\x222B');
     CHECK(ucd::get_bidi_mirroring_glyph(U'\x223C') == U'\x223D');
     CHECK(ucd::get_bidi_mirroring_glyph(U'\xFF63') == U'\xFF62');
     CHECK(ucd::get_bidi_mirroring_glyph(U'\xFFFF') == U'\xFFFF');
 }
-TEST_CASE("bidi control", "Querying Bidi_Control") {
+TEST_CASE("Bidi_Control can be queried", "[properties]") {
     CHECK(ucd::is_bidi_control(U'\x0041') == false);
     CHECK(ucd::is_bidi_control(U'\x00C5') == false);
     CHECK(ucd::is_bidi_control(U'\x200E') == true);
     CHECK(ucd::is_bidi_control(U'\x202E') == true);
     CHECK(ucd::is_bidi_control(U'\xFFFF') == false);
 }
-TEST_CASE("bidi paired bracket", "Querying Bidi_Paired_Bracket") {
+TEST_CASE("Bidi_Paired_Bracket can be queried", "[properties]") {
     CHECK(ucd::get_bidi_paired_bracket(U'\x0041') == U'\x0041');
     CHECK(ucd::get_bidi_paired_bracket(U'\x00C5') == U'\x00C5');
     CHECK(ucd::get_bidi_paired_bracket(U'\x0028') == U'\x0029');
@@ -122,7 +124,7 @@ TEST_CASE("bidi paired bracket", "Querying Bidi_Paired_Bracket") {
     CHECK(ucd::get_bidi_paired_bracket(U'\xFF5D') == U'\xFF5B');
     CHECK(ucd::get_bidi_paired_bracket(U'\xFFFF') == U'\xFFFF');
 }
-TEST_CASE("bidi paired bracket type", "Querying Bidi_Paired_Bracket_Type") {
+TEST_CASE("Bidi_Paired_Bracket_Type can be queried", "[properties]") {
     CHECK(ucd::get_bidi_paired_bracket_type(U'\x0041') == ucd::bracket_type::none);
     CHECK(ucd::get_bidi_paired_bracket_type(U'\x00C5') == ucd::bracket_type::none);
     CHECK(ucd::get_bidi_paired_bracket_type(U'\x0028') == ucd::bracket_type::open);
@@ -131,104 +133,104 @@ TEST_CASE("bidi paired bracket type", "Querying Bidi_Paired_Bracket_Type") {
     CHECK(ucd::get_bidi_paired_bracket_type(U'\xFF5D') == ucd::bracket_type::close);
     CHECK(ucd::get_bidi_paired_bracket_type(U'\xFFFF') == ucd::bracket_type::none);
 }
-TEST_CASE("decomposition type", "Querying Decomposition_Type") {
+TEST_CASE("Decomposition_Type can be queried", "[properties]") {
     CHECK(ucd::get_decomposition_type(U'\x0041') == ucd::decomposition_type::none);
     CHECK(ucd::get_decomposition_type(U'\x00C5') == ucd::decomposition_type::can);
     CHECK(ucd::get_decomposition_type(U'\x1EA0') == ucd::decomposition_type::can);
     CHECK(ucd::get_decomposition_type(U'\x3000') == ucd::decomposition_type::wide);
 }
-TEST_CASE("decomposition mapping", "Querying Decomposition_Mapping") {
-    CHECK(ucd::get_decomposition_mapping(U'\x0041') == std::u32string(U"\x0041"));
-    CHECK(ucd::get_decomposition_mapping(U'\x00C5') == std::u32string(U"\x0041\x030A"));
-    CHECK(ucd::get_decomposition_mapping(U'\x1EA0') == std::u32string(U"\x0041\x0323"));
-    CHECK(ucd::get_decomposition_mapping(U'\x3000') == std::u32string(U"\x0020"));
+TEST_CASE("Decomposition_Mapping can be queried", "[properties]") {
+    CHECK(ucd::get_decomposition_mapping(U'\x0041') == U"\x0041"_s);
+    CHECK(ucd::get_decomposition_mapping(U'\x00C5') == U"\x0041\x030A"_s);
+    CHECK(ucd::get_decomposition_mapping(U'\x1EA0') == U"\x0041\x0323"_s);
+    CHECK(ucd::get_decomposition_mapping(U'\x3000') == U"\x0020"_s);
 }
-TEST_CASE("full composition exclusion", "Querying Full_Composition_Exclusion") {
+TEST_CASE("Full_Composition_Exclusion can be queried", "[properties]") {
     CHECK(ucd::is_excluded_from_composition(U'\x0041') == false);
     CHECK(ucd::is_excluded_from_composition(U'\x0344') == true);
     CHECK(ucd::is_excluded_from_composition(U'\x0958') == true);
     CHECK(ucd::is_excluded_from_composition(U'\x2ADC') == true);
     CHECK(ucd::is_excluded_from_composition(U'\x2126') == true);
 }
-TEST_CASE("nfc quick check", "Querying NFC_Quick Check") {
+TEST_CASE("NFC_Quick_Check can be queried", "[properties]") {
     CHECK(ucd::get_nfc_quick_check(U'\x0041') == true);
     CHECK(ogonek::maybe(ucd::get_nfc_quick_check(U'\x0300')));
     CHECK(ucd::get_nfc_quick_check(U'\x0340') == false);
     CHECK(ucd::get_nfc_quick_check(U'\x1F4A9') == true);
 }
-TEST_CASE("nfd quick check", "Querying NFD_Quick_Check") {
+TEST_CASE("NFD_Quick_Check can be queried", "[properties]") {
     CHECK(ucd::get_nfd_quick_check(U'\x0041') == true);
     CHECK(ucd::get_nfd_quick_check(U'\x00C5') == false);
     CHECK(ucd::get_nfd_quick_check(U'\x2F801') == false);
     CHECK(ucd::get_nfd_quick_check(U'\x1F4A9') == true);
 }
-TEST_CASE("nfkc quick check", "Querying NFKC_Quick_Check") {
+TEST_CASE("NFKC_Quick_Check can be queried", "[properties]") {
     CHECK(ucd::get_nfkc_quick_check(U'\x0041') == true);
     CHECK(ogonek::maybe(ucd::get_nfkc_quick_check(U'\x0300')));
     CHECK(ucd::get_nfkc_quick_check(U'\x0340') == false);
     CHECK(ucd::get_nfkc_quick_check(U'\x1F4A9') == true);
 }
-TEST_CASE("nfkd quick check", "Querying NFKD_Quick_Check") {
+TEST_CASE("NFKD_Quick_Check can be queried", "[properties]") {
     CHECK(ucd::get_nfkd_quick_check(U'\x0041') == true);
     CHECK(ucd::get_nfkd_quick_check(U'\x00C5') == false);
     CHECK(ucd::get_nfkd_quick_check(U'\x013F') == false);
     CHECK(ucd::get_nfkd_quick_check(U'\x1F4A9') == true);
 }
-TEST_CASE("numeric type", "Querying Numeric_Type") {
+TEST_CASE("Numeric_Type can be queried", "[properties]") {
     CHECK(ucd::get_numeric_type(U'\x0041') == ucd::numeric_type::none);
     CHECK(ucd::get_numeric_type(U'\xA621') == ucd::numeric_type::decimal);
     CHECK(ucd::get_numeric_type(U'\x00B2') == ucd::numeric_type::digit);
     CHECK(ucd::get_numeric_type(U'\xA831') == ucd::numeric_type::numeric);
 }
-TEST_CASE("numeric value", "Querying Numeric_Value") {
+TEST_CASE("Numeric_Value can be queried", "[properties]") {
     CHECK(ucd::get_numeric_value(U'\x0041') == boost::none);
     CHECK(ucd::get_numeric_value(U'\xA621') == boost::rational<long>(1));
     CHECK(ucd::get_numeric_value(U'\x00B2') == boost::rational<long>(2));
     CHECK(ucd::get_numeric_value(U'\xA831') == boost::rational<long>(1, 2));
 }
-TEST_CASE("joining type", "Querying Joining_Type") {
+TEST_CASE("Joining_Type can be queried", "[properties]") {
     CHECK(ucd::get_joining_type(U'\x0041') == ucd::joining_type::u);
     CHECK(ucd::get_joining_type(U'\x0648') == ucd::joining_type::r);
     CHECK(ucd::get_joining_type(U'\x064B') == ucd::joining_type::t);
     CHECK(ucd::get_joining_type(U'\x066E') == ucd::joining_type::d);
 }
-TEST_CASE("joining group", "Querying Joining_Group") {
+TEST_CASE("Joining_Group can be queried", "[properties]") {
     CHECK(ucd::get_joining_group(U'\x0041') == ucd::joining_group::no_joining_group);
     CHECK(ucd::get_joining_group(U'\x0648') == ucd::joining_group::waw);
     CHECK(ucd::get_joining_group(U'\x064B') == ucd::joining_group::no_joining_group);
     CHECK(ucd::get_joining_group(U'\x066E') == ucd::joining_group::beh);
 }
-TEST_CASE("join control", "Querying Join_Control") {
+TEST_CASE("Join_Control can be queried", "[properties]") {
     CHECK(ucd::is_join_control(U'\x0041') == false);
     CHECK(ucd::is_join_control(U'\x200C') == true);
     CHECK(ucd::is_join_control(U'\x200D') == true);
     CHECK(ucd::is_join_control(U'\x1F4A9') == false);
 }
-TEST_CASE("line break", "Querying Line_Break") {
+TEST_CASE("Line_Break can be queried", "[properties]") {
     CHECK(ucd::get_line_break(U'\x000A') == ucd::line_break::lf);
     CHECK(ucd::get_line_break(U'\x000D') == ucd::line_break::cr);
     CHECK(ucd::get_line_break(U'\x0041') == ucd::line_break::al);
     CHECK(ucd::get_line_break(U'\x2028') == ucd::line_break::bk);
 }
-TEST_CASE("east asian width", "Querying East_Asian_Width") {
+TEST_CASE("East_Asian_Width can be queried", "[properties]") {
     CHECK(ucd::get_east_asian_width(U'\x000A') == ucd::east_asian_width::n);
     CHECK(ucd::get_east_asian_width(U'\x0041') == ucd::east_asian_width::na);
     CHECK(ucd::get_east_asian_width(U'\x1128') == ucd::east_asian_width::w);
     CHECK(ucd::get_east_asian_width(U'\x201C') == ucd::east_asian_width::a);
 }
-TEST_CASE("uppercase", "Querying Uppercase") {
+TEST_CASE("Uppercase can be queried", "[properties]") {
     CHECK(ucd::is_uppercase(U'\x0041') == true);
     CHECK(ucd::is_uppercase(U'\x0061') == false);
     CHECK(ucd::is_uppercase(U'\x1EA0') == true);
     CHECK(ucd::is_uppercase(U'\x1F4A9') == false);
 }
-TEST_CASE("lowercase", "Querying Lowercase") {
+TEST_CASE("Lowercase can be queried", "[properties]") {
     CHECK(ucd::is_lowercase(U'\x0041') == false);
     CHECK(ucd::is_lowercase(U'\x0061') == true);
     CHECK(ucd::is_lowercase(U'\x1EA0') == false);
     CHECK(ucd::is_lowercase(U'\x1F4A9') == false);
 }
-TEST_CASE("simple uppercase mapping", "Querying Simple_Uppercase_Mapping") {
+TEST_CASE("Simple_Uppercase_Mapping can be queried", "[properties]") {
     CHECK(ucd::get_simple_uppercase_mapping(U'\x0041') == U'\x0041');
     CHECK(ucd::get_simple_uppercase_mapping(U'\x00C5') == U'\x00C5');
     CHECK(ucd::get_simple_uppercase_mapping(U'\x1EA0') == U'\x1EA0');
@@ -237,7 +239,7 @@ TEST_CASE("simple uppercase mapping", "Querying Simple_Uppercase_Mapping") {
     CHECK(ucd::get_simple_uppercase_mapping(U'\x1EA1') == U'\x1EA0');
     CHECK(ucd::get_simple_uppercase_mapping(U'\x1F4A9') == U'\x1F4A9');
 }
-TEST_CASE("simple lowercase mapping", "Querying Simple_Lowercase_Mapping") {
+TEST_CASE("Simple_Lowercase_Mapping can be queried", "[properties]") {
     CHECK(ucd::get_simple_lowercase_mapping(U'\x0061') == U'\x0061');
     CHECK(ucd::get_simple_lowercase_mapping(U'\x00E5') == U'\x00E5');
     CHECK(ucd::get_simple_lowercase_mapping(U'\x1EA1') == U'\x1EA1');
@@ -246,7 +248,7 @@ TEST_CASE("simple lowercase mapping", "Querying Simple_Lowercase_Mapping") {
     CHECK(ucd::get_simple_lowercase_mapping(U'\x1EA0') == U'\x1EA1');
     CHECK(ucd::get_simple_lowercase_mapping(U'\x1F4A9') == U'\x1F4A9');
 }
-TEST_CASE("simple titlecase mapping", "Querying Simple_Titlecase_Mapping") {
+TEST_CASE("Simple_Titlecase_Mapping can be queried", "[properties]") {
     CHECK(ucd::get_simple_titlecase_mapping(U'\x0041') == U'\x0041');
     CHECK(ucd::get_simple_titlecase_mapping(U'\x0061') == U'\x0041');
     CHECK(ucd::get_simple_titlecase_mapping(U'\x00C5') == U'\x00C5');
@@ -255,28 +257,28 @@ TEST_CASE("simple titlecase mapping", "Querying Simple_Titlecase_Mapping") {
     CHECK(ucd::get_simple_titlecase_mapping(U'\x1EA1') == U'\x1EA0');
     CHECK(ucd::get_simple_titlecase_mapping(U'\x1F4A9') == U'\x1F4A9');
 }
-TEST_CASE("uppercase mapping", "Querying Uppercase_Mapping") {
-    CHECK(ucd::get_uppercase_mapping(U'\x0041') == std::u32string(U"\x0041"));
-    CHECK(ucd::get_uppercase_mapping(U'\x0061') == std::u32string(U"\x0041"));
-    CHECK(ucd::get_uppercase_mapping(U'\x00DF') == std::u32string(U"\x0053\x0053"));
-    CHECK(ucd::get_uppercase_mapping(U'\x1E96') == std::u32string(U"\x0048\x0331"));
-    CHECK(ucd::get_uppercase_mapping(U'\x1F4A9') == std::u32string(U"\x1F4A9"));
+TEST_CASE("Uppercase_Mapping can be queried", "[properties]") {
+    CHECK(ucd::get_uppercase_mapping(U'\x0041') == U"\x0041"_s);
+    CHECK(ucd::get_uppercase_mapping(U'\x0061') == U"\x0041"_s);
+    CHECK(ucd::get_uppercase_mapping(U'\x00DF') == U"\x0053\x0053"_s);
+    CHECK(ucd::get_uppercase_mapping(U'\x1E96') == U"\x0048\x0331"_s);
+    CHECK(ucd::get_uppercase_mapping(U'\x1F4A9') == U"\x1F4A9"_s);
 }
-TEST_CASE("lowercase mapping", "Querying Lowercase_Mapping") {
-    CHECK(ucd::get_lowercase_mapping(U'\x0041') == std::u32string(U"\x0061"));
-    CHECK(ucd::get_lowercase_mapping(U'\x0061') == std::u32string(U"\x0061"));
-    CHECK(ucd::get_lowercase_mapping(U'\x0130') == std::u32string(U"\x0069\x0307"));
-    CHECK(ucd::get_lowercase_mapping(U'\x1E96') == std::u32string(U"\x1E96"));
-    CHECK(ucd::get_lowercase_mapping(U'\x1F4A9') == std::u32string(U"\x1F4A9"));
+TEST_CASE("Lowercase_Mapping can be queried", "[properties]") {
+    CHECK(ucd::get_lowercase_mapping(U'\x0041') == U"\x0061"_s);
+    CHECK(ucd::get_lowercase_mapping(U'\x0061') == U"\x0061"_s);
+    CHECK(ucd::get_lowercase_mapping(U'\x0130') == U"\x0069\x0307"_s);
+    CHECK(ucd::get_lowercase_mapping(U'\x1E96') == U"\x1E96"_s);
+    CHECK(ucd::get_lowercase_mapping(U'\x1F4A9') == U"\x1F4A9"_s);
 }
-TEST_CASE("titlecase mapping", "Querying Titlecase_Mapping") {
-    CHECK(ucd::get_titlecase_mapping(U'\x0041') == std::u32string(U"\x0041"));
-    CHECK(ucd::get_titlecase_mapping(U'\x0061') == std::u32string(U"\x0041"));
-    CHECK(ucd::get_titlecase_mapping(U'\x00DF') == std::u32string(U"\x0053\x0073"));
-    CHECK(ucd::get_titlecase_mapping(U'\x1E96') == std::u32string(U"\x0048\x0331"));
-    CHECK(ucd::get_titlecase_mapping(U'\x1F4A9') == std::u32string(U"\x1F4A9"));
+TEST_CASE("Titlecase_Mapping can be queried", "[properties]") {
+    CHECK(ucd::get_titlecase_mapping(U'\x0041') == U"\x0041"_s);
+    CHECK(ucd::get_titlecase_mapping(U'\x0061') == U"\x0041"_s);
+    CHECK(ucd::get_titlecase_mapping(U'\x00DF') == U"\x0053\x0073"_s);
+    CHECK(ucd::get_titlecase_mapping(U'\x1E96') == U"\x0048\x0331"_s);
+    CHECK(ucd::get_titlecase_mapping(U'\x1F4A9') == U"\x1F4A9"_s);
 }
-TEST_CASE("simple case folding", "Querying Simple_Case_Folding") {
+TEST_CASE("Simple_Case_Folding can be queried", "[properties]") {
     CHECK(ucd::get_simple_case_folding(U'\x0041') == U'\x0061');
     CHECK(ucd::get_simple_case_folding(U'\x0061') == U'\x0061');
     CHECK(ucd::get_simple_case_folding(U'\x00DF') == U'\x00DF');
@@ -284,21 +286,21 @@ TEST_CASE("simple case folding", "Querying Simple_Case_Folding") {
     CHECK(ucd::get_simple_case_folding(U'\x1EA1') == U'\x1EA1');
     CHECK(ucd::get_simple_case_folding(U'\x1F4A9') == U'\x1F4A9');
 }
-TEST_CASE("case folding", "Querying Case_Folding") {
-    CHECK(ucd::get_case_folding(U'\x0041') == std::u32string(U"\x0061"));
-    CHECK(ucd::get_case_folding(U'\x0061') == std::u32string(U"\x0061"));
-    CHECK(ucd::get_case_folding(U'\x00DF') == std::u32string(U"\x0073\x0073"));
-    CHECK(ucd::get_case_folding(U'\x1E96') == std::u32string(U"\x0068\x0331"));
-    CHECK(ucd::get_case_folding(U'\x1F4A9') == std::u32string(U"\x1F4A9"));
+TEST_CASE("Case_Folding can be queried", "[properties]") {
+    CHECK(ucd::get_case_folding(U'\x0041') == U"\x0061"_s);
+    CHECK(ucd::get_case_folding(U'\x0061') == U"\x0061"_s);
+    CHECK(ucd::get_case_folding(U'\x00DF') == U"\x0073\x0073"_s);
+    CHECK(ucd::get_case_folding(U'\x1E96') == U"\x0068\x0331"_s);
+    CHECK(ucd::get_case_folding(U'\x1F4A9') == U"\x1F4A9"_s);
 }
-TEST_CASE("case ignorable", "Querying Case_Ignorable") {
+TEST_CASE("Case_Ignorable can be queried", "[properties]") {
     CHECK(ucd::is_case_ignorable(U'\x0041') == false);
     CHECK(ucd::is_case_ignorable(U'\x0061') == false);
     CHECK(ucd::is_case_ignorable(U'\x0027') == true);
     CHECK(ucd::is_case_ignorable(U'\x002E') == true);
     CHECK(ucd::is_case_ignorable(U'\x1F4A9') == false);
 }
-TEST_CASE("cased", "Querying Cased") {
+TEST_CASE("Cased can be queried", "[properties]") {
     CHECK(ucd::is_cased(U'\x0027') == false);
     CHECK(ucd::is_cased(U'\x002E') == false);
     CHECK(ucd::is_cased(U'\x0041') == true);
@@ -306,7 +308,7 @@ TEST_CASE("cased", "Querying Cased") {
     CHECK(ucd::is_cased(U'\x00DF') == true);
     CHECK(ucd::is_cased(U'\x1F4A9') == false);
 }
-TEST_CASE("changes when lowercased", "Querying Changes_When_Lowercased") {
+TEST_CASE("Changes_When_Lowercased can be queried", "[properties]") {
     CHECK(ucd::changes_when_lowercased(U'\x0041') == true);
     CHECK(ucd::changes_when_lowercased(U'\x0061') == false);
     CHECK(ucd::changes_when_lowercased(U'\x00C5') == true);
@@ -317,7 +319,7 @@ TEST_CASE("changes when lowercased", "Querying Changes_When_Lowercased") {
     CHECK(ucd::changes_when_lowercased(U'\x1EA0') == true);
     CHECK(ucd::changes_when_lowercased(U'\x1F4A9') == false);
 }
-TEST_CASE("changes when uppercased", "Querying Changes_When_Uppercased") {
+TEST_CASE("Changes_When_Uppercased can be queried", "[properties]") {
     CHECK(ucd::changes_when_uppercased(U'\x0041') == false);
     CHECK(ucd::changes_when_uppercased(U'\x00C5') == false);
     CHECK(ucd::changes_when_uppercased(U'\x00DF') == true);
@@ -328,7 +330,7 @@ TEST_CASE("changes when uppercased", "Querying Changes_When_Uppercased") {
     CHECK(ucd::changes_when_uppercased(U'\x1EA1') == true);
     CHECK(ucd::changes_when_uppercased(U'\x1F4A9') == false);
 }
-TEST_CASE("changes when titlecased", "Querying Changes_When_Titlecased") {
+TEST_CASE("Changes_When_Titlecased can be queried", "[properties]") {
     CHECK(ucd::changes_when_titlecased(U'\x0041') == false);
     CHECK(ucd::changes_when_titlecased(U'\x0061') == true);
     CHECK(ucd::changes_when_titlecased(U'\x00C5') == false);
@@ -339,7 +341,7 @@ TEST_CASE("changes when titlecased", "Querying Changes_When_Titlecased") {
     CHECK(ucd::changes_when_titlecased(U'\x1EA1') == true);
     CHECK(ucd::changes_when_titlecased(U'\x1F4A9') == false);
 }
-TEST_CASE("changes when casefolded", "Querying Changes_When_Casefolded") {
+TEST_CASE("Changes_When_Casefolded can be queried", "[properties]") {
     CHECK(ucd::changes_when_casefolded(U'\x0041') == true);
     CHECK(ucd::changes_when_casefolded(U'\x0061') == false);
     CHECK(ucd::changes_when_casefolded(U'\x00DF') == true);
@@ -348,7 +350,7 @@ TEST_CASE("changes when casefolded", "Querying Changes_When_Casefolded") {
     CHECK(ucd::changes_when_casefolded(U'\x1EA1') == false);
     CHECK(ucd::changes_when_casefolded(U'\x1F4A9') == false);
 }
-TEST_CASE("changes when casemapped", "Querying Changes_When_Casemapped") {
+TEST_CASE("Changes_When_Casemapped can be queried", "[properties]") {
     CHECK(ucd::changes_when_casemapped(U'\x0041') == true);
     CHECK(ucd::changes_when_casemapped(U'\x0061') == true);
     CHECK(ucd::changes_when_casemapped(U'\x00C5') == true);
@@ -360,7 +362,7 @@ TEST_CASE("changes when casemapped", "Querying Changes_When_Casemapped") {
     CHECK(ucd::changes_when_casemapped(U'\x1EA1') == true);
     CHECK(ucd::changes_when_casemapped(U'\x1F4A9') == false);
 }
-TEST_CASE("changes when nfkc casefolded", "Querying Changes_When_NFKC_Casefolded") {
+TEST_CASE("Changes_When_NFKC_Casefolded can be queried", "[properties]") {
     CHECK(ucd::changes_when_nfkc_casefolded(U'\x0041') == true);
     CHECK(ucd::changes_when_nfkc_casefolded(U'\x0061') == false);
     CHECK(ucd::changes_when_nfkc_casefolded(U'\x00A0') == true);
@@ -372,19 +374,19 @@ TEST_CASE("changes when nfkc casefolded", "Querying Changes_When_NFKC_Casefolded
     CHECK(ucd::changes_when_nfkc_casefolded(U'\x1EA1') == false);
     CHECK(ucd::changes_when_nfkc_casefolded(U'\x1F4A9') == false);
 }
-TEST_CASE("nfkc casefold", "Querying NFKC_Casefold") {
-    CHECK(ucd::get_nfkc_casefold(U'\x0041') == std::u32string(U"\x0061"));
-    CHECK(ucd::get_nfkc_casefold(U'\x0061') == std::u32string(U"\x0061"));
-    CHECK(ucd::get_nfkc_casefold(U'\x00A0') == std::u32string(U"\x0020"));
-    CHECK(ucd::get_nfkc_casefold(U'\x00DF') == std::u32string(U"\x0073\x0073"));
-    CHECK(ucd::get_nfkc_casefold(U'\x0390') == std::u32string(U"\x0390"));
-    CHECK(ucd::get_nfkc_casefold(U'\x0675') == std::u32string(U"\x0627\x0674"));
-    CHECK(ucd::get_nfkc_casefold(U'\x1E96') == std::u32string(U"\x1E96"));
-    CHECK(ucd::get_nfkc_casefold(U'\x1EA0') == std::u32string(U"\x1EA1"));
-    CHECK(ucd::get_nfkc_casefold(U'\x1EA1') == std::u32string(U"\x1EA1"));
-    CHECK(ucd::get_nfkc_casefold(U'\x1F4A9') == std::u32string(U"\x1F4A9"));
+TEST_CASE("NFKC_Casefold can be queried", "[properties]") {
+    CHECK(ucd::get_nfkc_casefold(U'\x0041') == U"\x0061"_s);
+    CHECK(ucd::get_nfkc_casefold(U'\x0061') == U"\x0061"_s);
+    CHECK(ucd::get_nfkc_casefold(U'\x00A0') == U"\x0020"_s);
+    CHECK(ucd::get_nfkc_casefold(U'\x00DF') == U"\x0073\x0073"_s);
+    CHECK(ucd::get_nfkc_casefold(U'\x0390') == U"\x0390"_s);
+    CHECK(ucd::get_nfkc_casefold(U'\x0675') == U"\x0627\x0674"_s);
+    CHECK(ucd::get_nfkc_casefold(U'\x1E96') == U"\x1E96"_s);
+    CHECK(ucd::get_nfkc_casefold(U'\x1EA0') == U"\x1EA1"_s);
+    CHECK(ucd::get_nfkc_casefold(U'\x1EA1') == U"\x1EA1"_s);
+    CHECK(ucd::get_nfkc_casefold(U'\x1F4A9') == U"\x1F4A9"_s);
 }
-TEST_CASE("script", "Querying Script") {
+TEST_CASE("Script can be queried", "[properties]") {
     CHECK(ucd::get_script(U'\x000A') == ucd::script::common);
     CHECK(ucd::get_script(U'\x0041') == ucd::script::latin);
     CHECK(ucd::get_script(U'\x0378') == ucd::script::unknown);
@@ -392,7 +394,7 @@ TEST_CASE("script", "Querying Script") {
     CHECK(ucd::get_script(U'\x10003') == ucd::script::linear_b);
     CHECK(ucd::get_script(U'\x1F4A9') == ucd::script::common);
 }
-TEST_CASE("hangul syllable type", "Querying Hangul_Syllable_Type") {
+TEST_CASE("Hangul_Syllable_Type can be queried", "[properties]") {
     CHECK(ucd::get_hangul_syllable_type(U'\x000A') == ucd::hangul_syllable_type::na);
     CHECK(ucd::get_hangul_syllable_type(U'\x0041') == ucd::hangul_syllable_type::na);
     CHECK(ucd::get_hangul_syllable_type(U'\x1132') == ucd::hangul_syllable_type::l);
@@ -406,7 +408,7 @@ TEST_CASE("hangul syllable type", "Querying Hangul_Syllable_Type") {
     CHECK(ucd::get_hangul_syllable_type(U'\xD7A8') == ucd::hangul_syllable_type::na);
     CHECK(ucd::get_hangul_syllable_type(U'\x1F4A9') == ucd::hangul_syllable_type::na);
 }
-TEST_CASE("indic positional category", "Querying Indic_Positional_Category") {
+TEST_CASE("Indic_Positional_Category can be queried", "[properties]") {
     CHECK(ucd::get_indic_positional_category(U'\x0041') == ucd::indic_positional_category::na);
     CHECK(ucd::get_indic_positional_category(U'\x0D3F') == ucd::indic_positional_category::right);
     CHECK(ucd::get_indic_positional_category(U'\x0D44') == ucd::indic_positional_category::bottom);
@@ -416,7 +418,7 @@ TEST_CASE("indic positional category", "Querying Indic_Positional_Category") {
     CHECK(ucd::get_indic_positional_category(U'\x0D59') == ucd::indic_positional_category::na);
     CHECK(ucd::get_indic_positional_category(U'\x1F4A9') == ucd::indic_positional_category::na);
 }
-TEST_CASE("indic syllabic category", "Querying Indic_Syllabic_Category") {
+TEST_CASE("Indic_Syllabic_Category can be queried", "[properties]") {
     CHECK(ucd::get_indic_syllabic_category(U'\x0041') == ucd::indic_syllabic_category::other);
     CHECK(ucd::get_indic_syllabic_category(U'\x00B3') == ucd::indic_syllabic_category::syllable_modifier);
     CHECK(ucd::get_indic_syllabic_category(U'\x093B') == ucd::indic_syllabic_category::vowel_dependent);
@@ -424,7 +426,7 @@ TEST_CASE("indic syllabic category", "Querying Indic_Syllabic_Category") {
     CHECK(ucd::get_indic_syllabic_category(U'\x093D') == ucd::indic_syllabic_category::avagraha);
     CHECK(ucd::get_indic_syllabic_category(U'\x1F4A9') == ucd::indic_syllabic_category::other);
 }
-TEST_CASE("id start", "Querying ID_Start") {
+TEST_CASE("ID_Start can be queried", "[properties]") {
     CHECK(ucd::is_id_start(U'\x0020') == false);
     CHECK(ucd::is_id_start(U'\x0021') == false);
     CHECK(ucd::is_id_start(U'\x0031') == false);
@@ -437,7 +439,7 @@ TEST_CASE("id start", "Querying ID_Start") {
     CHECK(ucd::is_id_start(U'\xFE76') == true);
     CHECK(ucd::is_id_start(U'\x1F4A9') == false);
 }
-TEST_CASE("id continue", "Querying ID_Continue") {
+TEST_CASE("ID_Continue can be queried", "[properties]") {
     CHECK(ucd::is_id_continue(U'\x0020') == false);
     CHECK(ucd::is_id_continue(U'\x0021') == false);
     CHECK(ucd::is_id_continue(U'\x0031') == true);
@@ -450,7 +452,7 @@ TEST_CASE("id continue", "Querying ID_Continue") {
     CHECK(ucd::is_id_continue(U'\xFE76') == true);
     CHECK(ucd::is_id_continue(U'\x1F4A9') == false);
 }
-TEST_CASE("xid start", "Querying XID_Start") {
+TEST_CASE("XID_Start can be queried", "[properties]") {
     CHECK(ucd::is_xid_start(U'\x0020') == false);
     CHECK(ucd::is_xid_start(U'\x0021') == false);
     CHECK(ucd::is_xid_start(U'\x0031') == false);
@@ -463,7 +465,7 @@ TEST_CASE("xid start", "Querying XID_Start") {
     CHECK(ucd::is_xid_start(U'\xFE76') == false);
     CHECK(ucd::is_xid_start(U'\x1F4A9') == false);
 }
-TEST_CASE("xid continue", "Querying XID_Continue") {
+TEST_CASE("XID_Continue can be queried", "[properties]") {
     CHECK(ucd::is_xid_continue(U'\x0020') == false);
     CHECK(ucd::is_xid_continue(U'\x0021') == false);
     CHECK(ucd::is_xid_continue(U'\x0031') == true);
@@ -476,7 +478,7 @@ TEST_CASE("xid continue", "Querying XID_Continue") {
     CHECK(ucd::is_xid_continue(U'\xFE76') == false);
     CHECK(ucd::is_xid_continue(U'\x1F4A9') == false);
 }
-TEST_CASE("pattern syntax", "Querying Pattern_Syntax") {
+TEST_CASE("Pattern_Syntax can be queried", "[properties]") {
     CHECK(ucd::is_pattern_syntax(U'\x0020') == false);
     CHECK(ucd::is_pattern_syntax(U'\x0021') == true);
     CHECK(ucd::is_pattern_syntax(U'\x0031') == false);
@@ -485,7 +487,7 @@ TEST_CASE("pattern syntax", "Querying Pattern_Syntax") {
     CHECK(ucd::is_pattern_syntax(U'\x2E93') == false);
     CHECK(ucd::is_pattern_syntax(U'\x1F4A9') == false);
 }
-TEST_CASE("pattern white space", "Querying Pattern_White_Space") {
+TEST_CASE("Pattern_White_Space can be queried", "[properties]") {
     CHECK(ucd::is_pattern_white_space(U'\x0008') == false);
     CHECK(ucd::is_pattern_white_space(U'\x0009') == true);
     CHECK(ucd::is_pattern_white_space(U'\x000A') == true);
@@ -513,13 +515,13 @@ TEST_CASE("pattern white space", "Querying Pattern_White_Space") {
     CHECK(ucd::is_pattern_white_space(U'\x202A') == false);
     CHECK(ucd::is_pattern_white_space(U'\x1F4A9') == false);
 }
-TEST_CASE("dash", "Querying Dash") {
+TEST_CASE("Dash can be queried", "[properties]") {
     CHECK(ucd::is_dash(U'\x002D') == true);
     CHECK(ucd::is_dash(U'\x0041') == false);
     CHECK(ucd::is_dash(U'\x05BE') == true);
     CHECK(ucd::is_dash(U'\x1F4A9') == false);
 }
-TEST_CASE("quotation mark", "Querying Quotation_Mark") {
+TEST_CASE("Quotation_Mark can be queried", "[properties]") {
     CHECK(ucd::is_quotation_mark(U'\x0022') == true);
     CHECK(ucd::is_quotation_mark(U'\x0024') == false);
     CHECK(ucd::is_quotation_mark(U'\x0027') == true);
@@ -534,7 +536,7 @@ TEST_CASE("quotation mark", "Querying Quotation_Mark") {
     CHECK(ucd::is_quotation_mark(U'\x201F') == true);
     CHECK(ucd::is_quotation_mark(U'\x1F4A9') == false);
 }
-TEST_CASE("terminal punctuation", "Querying Terminal_Punctuation") {
+TEST_CASE("Terminal_Punctuation can be queried", "[properties]") {
     CHECK(ucd::is_terminal_punctuation(U'\x0021') == true);
     CHECK(ucd::is_terminal_punctuation(U'\x0022') == false);
     CHECK(ucd::is_terminal_punctuation(U'\x0387') == true);
@@ -542,7 +544,7 @@ TEST_CASE("terminal punctuation", "Querying Terminal_Punctuation") {
     CHECK(ucd::is_terminal_punctuation(U'\x1C7E') == true);
     CHECK(ucd::is_terminal_punctuation(U'\x1F4A9') == false);
 }
-TEST_CASE("sterm", "Querying STerm") {
+TEST_CASE("STerm can be queried", "[properties]") {
     CHECK(ucd::is_sterm(U'\x0021') == true);
     CHECK(ucd::is_sterm(U'\x0022') == false);
     CHECK(ucd::is_sterm(U'\x002E') == true);
@@ -550,7 +552,7 @@ TEST_CASE("sterm", "Querying STerm") {
     CHECK(ucd::is_sterm(U'\x061F') == true);
     CHECK(ucd::is_sterm(U'\x1F4A9') == false);
 }
-TEST_CASE("diacritic", "Querying Diacritic") {
+TEST_CASE("Diacritic can be queried", "[properties]") {
     CHECK(ucd::is_diacritic(U'\x0041') == false);
     CHECK(ucd::is_diacritic(U'\x0060') == true);
     CHECK(ucd::is_diacritic(U'\x0061') == false);
@@ -558,7 +560,7 @@ TEST_CASE("diacritic", "Querying Diacritic") {
     CHECK(ucd::is_diacritic(U'\x16AF3') == true);
     CHECK(ucd::is_diacritic(U'\x1F4A9') == false);
 }
-TEST_CASE("extender", "Querying Extender") {
+TEST_CASE("Extender can be queried", "[properties]") {
     CHECK(ucd::is_extender(U'\x00B7') == true);
     CHECK(ucd::is_extender(U'\x02D1') == true);
     CHECK(ucd::is_extender(U'\x02D2') == false);
@@ -567,7 +569,7 @@ TEST_CASE("extender", "Querying Extender") {
     CHECK(ucd::is_extender(U'\x3033') == true);
     CHECK(ucd::is_extender(U'\x1F4A9') == false);
 }
-TEST_CASE("soft dotted", "Querying Soft_Dotted") {
+TEST_CASE("Soft_Dotted can be queried", "[properties]") {
     CHECK(ucd::is_soft_dotted(U'\x0041') == false);
     CHECK(ucd::is_soft_dotted(U'\x006A') == true);
     CHECK(ucd::is_soft_dotted(U'\x006B') == false);
@@ -576,7 +578,7 @@ TEST_CASE("soft dotted", "Querying Soft_Dotted") {
     CHECK(ucd::is_soft_dotted(U'\x1D55B') == true);
     CHECK(ucd::is_soft_dotted(U'\x1F4A9') == false);
 }
-TEST_CASE("hex digit", "Querying Hex_Digit") {
+TEST_CASE("Hex_Digit can be queried", "[properties]") {
     CHECK(ucd::is_hex_digit(U'\x0033') == true);
     CHECK(ucd::is_hex_digit(U'\x003B') == false);
     CHECK(ucd::is_hex_digit(U'\x0043') == true);
@@ -587,7 +589,7 @@ TEST_CASE("hex digit", "Querying Hex_Digit") {
     CHECK(ucd::is_hex_digit(U'\xFF43') == true);
     CHECK(ucd::is_hex_digit(U'\x1F4A9') == false);
 }
-TEST_CASE("ascii hex digit", "Querying ASCII_Hex_Digit") {
+TEST_CASE("ASCII_Hex_Digit can be queried", "[properties]") {
     CHECK(ucd::is_ascii_hex_digit(U'\x0033') == true);
     CHECK(ucd::is_ascii_hex_digit(U'\x003B') == false);
     CHECK(ucd::is_ascii_hex_digit(U'\x0043') == true);
@@ -598,14 +600,14 @@ TEST_CASE("ascii hex digit", "Querying ASCII_Hex_Digit") {
     CHECK(ucd::is_ascii_hex_digit(U'\xFF43') == false);
     CHECK(ucd::is_ascii_hex_digit(U'\x1F4A9') == false);
 }
-TEST_CASE("logical order exception", "Querying Logical_Order_Exception") {
+TEST_CASE("Logical_Order_Exception can be queried", "[properties]") {
     CHECK(ucd::is_logical_order_exception(U'\x0041') == false);
     CHECK(ucd::is_logical_order_exception(U'\x0EC4') == true);
     CHECK(ucd::is_logical_order_exception(U'\x19B9') == false);
     CHECK(ucd::is_logical_order_exception(U'\xAABC') == true);
     CHECK(ucd::is_logical_order_exception(U'\x1F4A9') == false);
 }
-TEST_CASE("white space", "Querying White_Space") {
+TEST_CASE("White_Space can be queried", "[properties]") {
     CHECK(ucd::is_white_space(U'\x0008') == false);
     CHECK(ucd::is_white_space(U'\x000A') == true);
     CHECK(ucd::is_white_space(U'\x000D') == true);
@@ -618,7 +620,7 @@ TEST_CASE("white space", "Querying White_Space") {
     CHECK(ucd::is_white_space(U'\x1680') == true);
     CHECK(ucd::is_white_space(U'\x1F4A9') == false);
 }
-TEST_CASE("variation selector", "Querying Variation_Selector") {
+TEST_CASE("Variation_Selector can be queried", "[properties]") {
     CHECK(ucd::is_variation_selector(U'\x0041') == false);
     CHECK(ucd::is_variation_selector(U'\x180D') == true);
     CHECK(ucd::is_variation_selector(U'\xFE03') == true);
@@ -626,7 +628,7 @@ TEST_CASE("variation selector", "Querying Variation_Selector") {
     CHECK(ucd::is_variation_selector(U'\x1F4A9') == false);
     CHECK(ucd::is_variation_selector(U'\xE0123') == true);
 }
-TEST_CASE("alphabetic", "Querying Alphabetic") {
+TEST_CASE("Alphabetic can be queried", "[properties]") {
     CHECK(ucd::is_alphabetic(U'\x0021') == false);
     CHECK(ucd::is_alphabetic(U'\x0041') == true);
     CHECK(ucd::is_alphabetic(U'\x005D') == false);
@@ -638,7 +640,7 @@ TEST_CASE("alphabetic", "Querying Alphabetic") {
     CHECK(ucd::is_alphabetic(U'\x1F4A9') == false);
     CHECK(ucd::is_alphabetic(U'\x20321') == true);
 }
-TEST_CASE("math", "Querying Math") {
+TEST_CASE("Math can be queried", "[properties]") {
     CHECK(ucd::is_math(U'\x000A') == false);
     CHECK(ucd::is_math(U'\x002B') == true);
     CHECK(ucd::is_math(U'\x002C') == false);
@@ -649,7 +651,7 @@ TEST_CASE("math", "Querying Math") {
     CHECK(ucd::is_math(U'\x2119') == true);
     CHECK(ucd::is_math(U'\x1F4A9') == false);
 }
-TEST_CASE("default ignorable code point", "Querying Default_Ignorable_Code_Point") {
+TEST_CASE("Default_Ignorable_Code_Point can be queried", "[properties]") {
     CHECK(ucd::is_default_ignorable_code_point(U'\x0041') == false);
     CHECK(ucd::is_default_ignorable_code_point(U'\x00AD') == true);
     CHECK(ucd::is_default_ignorable_code_point(U'\x0100') == false);
@@ -658,7 +660,7 @@ TEST_CASE("default ignorable code point", "Querying Default_Ignorable_Code_Point
     CHECK(ucd::is_default_ignorable_code_point(U'\xE0003') == true);
     CHECK(ucd::is_default_ignorable_code_point(U'\xE1003') == false);
 }
-TEST_CASE("grapheme base", "Querying Grapheme_Base") {
+TEST_CASE("Grapheme_Base can be queried", "[properties]") {
     CHECK(ucd::is_grapheme_base(U'\x000A') == false);
     CHECK(ucd::is_grapheme_base(U'\x0041') == true);
     CHECK(ucd::is_grapheme_base(U'\x0100') == true);
@@ -667,7 +669,7 @@ TEST_CASE("grapheme base", "Querying Grapheme_Base") {
     CHECK(ucd::is_grapheme_base(U'\x0D62') == false);
     CHECK(ucd::is_grapheme_base(U'\x1F4A9') == true);
 }
-TEST_CASE("grapheme extend", "Querying Grapheme_Extend") {
+TEST_CASE("Grapheme_Extend can be queried", "[properties]") {
     CHECK(ucd::is_grapheme_extend(U'\x000A') == false);
     CHECK(ucd::is_grapheme_extend(U'\x0041') == false);
     CHECK(ucd::is_grapheme_extend(U'\x0100') == false);
@@ -676,7 +678,7 @@ TEST_CASE("grapheme extend", "Querying Grapheme_Extend") {
     CHECK(ucd::is_grapheme_extend(U'\x0D62') == true);
     CHECK(ucd::is_grapheme_extend(U'\x1F4A9') == false);
 }
-TEST_CASE("grapheme cluster break", "Querying Grapheme_Cluster_Break") {
+TEST_CASE("Grapheme_Cluster_Break can be queried", "[properties]") {
     CHECK(ucd::get_grapheme_cluster_break(U'\x0008') == ucd::grapheme_cluster_break::cn);
     CHECK(ucd::get_grapheme_cluster_break(U'\x000A') == ucd::grapheme_cluster_break::lf);
     CHECK(ucd::get_grapheme_cluster_break(U'\x000B') == ucd::grapheme_cluster_break::cn);
@@ -688,7 +690,7 @@ TEST_CASE("grapheme cluster break", "Querying Grapheme_Cluster_Break") {
     CHECK(ucd::get_grapheme_cluster_break(U'\x1F4A9') == ucd::grapheme_cluster_break::xx);
     CHECK(ucd::get_grapheme_cluster_break(U'\xE000E') == ucd::grapheme_cluster_break::cn);
 }
-TEST_CASE("word break", "Querying Word_Break") {
+TEST_CASE("Word_Break can be queried", "[properties]") {
     CHECK(ucd::get_word_break(U'\x0008') == ucd::word_break::xx);
     CHECK(ucd::get_word_break(U'\x000A') == ucd::word_break::lf);
     CHECK(ucd::get_word_break(U'\x000C') == ucd::word_break::nl);
@@ -701,7 +703,7 @@ TEST_CASE("word break", "Querying Word_Break") {
     CHECK(ucd::get_word_break(U'\xE0101') == ucd::word_break::extend);
     CHECK(ucd::get_word_break(U'\x1F4A9') == ucd::word_break::xx);
 }
-TEST_CASE("sentence break", "Querying Sentence_Break") {
+TEST_CASE("Sentence_Break can be queried", "[properties]") {
     CHECK(ucd::get_sentence_break(U'\x0008') == ucd::sentence_break::xx);
     CHECK(ucd::get_sentence_break(U'\x000A') == ucd::sentence_break::lf);
     CHECK(ucd::get_sentence_break(U'\x000B') == ucd::sentence_break::sp);
@@ -715,7 +717,7 @@ TEST_CASE("sentence break", "Querying Sentence_Break") {
     CHECK(ucd::get_sentence_break(U'\xE0030') == ucd::sentence_break::ex);
     CHECK(ucd::get_sentence_break(U'\xE0200') == ucd::sentence_break::xx);
 }
-TEST_CASE("ideographic", "Querying Ideographic") {
+TEST_CASE("Ideographic can be queried", "[properties]") {
     CHECK(ucd::is_ideographic(U'\x0021') == false);
     CHECK(ucd::is_ideographic(U'\x0041') == false);
     CHECK(ucd::is_ideographic(U'\x005D') == false);
@@ -731,7 +733,7 @@ TEST_CASE("ideographic", "Querying Ideographic") {
     CHECK(ucd::is_ideographic(U'\x20321') == true);
     CHECK(ucd::is_ideographic(U'\x2F808') == true);
 }
-TEST_CASE("unified ideograph", "Querying Unified_Ideograph") {
+TEST_CASE("Unified_Ideograph can be queried", "[properties]") {
     CHECK(ucd::is_unified_ideograph(U'\x0021') == false);
     CHECK(ucd::is_unified_ideograph(U'\x0041') == false);
     CHECK(ucd::is_unified_ideograph(U'\x005D') == false);
@@ -747,7 +749,7 @@ TEST_CASE("unified ideograph", "Querying Unified_Ideograph") {
     CHECK(ucd::is_unified_ideograph(U'\x20321') == true);
     CHECK(ucd::is_unified_ideograph(U'\x2F808') == false);
 }
-TEST_CASE("ids binary operator", "Querying IDS_Binary_Operator") {
+TEST_CASE("IDS_Binary_Operator can be queried", "[properties]") {
     CHECK(ucd::is_ids_binary_operator(U'\x0041') == false);
     CHECK(ucd::is_ids_binary_operator(U'\x2FF0') == true);
     CHECK(ucd::is_ids_binary_operator(U'\x2FF1') == true);
@@ -759,7 +761,7 @@ TEST_CASE("ids binary operator", "Querying IDS_Binary_Operator") {
     CHECK(ucd::is_ids_binary_operator(U'\x2FFC') == false);
     CHECK(ucd::is_ids_binary_operator(U'\x1F4A9') == false);
 }
-TEST_CASE("ids trinary operator", "Querying IDS_Trinary_Operator") {
+TEST_CASE("IDS_Trinary_Operator can be queried", "[properties]") {
     CHECK(ucd::is_ids_trinary_operator(U'\x0041') == false);
     CHECK(ucd::is_ids_trinary_operator(U'\x2FF1') == false);
     CHECK(ucd::is_ids_trinary_operator(U'\x2FF2') == true);
@@ -770,7 +772,7 @@ TEST_CASE("ids trinary operator", "Querying IDS_Trinary_Operator") {
     CHECK(ucd::is_ids_trinary_operator(U'\x2FFC') == false);
     CHECK(ucd::is_ids_trinary_operator(U'\x1F4A9') == false);
 }
-TEST_CASE("radical", "Querying Radical") {
+TEST_CASE("Radical can be queried", "[properties]") {
     CHECK(ucd::is_radical(U'\x0041') == false);
     CHECK(ucd::is_radical(U'\x2E88') == true);
     CHECK(ucd::is_radical(U'\x2E9A') == false);
@@ -780,7 +782,7 @@ TEST_CASE("radical", "Querying Radical") {
     CHECK(ucd::is_radical(U'\x2FFF') == false);
     CHECK(ucd::is_radical(U'\x1F4A9') == false);
 }
-TEST_CASE("deprecated", "Querying Deprecated") {
+TEST_CASE("Deprecated can be queried", "[properties]") {
     CHECK(ucd::is_deprecated(U'\x0041') == false);
     CHECK(ucd::is_deprecated(U'\x0149') == true);
     CHECK(ucd::is_deprecated(U'\x014A') == false);
@@ -795,7 +797,7 @@ TEST_CASE("deprecated", "Querying Deprecated") {
     CHECK(ucd::is_deprecated(U'\xE0001') == true);
     CHECK(ucd::is_deprecated(U'\xE0002') == false);
 }
-TEST_CASE("noncharacter code point", "Querying Noncharacter_Code_Point") {
+TEST_CASE("Noncharacter_Code_Point can be queried", "[properties]") {
     CHECK(ucd::is_noncharacter_code_point(U'\x0041') == false);
     CHECK(ucd::is_noncharacter_code_point(U'\xFDCF') == false);
     for(auto u = U'\xFDD0'; u < U'\xFDF0'; ++u) {
@@ -803,7 +805,6 @@ TEST_CASE("noncharacter code point", "Querying Noncharacter_Code_Point") {
     }
     CHECK(ucd::is_noncharacter_code_point(U'\xFDF0') == false);
     for(auto u = U'\xFFFE'; u < U'\x110000'; u += 0x10000) {
-        INFO("u := 0x" << std::hex << u);
         CHECK(ucd::is_noncharacter_code_point(u-1) == false);
         CHECK(ucd::is_noncharacter_code_point(u+0) == true);
         CHECK(ucd::is_noncharacter_code_point(u+1) == true);
@@ -811,4 +812,3 @@ TEST_CASE("noncharacter code point", "Querying Noncharacter_Code_Point") {
             CHECK(ucd::is_noncharacter_code_point(u+2) == false);
     }
 }
-
