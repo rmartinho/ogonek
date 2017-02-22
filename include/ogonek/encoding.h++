@@ -343,7 +343,6 @@ namespace ogonek {
                             ++first; // TODO advance this from encoding itself?
                         }
                     }
-                    std::cout << "done decoding\n";
                 }
 
                 static constexpr code_point invalid = -1; // TODO replace with optional

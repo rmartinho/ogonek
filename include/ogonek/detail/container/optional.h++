@@ -22,7 +22,7 @@ namespace ogonek {
         template <typename T>
         struct optional;
 
-        // trivial specializations that use unused representation bits for nullopt
+        // trivial specializations that uses unused representation bits for nullopt
         template <>
         struct optional<code_point> {
         private:
