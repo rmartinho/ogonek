@@ -90,6 +90,14 @@ namespace ogonek {
                 //variant<Rng const*, iterating> it;
             };
 
+            cursor begin_cursor() const {
+                return { *this, ranges::begin_tag{} };
+            }
+
+            sentinel end_cursor() const {
+                return { *this, ranges::end_tag{} };
+            }
+
         public:
             deferred_view() = default;
             deferred_view(Rng rng)
@@ -101,6 +109,12 @@ namespace ogonek {
 
             Rng rng;
         };
+
+        template <typename Rng,
+                CONCEPT_REQUIRES_(Range<Rng>())>
+        auto defer(Rng rng) {
+            return deferred_view<Rng>(std::move(rng));
+        }
     } // namespace detail
 } // namespace ogonek
 

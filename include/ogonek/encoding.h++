@@ -248,7 +248,7 @@ namespace ogonek {
               CONCEPT_REQUIRES_(InputRangeOf<code_point, Rng>()),
               CONCEPT_REQUIRES_(EncodeErrorHandler<std::decay_t<Handler>, Encoding>())>
     auto encode(Rng rng, Handler&& handler) {
-        return detail::encoded_view<Encoding, Rng, Handler>(std::move(rng), std::forward<Handler>(handler));
+        return detail::defer(detail::encoded_view<Encoding, Rng, Handler>(std::move(rng), std::forward<Handler>(handler)));
     }
 
     /**
@@ -393,7 +393,7 @@ namespace ogonek {
               CONCEPT_REQUIRES_(InputRangeOf<code_unit_t<Encoding>, Rng>()),
               CONCEPT_REQUIRES_(DecodeErrorHandler<std::decay_t<Handler>, Encoding>())>
     auto decode(Rng rng, Handler&& handler) {
-        return detail::decoded_view<Encoding, Rng, Handler>(std::move(rng), std::forward<Handler>(handler));
+        return detail::defer(detail::decoded_view<Encoding, Rng, Handler>(std::move(rng), std::forward<Handler>(handler)));
     }
 
     /**
