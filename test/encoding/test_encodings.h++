@@ -20,6 +20,9 @@
 #include <catch.hpp>
 #include "util.h++"
 
+#include <range/v3/view/all.hpp>
+#include <range/v3/to_container.hpp>
+
 #include <vector>
 #include <utility>
 

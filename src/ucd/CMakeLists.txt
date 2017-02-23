@@ -14,7 +14,7 @@ execute_process (
 add_custom_command (
     OUTPUT ${ucd_gen_SRC}
     COMMAND python ${UCD_TRANSFORM_TOOL} ${OGONEK_ABI} ${UCD_DIR} ${INCLUDE_DIR} ${UCD_SRC_DIR}
-    DEPENDS ${PROJECT_SOURCE_DIR}/tool/transforms/ucd.py
+    DEPENDS ${UCD_TRANSFORM_TOOL}
     COMMENT "Translating UCD")
 
 add_library (ogonek_ucd STATIC ${ucd_gen_SRC})

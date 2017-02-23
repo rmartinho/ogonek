@@ -17,12 +17,13 @@ import sys
 import os
 import string
 
-if len(sys.argv) != 3:
-    print('usage: ' + os.path.basename(sys.argv[0]) + ' <UCD folder> <output folder>')
+if len(sys.argv) != 4:
+    print('usage: ' + os.path.basename(sys.argv[0]) + ' <input> <header> <impl>')
     sys.exit(17)
 
-ucd = sys.argv[1]
-destination = sys.argv[2]
+test_input = sys.argv[1]
+header = sys.argv[2]
+impl = sys.argv[3]
 
 def filtertests(lines):
     for l in lines:
@@ -35,7 +36,7 @@ def parseform(item):
     return ('\\x' + u.strip() for u in item.strip().split())
 
 def parsetests(lines):
-    return (['U"' + ''.join([str(x) for x in parseform(u)]) + '"' for u in l.split(';')] for l in lines)
+    return (['U"' + ''.join([str(x) for x in parseform(u)]) + '"_s' for u in l.split(';')] for l in lines)
 
 copyrighttmpl = string.Template('''// Ogonek
 //
@@ -57,25 +58,27 @@ headertmpl = string.Template('''
 #ifndef OGONEK_TEST_NORMALIZATION_HPP
 #define OGONEK_TEST_NORMALIZATION_HPP
 
-#include <string>
+#include "util.h++"
 
 namespace test {
     struct normalization_test {
-        std::u32string input;
-        std::u32string nfc;
-        std::u32string nfd;
-        std::u32string nfkc;
-        std::u32string nfkd;
+        u32string input;
+        u32string nfc;
+        u32string nfd;
+        u32string nfkc;
+        u32string nfkd;
     };
 
     extern normalization_test normalization_test_data[${count}];
 } // namespace test
 
-#endif // OGONEK_TEST_SEGMENTATION_HPP
+#endif // OGONEK_TEST_NORMALIZATION_HPP
 ''')
 
 impltmpl = string.Template('''
-#include "normalization.g.h++"
+#include "${header}"
+
+using namespace test::string_literals;
 
 namespace test {
     normalization_test normalization_test_data[] = {
@@ -84,15 +87,14 @@ namespace test {
 } // namespace test
 ''')
 
-with open(os.path.join(ucd, 'NormalizationTest.txt'), 'r') as sourcefile:
+with open(test_input, 'r') as sourcefile:
     tests = list(parsetests(filtertests(sourcefile.readlines())))
 
-with open(os.path.join(destination, 'normalization.g.h++'), 'w') as headerfile:
+with open(header, 'w') as headerfile:
     headerfile.write(copyrighttmpl.substitute())
     headerfile.write(headertmpl.substitute(count=len(tests)))
 
-with open(os.path.join(destination, 'normalization_test_data.g.c++'), 'w') as implfile:
+with open(impl, 'w') as implfile:
     implfile.write(copyrighttmpl.substitute())
     entries = '\n        '.join('{{ {0}, {1}, {2}, {3}, {4} }},'.format(*t) for t in tests)
-    implfile.write(impltmpl.substitute(data=entries))
-
+    implfile.write(impltmpl.substitute(data=entries, header=os.path.basename(header)))

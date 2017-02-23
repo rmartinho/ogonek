@@ -15,6 +15,7 @@
 #define OGONEK_DETAIL_RANGE_DEFERRED_HPP
 
 #include <ogonek/concepts.h++>
+#include <ogonek/detail/container/either.h++>
 
 #include <range/v3/view_facade.hpp>
 
@@ -41,53 +42,51 @@ namespace ogonek {
                 using difference_type = ranges::range_difference_t<Rng>;
                 using single_pass = ranges::SinglePass<ranges::range_iterator_t<Rng>>;
 
-                cursor() = default;
+                cursor()
+                : state(state_t::make_left(nullptr)) {}
                 cursor(deferred_view const& rng, ranges::begin_tag)
-                : rng(&rng.rng)
-                {}
+                : state(state_t::make_left(&rng.rng)) {}
 
                 reference read() const {
                     ensure_started();
-                    return *first;
+                    return *state.as_right().first;
                 }
 
                 void next() {
                     ensure_started();
-                    ++first;
+                    ++state.as_right().first;
                 }
 
                 bool equal(cursor const& pos) const {
                     ensure_started();
                     pos.ensure_started();
-                    return first == pos.first;
+                    return state.as_right().first == pos.state.as_right().first;
                 }
 
                 bool equal(sentinel const&) const {
                     ensure_started();
-                    return first == last;
+                    return state.as_right().first == state.as_right().last;
                 }
 
             private:
                 void ensure_started() const {
-                    if(!started) {
-                        first = ranges::begin(*rng);
-                        last = ranges::end(*rng);
-                        started = true;
+                    if(state.is_left()) {
+                        auto& rng = *state.as_left();
+                        auto first = ranges::begin(rng);
+                        auto last = ranges::end(rng);
+                        state.place_right(iterating { first, last });
                     }
                 }
 
                 using iterator = ranges::range_iterator_t<Rng>;
                 using sentinel = ranges::range_sentinel_t<Rng>;
                
-                Rng const* rng = nullptr;
-                mutable iterator first;
-                mutable sentinel last;
-                mutable bool started = false;
-                //struct iterating {
-                //    iterator first;
-                //    sentinel last;
-                //};
-                //variant<Rng const*, iterating> it;
+                struct iterating {
+                    iterator first;
+                    sentinel last;
+                };
+                using state_t = either<Rng const*, iterating>;
+                mutable state_t state;
             };
 
             cursor begin_cursor() const {
