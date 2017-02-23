@@ -35,7 +35,7 @@ namespace ogonek {
         }
 
     public:
-        static encoded_character<utf32> encode_one(code_point u) {
+        static coded_character<utf32> encode_one(code_point u) {
             return { static_cast<code_unit>(u) };
         }
 

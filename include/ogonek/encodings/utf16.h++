@@ -60,7 +60,7 @@ namespace ogonek {
     public:
         static constexpr std::size_t max_width = 2;
 
-        static encoded_character<utf16> encode_one(code_point u) {
+        static coded_character<utf16> encode_one(code_point u) {
             if(u <= last_1word_value) {
                 return { static_cast<code_unit>(u) };
             }

@@ -18,7 +18,7 @@
 
 #include <ogonek/types.h++>
 #include <ogonek/concepts.h++>
-#include <ogonek/detail/simple_byte_mapping_encoding.h++>
+#include <ogonek/detail/encoding/simple_byte_mapping_encoding.h++>
 #include <ogonek/detail/visibility.h++>
 
 namespace ogonek {
