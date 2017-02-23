@@ -67,13 +67,13 @@ namespace ogonek {
 
     /**
      * .. type:: template <EncodingForm Encoding>\
-     *           encoding_state_t
+     *           coding_state_t
      * 
      *     The type of the state used by ``Encoding``. For stateless encoding forms
      *     this is an empty type.
      */
     template <typename Encoding>
-    using encoding_state_t = typename concepts::EncodingForm::state_t<Encoding>;
+    using coding_state_t = typename concepts::EncodingForm::state_t<Encoding>;
 
     /**
      * .. type:: template <EncodingForm Encoding>\
@@ -83,7 +83,7 @@ namespace ogonek {
      *     ``std::false_type`` otherwise.
      */
     template <typename Encoding>
-    using is_stateless = std::is_empty<encoding_state_t<Encoding>>;
+    using is_stateless = std::is_empty<coding_state_t<Encoding>>;
 
     /**
      * .. var:: template <EncodingForm Encoding>\
@@ -96,7 +96,7 @@ namespace ogonek {
 
     /**
      * .. function:: template <EncodingForm Encoding>\
-     *               encoded_character_t<Encoding> encode_one(code_point u, encoding_state_t<Encoding>& state)
+     *               coded_character_t<Encoding> encode_one(code_point u, coding_state_t<Encoding>& state)
      *
      *     Encodes ``u`` according to ``Encoding``.
      *
@@ -110,18 +110,18 @@ namespace ogonek {
      */
     template <typename Encoding,
               CONCEPT_REQUIRES_(EncodingForm<Encoding>())>
-    auto encode_one(code_point u, encoding_state_t<Encoding>& state) {
+    auto encode_one(code_point u, coding_state_t<Encoding>& state) {
         return concepts::EncodingForm::encode_one<Encoding>(u, state);
     }
 
     /**
      * .. type:: template <EncodingForm Encoding>\
-     *           encoded_character_t
+     *           coded_character_t
      * 
      *     Range of the |code-units| that encode one |code-point|.
      */
     template <typename Encoding>
-    using encoded_character_t = decltype(encode_one<Encoding>(std::declval<code_point>(), std::declval<encoding_state_t<Encoding>&>()));
+    using coded_character_t = decltype(encode_one<Encoding>(std::declval<code_point>(), std::declval<coding_state_t<Encoding>&>()));
 
     namespace detail {
         template <typename Encoding, typename Rng, typename Handler>
@@ -130,11 +130,6 @@ namespace ogonek {
             encoded_view<Encoding, Rng, Handler>,
             ranges::is_finite<Rng>::value? ranges::finite : ranges::range_cardinality<Rng>::value> {
         private:
-            using base_type = ranges::view_adaptor<
-                encoded_view<Encoding, Rng, Handler>,
-                Rng,
-                ranges::is_finite<Rng>::value? ranges::finite : ranges::range_cardinality<Rng>::value>;
-
             CONCEPT_ASSERT(InputRangeOf<code_point, Rng>());
             CONCEPT_ASSERT(EncodingForm<Encoding>());
             CONCEPT_ASSERT(EncodeErrorHandler<std::decay_t<Handler>, Encoding>());
@@ -176,7 +171,7 @@ namespace ogonek {
                 }
 
                 bool equal(cursor const& pos) const {
-                    return first == pos.first;
+                    return first == pos.first && position == pos.position;
                 }
 
                 bool equal(sentinel const&) const {
@@ -203,10 +198,10 @@ namespace ogonek {
 
                 iterator first;
                 iterator last;
-                encoded_character_t<Encoding> encoded;
+                coded_character_t<Encoding> encoded;
                 std::ptrdiff_t position = max_width_v<Encoding>;
                 std::decay_t<Handler> const* handler = nullptr;
-                encoding_state_t<Encoding> state {};
+                coding_state_t<Encoding> state {};
             };
 
             cursor begin_cursor() const {
@@ -253,7 +248,7 @@ namespace ogonek {
 
     /**
      * .. function:: template <EncodingForm Encoding, Iterator It, Sentinel St>\
-     *               std::pair<code_point, It> decode_one(It first, St last, encoding_state_t<Encoding>& state)
+     *               std::pair<code_point, It> decode_one(It first, St last, coding_state_t<Encoding>& state)
      *
      *     Decodes the first |code-point| from the range [``first``, ``last``), according to ``Encoding``.
      *
@@ -268,7 +263,7 @@ namespace ogonek {
      *     :throws: :type:`decode_error` when the input cannot be decoded by ``Encoding``
      */
     template <typename Encoding, typename It, typename St>
-    auto decode_one(It first, St last, encoding_state_t<Encoding>& state) {
+    auto decode_one(It first, St last, coding_state_t<Encoding>& state) {
         return concepts::EncodingForm::decode_one<Encoding>(first, last, state);
     }
 
@@ -351,7 +346,7 @@ namespace ogonek {
                 iterator last;
                 code_point decoded = invalid;
                 std::decay_t<Handler> const* handler = nullptr;
-                encoding_state_t<Encoding> state {};
+                coding_state_t<Encoding> state {};
             };
 
             cursor begin_cursor() const {
@@ -398,13 +393,13 @@ namespace ogonek {
 
     /**
      * .. type:: template <EncodingForm Encoding>\
-     *           encoded_character
+     *           coded_character
      *
      *     A container type for the |code-units| that encode a single
      *     |code-point| according to ``Encoding``.
      */
     template <typename Encoding>
-    struct encoded_character
+    struct coded_character
     : public detail::partial_array<code_unit_t<Encoding>, max_width_v<Encoding>> {
         using detail::partial_array<code_unit_t<Encoding>, max_width_v<Encoding>>::partial_array;
     };
