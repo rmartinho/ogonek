@@ -22,10 +22,17 @@
 #include <vector> // TODO remove
 
 namespace ogonek {
-    template <typename Form, typename Rng>
-    auto normalize(Rng rng) {
-        return detail::decomposed_view<Rng>(rng);
-    }
+    namespace fun {
+        template <typename Form>
+        struct normalize {
+            template <typename Rng>
+            auto operator()(Rng rng) const {
+                return detail::decomposed_view<Rng>(rng);
+            }
+        };
+    } // namespace fun
+    template <typename Form>
+    constexpr auto const& normalize = fun::normalize<Form> {};
 } // namespace ogonek
 
 #endif // OGONEK_NORMALIZATION_HPP
