@@ -154,7 +154,7 @@ TEST_CASE("Full_Composition_Exclusion can be queried", "[properties]") {
 }
 TEST_CASE("NFC_Quick_Check can be queried", "[properties]") {
     CHECK(ucd::get_nfc_quick_check(U'\x0041') == true);
-    CHECK(ogonek::maybe(ucd::get_nfc_quick_check(U'\x0300')));
+    CHECK(ogonek::ucd::maybe(ucd::get_nfc_quick_check(U'\x0300')));
     CHECK(ucd::get_nfc_quick_check(U'\x0340') == false);
     CHECK(ucd::get_nfc_quick_check(U'\x1F4A9') == true);
 }
@@ -166,7 +166,7 @@ TEST_CASE("NFD_Quick_Check can be queried", "[properties]") {
 }
 TEST_CASE("NFKC_Quick_Check can be queried", "[properties]") {
     CHECK(ucd::get_nfkc_quick_check(U'\x0041') == true);
-    CHECK(ogonek::maybe(ucd::get_nfkc_quick_check(U'\x0300')));
+    CHECK(ogonek::ucd::maybe(ucd::get_nfkc_quick_check(U'\x0300')));
     CHECK(ucd::get_nfkc_quick_check(U'\x0340') == false);
     CHECK(ucd::get_nfkc_quick_check(U'\x1F4A9') == true);
 }
