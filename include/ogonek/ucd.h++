@@ -35,13 +35,16 @@
 
 namespace ogonek {
     /**
-     * .. var:: constexpr auto maybe = boost::indeterminate
-     *
-     *     An alternative name for ``boost::indeterminate``.
+     * .. note:: The items in this section are in the namespace ``ogonek::ucd``.
      */
-    BOOST_TRIBOOL_THIRD_STATE(maybe)
-
     namespace ucd {
+        /**
+        * .. var:: constexpr auto maybe = boost::indeterminate
+        *
+        *     An alternative name for ``boost::indeterminate``.
+        */
+        BOOST_TRIBOOL_THIRD_STATE(maybe)
+
         namespace detail {
             inline boost::tribool to_tribool(ogonek::detail::trinary t) {
                 switch(t.value) {
@@ -120,24 +123,39 @@ namespace ogonek {
         } // namespace detail
 
 #define OGONEK_UCD_QUERY(type, name, query) \
-        inline type query(code_point u) {\
-            return detail::find_property_group(name##_data, name##_data_size, u).value;\
-        }\
+        namespace fun {\
+            struct query {\
+                type operator()(code_point u) const {\
+                    return detail::find_property_group(name##_data, name##_data_size, u).value;\
+                }\
+            };\
+        } /* namespace fun */ \
+        constexpr auto const& query = fun::query {};\
         static_assert(true, "")
 #define OGONEK_UCD_GETTER(type, name) OGONEK_UCD_QUERY(type, name, get_##name)
 #define OGONEK_UCD_TESTER(name) OGONEK_UCD_QUERY(bool, name, is_##name)
 #define OGONEK_UCD_TESTER3(name) \
-        inline boost::tribool get_##name(code_point u) {\
-            auto value = detail::find_property_group(name##_data, name##_data_size, u).value;\
-            return detail::to_tribool(value);\
-        }\
+        namespace fun {\
+            struct get_##name {\
+                boost::tribool operator()(code_point u) const {\
+                    auto value = detail::find_property_group(name##_data, name##_data_size, u).value;\
+                    return detail::to_tribool(value);\
+                }\
+            };\
+        } /* namespace fun */ \
+        constexpr auto const& get_##name = fun::get_##name {};\
         static_assert(true, "")
 #define OGONEK_UCD_CODE_POINT_GETTER(name) \
-        inline code_point get_##name(code_point u) {\
-            auto value = detail::find_property_group(name##_data, name##_data_size, u).value;\
-            if(value == code_point(-1)) return u;\
-            else return value;\
-        }\
+        namespace fun {\
+            struct get_##name {\
+                code_point operator()(code_point u) const {\
+                    auto value = detail::find_property_group(name##_data, name##_data_size, u).value;\
+                    if(value == code_point(-1)) return u;\
+                    else return value;\
+                }\
+            };\
+        } /* namespace fun */ \
+        constexpr auto const& get_##name = fun::get_##name {};\
         static_assert(true, "")
 
         /**
@@ -152,23 +170,28 @@ namespace ogonek {
          *
          *     :returns: the *Name* property of ``u``
          */
-        inline std::string get_name(code_point u) {
-            auto value = detail::find_property_group(name_data, name_data_size, u).value;
-            if(value[0] != '<') return value;
+        namespace fun {
+            struct get_name {
+                std::string operator()(code_point u) const {
+                    auto value = detail::find_property_group(name_data, name_data_size, u).value;
+                    if(value[0] != '<') return value;
 
-            if(std::strcmp(value, "<CJK Ideograph>") == 0
-            || std::strcmp(value, "<CJK Ideograph Extension A>") == 0
-            || std::strcmp(value, "<CJK Ideograph Extension B>") == 0
-            || std::strcmp(value, "<CJK Ideograph Extension C>") == 0
-            || std::strcmp(value, "<CJK Ideograph Extension D>") == 0
-            || std::strcmp(value, "<CJK Ideograph Extension E>") == 0) {
-                return detail::make_ideograph_name(u, "CJK UNIFIED IDEOGRAPH-");
-            }
-            if(std::strcmp(value, "<Hangul Syllable>") == 0) {
-                return detail::make_hangul_syllable_name(u, "HANGUL SYLLABLE ");
-            }
-            return {};
-        }
+                    if(std::strcmp(value, "<CJK Ideograph>") == 0
+                    || std::strcmp(value, "<CJK Ideograph Extension A>") == 0
+                    || std::strcmp(value, "<CJK Ideograph Extension B>") == 0
+                    || std::strcmp(value, "<CJK Ideograph Extension C>") == 0
+                    || std::strcmp(value, "<CJK Ideograph Extension D>") == 0
+                    || std::strcmp(value, "<CJK Ideograph Extension E>") == 0) {
+                        return detail::make_ideograph_name(u, "CJK UNIFIED IDEOGRAPH-");
+                    }
+                    if(std::strcmp(value, "<Hangul Syllable>") == 0) {
+                        return detail::make_hangul_syllable_name(u, "HANGUL SYLLABLE ");
+                    }
+                    return {};
+                }
+            };
+        } //namespace fun
+        constexpr auto const& get_name = fun::get_name {};
 
         /**
          * .. function:: block get_block(code_point u)
@@ -236,11 +259,16 @@ namespace ogonek {
          *
          *     :returns: the *Decomposition_Mapping* property of ``u``
          */
-        inline std::u32string get_decomposition_mapping(code_point u) {
-            auto value = detail::find_property_group(decomposition_mapping_data, decomposition_mapping_data_size, u).value;
-            if(value) return value;
-            else return std::u32string(1, u);
-        }
+        namespace fun {
+            struct get_decomposition_mapping {
+                std::u32string operator()(code_point u) const {
+                    auto value = detail::find_property_group(decomposition_mapping_data, decomposition_mapping_data_size, u).value;
+                    if(value) return value;
+                    else return std::u32string(1, u);
+                }
+            };
+        } // namespace fun
+        constexpr auto const& get_decomposition_mapping = fun::get_decomposition_mapping {};
 
         /**
          * .. function:: bool is_excluded_from_composition(code_point u)
@@ -284,10 +312,15 @@ namespace ogonek {
          *
          *     :returns: the *Numeric_Value* property of ``u``, if present; none otherwise
          */
-        inline boost::optional<boost::rational<long>> get_numeric_value(code_point u) {
-            auto value = detail::find_property_group(numeric_value_data, numeric_value_data_size, u).value;
-            return detail::to_rational(value);
-        }
+        namespace fun {
+            struct get_numeric_value {
+                boost::optional<boost::rational<long>> operator()(code_point u) const {
+                    auto value = detail::find_property_group(numeric_value_data, numeric_value_data_size, u).value;
+                    return detail::to_rational(value);
+                }
+            };
+        } // namespace fun
+        constexpr auto const& get_numeric_value = fun::get_numeric_value {};
 
         /**
          * .. function:: joining_type get_joining_type(code_point u)
@@ -355,31 +388,46 @@ namespace ogonek {
          *
          *     :returns: the *Uppercase_Mapping* property of ``u``
          */
-        inline std::u32string get_uppercase_mapping(code_point u) {
-            auto value = detail::find_property_group(uppercase_mapping_data, uppercase_mapping_data_size, u).value;
-            if(value) return value;
-            else return std::u32string(1, get_simple_uppercase_mapping(u));
-        }
+        namespace fun {
+            struct get_uppercase_mapping {
+                std::u32string operator()(code_point u) const {
+                    auto value = detail::find_property_group(uppercase_mapping_data, uppercase_mapping_data_size, u).value;
+                    if(value) return value;
+                    else return std::u32string(1, get_simple_uppercase_mapping{}(u));
+                }
+            };
+        } // namespace fun
+        constexpr auto const& get_uppercase_mapping = fun::get_uppercase_mapping {};
         /**
          * .. function:: std::u32string get_lowercase_mapping(code_point u)
          *
          *     :returns: the *Lowercase_Mapping* property of ``u``
          */
-        inline std::u32string get_lowercase_mapping(code_point u) {
-            auto value = detail::find_property_group(lowercase_mapping_data, lowercase_mapping_data_size, u).value;
-            if(value) return value;
-            else return std::u32string(1, get_simple_lowercase_mapping(u));
-        }
+        namespace fun {
+            struct get_lowercase_mapping {
+                std::u32string operator()(code_point u) const {
+                    auto value = detail::find_property_group(lowercase_mapping_data, lowercase_mapping_data_size, u).value;
+                    if(value) return value;
+                    else return std::u32string(1, get_simple_lowercase_mapping{}(u));
+                }
+            };
+        } // namespace fun
+        constexpr auto const& get_lowercase_mapping = fun::get_lowercase_mapping {};
         /**
          * .. function:: std::u32string get_titlecase_mapping(code_point u)
          *
          *     :returns: the *Titlecase_Mapping* property of ``u``
          */
-        inline std::u32string get_titlecase_mapping(code_point u) {
-            auto value = detail::find_property_group(titlecase_mapping_data, titlecase_mapping_data_size, u).value;
-            if(value) return value;
-            else return std::u32string(1, get_simple_titlecase_mapping(u));
-        }
+        namespace fun {
+            struct get_titlecase_mapping {
+                std::u32string operator()(code_point u) const {
+                    auto value = detail::find_property_group(titlecase_mapping_data, titlecase_mapping_data_size, u).value;
+                    if(value) return value;
+                    else return std::u32string(1, get_simple_titlecase_mapping{}(u));
+                }
+            };
+        } // namespace fun
+        constexpr auto const& get_titlecase_mapping = fun::get_titlecase_mapping {};
 
         /**
          * .. function:: code_point get_simple_case_folding(code_point u)
@@ -393,11 +441,16 @@ namespace ogonek {
          *
          *     :returns: the *Case_Folding* property of ``u``
          */
-        inline std::u32string get_case_folding(code_point u) {
-            auto value = detail::find_property_group(case_folding_data, case_folding_data_size, u).value;
-            if(value) return value;
-            else return std::u32string(1, get_simple_case_folding(u));
-        }
+        namespace fun {
+            struct get_case_folding {
+                std::u32string operator()(code_point u) const {
+                    auto value = detail::find_property_group(case_folding_data, case_folding_data_size, u).value;
+                    if(value) return value;
+                    else return std::u32string(1, get_simple_case_folding{}(u));
+                }
+            };
+        } // namespace fun
+        constexpr auto const& get_case_folding = fun::get_case_folding {};
 
         /**
          * .. function:: bool is_case_ignorable(code_point u)
@@ -453,11 +506,16 @@ namespace ogonek {
          *
          *     :returns: the *NFKC_Casefold* property of ``u``
          */
-        inline std::u32string get_nfkc_casefold(code_point u) {
-            auto value = detail::find_property_group(nfkc_casefold_data, nfkc_casefold_data_size, u).value;
-            if(value) return value;
-            else return std::u32string(1, u);
-        }
+        namespace fun {
+            struct get_nfkc_casefold {
+                std::u32string operator()(code_point u) const {
+                    auto value = detail::find_property_group(nfkc_casefold_data, nfkc_casefold_data_size, u).value;
+                    if(value) return value;
+                    else return std::u32string(1, u);
+                }
+            };
+        } // namespace fun
+        constexpr auto const& get_nfkc_casefold = fun::get_nfkc_casefold {};
 
         /**
          * .. function:: script get_script(code_point u)
@@ -477,7 +535,14 @@ namespace ogonek {
          *
          *     :returns: the *Jamo_Short_Name* property of ``u``
          */
-        inline std::string get_jamo_short_name(code_point u) { return detail::get_jamo_short_name(u); }
+        namespace fun {
+            struct get_jamo_short_name {
+                std::string operator()(code_point u) const {
+                    return detail::get_jamo_short_name(u);
+                }
+            };
+        } // namespace fun
+        constexpr auto const& get_jamo_short_name = fun::get_jamo_short_name {};
 
         /**
          * .. function:: indic_positional_category get_indic_positional_category(code_point u)
