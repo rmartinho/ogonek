@@ -20,6 +20,7 @@
 #include <ogonek/types.h++>
 #include <ogonek/error_fwd.h++>
 #include <ogonek/concepts.h++>
+#include <ogonek/detail/static_const.h++>
 #include <ogonek/detail/container/partial_array.h++>
 #include <ogonek/detail/range/deferred.h++>
 
@@ -117,8 +118,10 @@ namespace ogonek {
             }
         };
     } // namespace fun
-    template <typename Encoding>
-    constexpr auto const& encode_one = fun::encode_one<Encoding>{};
+    inline namespace {
+        template <typename Encoding>
+        constexpr auto const& encode_one = detail::static_const<fun::encode_one<Encoding>>::value;
+    }
 
     /**
      * .. type:: template <EncodingForm Encoding>\
@@ -257,8 +260,10 @@ namespace ogonek {
             }
         };
     } // namespace fun
-    template <typename Encoding>
-    constexpr auto const& encode = fun::encode<Encoding>{};
+    inline namespace {
+        template <typename Encoding>
+        constexpr auto const& encode = detail::static_const<fun::encode<Encoding>>::value;
+    }
 
     /**
      * .. function:: template <EncodingForm Encoding, Iterator It, Sentinel St>\
@@ -287,8 +292,10 @@ namespace ogonek {
             }
         };
     } // namespace fun
-    template <typename Encoding>
-    constexpr auto const& decode_one = fun::decode_one<Encoding>{};
+    inline namespace {
+        template <typename Encoding>
+        constexpr auto const& decode_one = detail::static_const<fun::decode_one<Encoding>>::value;
+    }
 
     namespace detail {
         template <typename Encoding, typename Rng, typename Handler>
@@ -418,8 +425,10 @@ namespace ogonek {
             }
         };
     } // namespace fun
-    template <typename Encoding>
-    constexpr auto const& decode = fun::decode<Encoding>{};
+    inline namespace {
+        template <typename Encoding>
+        constexpr auto const& decode = detail::static_const<fun::decode<Encoding>>::value;
+    }
 
     /**
      * .. type:: template <EncodingForm Encoding>\

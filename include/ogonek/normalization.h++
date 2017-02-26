@@ -17,6 +17,7 @@
 #ifndef OGONEK_NORMALIZATION_HPP
 #define OGONEK_NORMALIZATION_HPP
 
+#include <ogonek/detail/static_const.h++>
 #include <ogonek/detail/normalization/decomposed.h++>
 
 #include <vector> // TODO remove
@@ -31,8 +32,10 @@ namespace ogonek {
             }
         };
     } // namespace fun
-    template <typename Form>
-    constexpr auto const& normalize = fun::normalize<Form> {};
+    inline namespace {
+        template <typename Form>
+        constexpr auto const& normalize = detail::static_const<fun::normalize<Form>>::value;
+    }
 } // namespace ogonek
 
 #endif // OGONEK_NORMALIZATION_HPP

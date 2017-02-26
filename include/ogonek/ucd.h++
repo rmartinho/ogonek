@@ -18,8 +18,8 @@
 #define OGONEK_UCD_HPP
 
 #include <ogonek/ucd/ucd_all.g.h++>
-
 #include <ogonek/types.h++>
+#include <ogonek/detail/static_const.h++>
 
 #include <boost/logic/tribool.hpp>
 #include <boost/optional.hpp>
@@ -130,7 +130,9 @@ namespace ogonek {
                 }\
             };\
         } /* namespace fun */ \
-        constexpr auto const& query = fun::query {};\
+        inline namespace {\
+            constexpr auto const& query = ogonek::detail::static_const<fun::query>::value;\
+        }\
         static_assert(true, "")
 #define OGONEK_UCD_GETTER(type, name) OGONEK_UCD_QUERY(type, name, get_##name)
 #define OGONEK_UCD_TESTER(name) OGONEK_UCD_QUERY(bool, name, is_##name)
@@ -143,7 +145,9 @@ namespace ogonek {
                 }\
             };\
         } /* namespace fun */ \
-        constexpr auto const& get_##name = fun::get_##name {};\
+        inline namespace {\
+            constexpr auto const& get_##name = ogonek::detail::static_const<fun::get_##name>::value;\
+        }\
         static_assert(true, "")
 #define OGONEK_UCD_CODE_POINT_GETTER(name) \
         namespace fun {\
@@ -155,7 +159,9 @@ namespace ogonek {
                 }\
             };\
         } /* namespace fun */ \
-        constexpr auto const& get_##name = fun::get_##name {};\
+        inline namespace {\
+            constexpr auto const& get_##name = ogonek::detail::static_const<fun::get_##name>::value;\
+        }\
         static_assert(true, "")
 
         /**
@@ -191,7 +197,9 @@ namespace ogonek {
                 }
             };
         } //namespace fun
-        constexpr auto const& get_name = fun::get_name {};
+        inline namespace {
+            constexpr auto const& get_name = ogonek::detail::static_const<fun::get_name>::value;
+        }
 
         /**
          * .. function:: block get_block(code_point u)
@@ -268,7 +276,9 @@ namespace ogonek {
                 }
             };
         } // namespace fun
-        constexpr auto const& get_decomposition_mapping = fun::get_decomposition_mapping {};
+        inline namespace {
+            constexpr auto const& get_decomposition_mapping = ogonek::detail::static_const<fun::get_decomposition_mapping>::value;
+        }
 
         /**
          * .. function:: bool is_excluded_from_composition(code_point u)
@@ -320,7 +330,9 @@ namespace ogonek {
                 }
             };
         } // namespace fun
-        constexpr auto const& get_numeric_value = fun::get_numeric_value {};
+        inline namespace {
+            constexpr auto const& get_numeric_value = ogonek::detail::static_const<fun::get_numeric_value>::value;
+        }
 
         /**
          * .. function:: joining_type get_joining_type(code_point u)
@@ -397,7 +409,9 @@ namespace ogonek {
                 }
             };
         } // namespace fun
-        constexpr auto const& get_uppercase_mapping = fun::get_uppercase_mapping {};
+        inline namespace {
+            constexpr auto const& get_uppercase_mapping = ogonek::detail::static_const<fun::get_uppercase_mapping>::value;
+        }
         /**
          * .. function:: std::u32string get_lowercase_mapping(code_point u)
          *
@@ -412,7 +426,9 @@ namespace ogonek {
                 }
             };
         } // namespace fun
-        constexpr auto const& get_lowercase_mapping = fun::get_lowercase_mapping {};
+        inline namespace {
+            constexpr auto const& get_lowercase_mapping = ogonek::detail::static_const<fun::get_lowercase_mapping>::value;
+        }
         /**
          * .. function:: std::u32string get_titlecase_mapping(code_point u)
          *
@@ -427,7 +443,9 @@ namespace ogonek {
                 }
             };
         } // namespace fun
-        constexpr auto const& get_titlecase_mapping = fun::get_titlecase_mapping {};
+        inline namespace {
+            constexpr auto const& get_titlecase_mapping = ogonek::detail::static_const<fun::get_titlecase_mapping>::value;
+        }
 
         /**
          * .. function:: code_point get_simple_case_folding(code_point u)
@@ -450,7 +468,9 @@ namespace ogonek {
                 }
             };
         } // namespace fun
-        constexpr auto const& get_case_folding = fun::get_case_folding {};
+        inline namespace {
+            constexpr auto const& get_case_folding = ogonek::detail::static_const<fun::get_case_folding>::value;
+        }
 
         /**
          * .. function:: bool is_case_ignorable(code_point u)
@@ -515,7 +535,9 @@ namespace ogonek {
                 }
             };
         } // namespace fun
-        constexpr auto const& get_nfkc_casefold = fun::get_nfkc_casefold {};
+        inline namespace {
+            constexpr auto const& get_nfkc_casefold = ogonek::detail::static_const<fun::get_nfkc_casefold>::value;
+        }
 
         /**
          * .. function:: script get_script(code_point u)
@@ -542,7 +564,9 @@ namespace ogonek {
                 }
             };
         } // namespace fun
-        constexpr auto const& get_jamo_short_name = fun::get_jamo_short_name {};
+        inline namespace {
+            constexpr auto const& get_jamo_short_name = ogonek::detail::static_const<fun::get_jamo_short_name>::value;
+        }
 
         /**
          * .. function:: indic_positional_category get_indic_positional_category(code_point u)
