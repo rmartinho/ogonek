@@ -35,13 +35,16 @@
 
 namespace ogonek {
     /**
-     * .. var:: constexpr auto maybe = boost::indeterminate
-     *
-     *     An alternative name for ``boost::indeterminate``.
+     * .. note:: The items in this section are in the namespace ``ogonek::ucd``.
      */
-    BOOST_TRIBOOL_THIRD_STATE(maybe)
-
     namespace ucd {
+        /**
+        * .. var:: constexpr auto maybe = boost::indeterminate
+        *
+        *     An alternative name for ``boost::indeterminate``.
+        */
+        BOOST_TRIBOOL_THIRD_STATE(maybe)
+
         namespace detail {
             inline boost::tribool to_tribool(ogonek::detail::trinary t) {
                 switch(t.value) {
