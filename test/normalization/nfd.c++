@@ -25,6 +25,7 @@ using namespace test::string_literals;
 
 TEST_CASE("official normalization tests", "[normalization][official]") {
     for(auto&& t : test::normalization_test_data) {
+        INFO(t.input);
         auto str = ogonek::normalize<ogonek::nfd>(ranges::view::all(t.input))
                  | ranges::to_<test::u32string>();
         CHECK(str == t.nfd);
