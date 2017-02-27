@@ -18,6 +18,9 @@
 
 #include <range/v3/view_facade.hpp>
 
+#include <algorithm>
+#include <iterator>
+
 namespace ogonek {
     namespace detail {
         template <typename Rng>
@@ -58,8 +61,6 @@ namespace ogonek {
                 void next() {
                     ++position;
                     if(position == static_cast<std::ptrdiff_t>(decomposed.size())) {
-                        ++first;
-
                         decompose_next();
                     }
                 }
@@ -69,31 +70,29 @@ namespace ogonek {
                 }
 
                 bool equal(sentinel const&) const {
-                    return first == last;
+                    return decomposed.size() == 0;
                 }
 
             private:
                 void decompose_next() {
+                    decomposed.clear();
                     if(first != last) {
-                        auto u = *first;
-                        if(ucd::get_decomposition_type(u) == ucd::decomposition_type::canonical) {
-                            // TODO internals that return small_vector directly
-                            auto&& str = ucd::get_full_decomposition(u);
-                            decomposed = decomposed_character(str.begin(), str.end());
-
-                            auto is_starter = [](auto u) { return ucd::get_canonical_combining_class(u) == ucd::not_reordered; };
-                            auto by_combining_class = [](auto a, auto b) {
-                                return ucd::get_canonical_combining_class(a) < ucd::get_canonical_combining_class(b);
-                            };
-                            // TODO needs to be done on the entire stream below
-                            auto l = decomposed.begin();
-                            for(auto r = l; r != decomposed.end(); l = r) {
-                                r = std::find_if(r+1, decomposed.end(), is_starter);
-                                std::sort(l, r, by_combining_class);
+                        auto next_starter = std::find_if(first+1, last, [](auto u) {
+                            return ucd::get_canonical_combining_class(u) == ucd::not_reordered;
+                        });
+                        for(; first != next_starter; ++first) {
+                            auto u = *first;
+                            if(ucd::get_decomposition_type(u) == ucd::decomposition_type::canonical) { // TODO compat
+                                // TODO internals that return small_vector directly
+                                auto&& str = ucd::get_full_decomposition(u);
+                                std::copy(str.begin(), str.end(), std::back_inserter(decomposed));
+                            } else {
+                                decomposed.push_back(u);
                             }
-                        } else {
-                            decomposed = { u };
                         }
+                        std::sort(decomposed.begin(), decomposed.end(), [](auto a, auto b) {
+                            return ucd::get_canonical_combining_class(a) < ucd::get_canonical_combining_class(b);
+                        });
                         position = 0;
                     }
                 }

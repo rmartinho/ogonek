@@ -95,8 +95,7 @@ namespace ogonek {
             inline char const* get_jamo_short_name(code_point u) {
                 return detail::find_property_group(jamo_short_name_data, jamo_short_name_data_size, u).value;
             }
-            template <std::size_t N>
-            std::string make_hangul_syllable_name(code_point u, char const (&base)[N]) {
+            inline void get_hangul_syllable_parts(code_point u, code_point& lpart, code_point& vpart, code_point& tpart) {
                 const int sbase = 0xAC00;
                 const int lbase = 0x1100;
                 const int vbase = 0x1161;
@@ -108,17 +107,37 @@ namespace ogonek {
                 auto lindex = sindex / ncount;
                 auto vindex = (sindex % ncount) / tcount;
                 auto tindex = sindex % tcount;
-                auto lpart = lbase + lindex;
-                auto vpart = vbase + vindex;
-                auto tpart = tbase + tindex;
+
+                lpart = lbase + lindex;
+                vpart = vbase + vindex;
+                if(tindex > 0) {
+                    tpart = tbase + tindex;
+                } else {
+                    tpart = 0;
+                }
+            }
+            template <std::size_t N>
+            std::string make_hangul_syllable_name(code_point u, char const (&base)[N]) {
+                char32_t lpart, vpart, tpart;
+                get_hangul_syllable_parts(u, lpart, vpart, tpart);
 
                 std::string result;
                 result.reserve(N + 9);
                 result += base;
                 result += detail::get_jamo_short_name(lpart);
                 result += detail::get_jamo_short_name(vpart);
-                if(tindex > 0) result += detail::get_jamo_short_name(tpart);
+                if(tpart > 0) result += detail::get_jamo_short_name(tpart);
                 return result;
+            }
+            inline std::u32string decompose_hangul_syllable(code_point u) {
+                char32_t lpart, vpart, tpart;
+                get_hangul_syllable_parts(u, lpart, vpart, tpart);
+
+                if(tpart > 0) {
+                    return { lpart, vpart, tpart };
+                } else {
+                    return { lpart, vpart };
+                }
             }
         } // namespace detail
 
@@ -295,8 +314,14 @@ namespace ogonek {
                     auto value = canonical
                         ? detail::find_property_group(full_canonical_decomposition_mapping_data, full_canonical_decomposition_mapping_data_size, u).value
                         : detail::find_property_group(full_compatibility_decomposition_mapping_data, full_compatibility_decomposition_mapping_data_size, u).value;
-                    if(value) return value;
-                    else return std::u32string(1, u);
+                    if(!value) {
+                        return std::u32string(1, u);
+                    }
+                    if(*value == -1u) {
+                        return detail::decompose_hangul_syllable(u);
+                    }
+
+                    return value;
                 }
             };
         } // namespace fun

@@ -33,6 +33,7 @@ TEST_CASE("Name can be queried", "[properties]") {
         CHECK(ucd::get_name(U'\x0041') == u8"LATIN CAPITAL LETTER A");
         CHECK(ucd::get_name(U'\x00C5') == u8"LATIN CAPITAL LETTER A WITH RING ABOVE");
         CHECK(ucd::get_name(U'\x1EA0') == u8"LATIN CAPITAL LETTER A WITH DOT BELOW");
+        CHECK(ucd::get_name(U'\xAC00') == u8"HANGUL SYLLABLE GA");
         CHECK(ucd::get_name(U'\x1F4A9') == u8"PILE OF POO");
     }
     SECTION("control", "control characters have empty names") {
@@ -139,6 +140,7 @@ TEST_CASE("Decomposition_Type can be queried", "[properties]") {
     CHECK(ucd::get_decomposition_type(U'\x00C5') == ucd::decomposition_type::can);
     CHECK(ucd::get_decomposition_type(U'\x1EA0') == ucd::decomposition_type::can);
     CHECK(ucd::get_decomposition_type(U'\x3000') == ucd::decomposition_type::wide);
+    // TODO Add Hangul tests
 }
 TEST_CASE("Decomposition_Mapping can be queried", "[properties]") {
     CHECK(ucd::get_decomposition_mapping(U'\x0041') == U"\x0041"_s);
@@ -146,6 +148,7 @@ TEST_CASE("Decomposition_Mapping can be queried", "[properties]") {
     CHECK(ucd::get_decomposition_mapping(U'\x00C5') == U"\x0041\x030A"_s);
     CHECK(ucd::get_decomposition_mapping(U'\x1EA0') == U"\x0041\x0323"_s);
     CHECK(ucd::get_decomposition_mapping(U'\x3000') == U"\x0020"_s);
+    // TODO Add Hangul tests
 }
 TEST_CASE("full canonical decomposition can be queried", "[properties]") {
     CHECK(ucd::get_full_decomposition(U'\x0041', true) == U"\x0041"_s);

@@ -703,7 +703,6 @@ def extract_props(aliases, parsed):
                 t = t.py()
                 for x in range(r[0], r[1] + 1):
                     yield (x, t[1] if t else 'Can')
-
         type_map = { x: t for (x, t) in enumerate_types() }
 
         decompositions = { r[0].py()[0]: r[5] for r in records }
@@ -725,13 +724,27 @@ def extract_props(aliases, parsed):
 
         def full_decomposition_of(r):
             u = r[0].py()[0]
+
             if not should_decompose(u):
                 return Value(Types.String(), None)
 
             full_decomp = ' '.join('{0:X}'.format(x) for x in full_decompose(u))
             return Value(Types.String(), full_decomp)
 
-        return ([r[0], full_decomposition_of(r)] for r in records)
+        gen = (r for r in records)
+        try:
+            while True:
+                r = next(gen)
+                if r[1].py() == '<Hangul Syllable, First>':
+                    r2 = next(gen)
+                    start = r[1].py().split(',')[0]
+                    assert r2[1].py().startswith(start)
+                    assert r2[1].py().endswith(', Last>')
+                    yield [Value(Types.Range(), '{0}..{1}'.format(r[0].value, r2[0].value)), Value(Types.String(), 'FFFFFFFF')]
+                else:
+                    yield [r[0], full_decomposition_of(r)]
+        except StopIteration:
+            pass
 
     def gen_indexed_prop(records, index):
         return ([r[0], r[index]] for r in records)

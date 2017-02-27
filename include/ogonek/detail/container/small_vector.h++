@@ -31,6 +31,8 @@ namespace ogonek {
         struct small_vector {
             static_assert(std::is_pod<T>::value, "T must be POD");
         public:
+            using value_type = T;
+
             small_vector()
             : storage(make_if(true)) {}
 
@@ -128,8 +130,6 @@ namespace ogonek {
             void grow() {
                 assert(is_small());
                 auto copy(as_small());
-                storage.destroy();
-                // WARNING not exception safe
                 storage.place_right(copy.begin(), copy.end());
             }
 
