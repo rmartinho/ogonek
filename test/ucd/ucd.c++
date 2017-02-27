@@ -135,15 +135,33 @@ TEST_CASE("Bidi_Paired_Bracket_Type can be queried", "[properties]") {
 }
 TEST_CASE("Decomposition_Type can be queried", "[properties]") {
     CHECK(ucd::get_decomposition_type(U'\x0041') == ucd::decomposition_type::none);
+    CHECK(ucd::get_decomposition_type(U'\x00A8') == ucd::decomposition_type::compat);
     CHECK(ucd::get_decomposition_type(U'\x00C5') == ucd::decomposition_type::can);
     CHECK(ucd::get_decomposition_type(U'\x1EA0') == ucd::decomposition_type::can);
     CHECK(ucd::get_decomposition_type(U'\x3000') == ucd::decomposition_type::wide);
 }
 TEST_CASE("Decomposition_Mapping can be queried", "[properties]") {
     CHECK(ucd::get_decomposition_mapping(U'\x0041') == U"\x0041"_s);
+    CHECK(ucd::get_decomposition_mapping(U'\x00A8') == U"\x0020\x0308"_s);
     CHECK(ucd::get_decomposition_mapping(U'\x00C5') == U"\x0041\x030A"_s);
     CHECK(ucd::get_decomposition_mapping(U'\x1EA0') == U"\x0041\x0323"_s);
     CHECK(ucd::get_decomposition_mapping(U'\x3000') == U"\x0020"_s);
+}
+TEST_CASE("full canonical decomposition can be queried", "[properties]") {
+    CHECK(ucd::get_full_decomposition(U'\x0041', true) == U"\x0041"_s);
+    CHECK(ucd::get_full_decomposition(U'\x00A8', true) == U"\x00A8"_s);
+    CHECK(ucd::get_full_decomposition(U'\x00C5', true) == U"\x0041\x030A"_s);
+    CHECK(ucd::get_full_decomposition(U'\x1EA0', true) == U"\x0041\x0323"_s);
+    CHECK(ucd::get_full_decomposition(U'\x3000', true) == U"\x3000"_s);
+    // TODO contrast with normal decomposition
+}
+TEST_CASE("full compatibility decomposition can be queried", "[properties]") {
+    CHECK(ucd::get_full_decomposition(U'\x0041', false) == U"\x0041"_s);
+    CHECK(ucd::get_full_decomposition(U'\x00A8', false) == U"\x0020\x0308"_s);
+    CHECK(ucd::get_full_decomposition(U'\x00C5', false) == U"\x0041\x030A"_s);
+    CHECK(ucd::get_full_decomposition(U'\x1EA0', false) == U"\x0041\x0323"_s);
+    CHECK(ucd::get_full_decomposition(U'\x3000', false) == U"\x0020"_s);
+    // TODO contrast with normal decomposition
 }
 TEST_CASE("Full_Composition_Exclusion can be queried", "[properties]") {
     CHECK(ucd::is_excluded_from_composition(U'\x0041') == false);

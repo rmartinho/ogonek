@@ -700,25 +700,35 @@ def extract_props(aliases, parsed):
         def enumerate_types():
             for r, t in types:
                 r = r.py()
+                t = t.py()
                 for x in range(r[0], r[1] + 1):
-                    yield (x, t.py()[0] if t.py() else 'Can')
+                    yield (x, t[1] if t else 'Can')
 
         type_map = { x: t for (x, t) in enumerate_types() }
 
         decompositions = { r[0].py()[0]: r[5] for r in records }
 
-        def full_decompose(u):
+        def should_decompose(u):
             if u in decompositions and decompositions[u].py():
+                if canonical:
+                    return type_map[u] == 'Can'
+                return True
+            return False
+
+        def full_decompose(u):
+            if should_decompose(u):
                 for d in decompositions[u].py():
-                    if not canonical or type_map[u] == 'Can':
                         for x in full_decompose(d):
                             yield x
             else:
                 yield u
 
         def full_decomposition_of(r):
-            decomp = r[5].py()
-            full_decomp = ' '.join('{0:X}'.format(x) for x in full_decompose(decomp[0])) if decomp else '<code point>'
+            u = r[0].py()[0]
+            if not should_decompose(u):
+                return Value(Types.String(), None)
+
+            full_decomp = ' '.join('{0:X}'.format(x) for x in full_decompose(u))
             return Value(Types.String(), full_decomp)
 
         return ([r[0], full_decomposition_of(r)] for r in records)

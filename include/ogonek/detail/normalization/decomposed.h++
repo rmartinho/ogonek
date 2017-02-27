@@ -78,7 +78,7 @@ namespace ogonek {
                         auto u = *first;
                         if(ucd::get_decomposition_type(u) == ucd::decomposition_type::canonical) {
                             // TODO internals that return small_vector directly
-                            auto&& str = ucd::get_decomposition_mapping(u);
+                            auto&& str = ucd::get_full_decomposition(u);
                             decomposed = decomposed_character(str.begin(), str.end());
 
                             auto is_starter = [](auto u) { return ucd::get_canonical_combining_class(u) == ucd::not_reordered; };
