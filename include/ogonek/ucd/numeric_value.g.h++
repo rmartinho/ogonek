@@ -24,8 +24,6 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            
-
             struct numeric_value_properties {
                 code_point start;
                 detail::fraction value;

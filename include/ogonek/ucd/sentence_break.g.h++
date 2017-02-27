@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum class sentence_break {
+enum class sentence_break {
                 at,
                 cl,
                 cr,
@@ -53,7 +53,6 @@ namespace ogonek {
                 upper = up,
                 other = xx,
             };
-
             struct sentence_break_properties {
                 code_point start;
                 sentence_break value;

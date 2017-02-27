@@ -24,8 +24,6 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            
-
             struct jamo_short_name_properties {
                 code_point start;
                 char const* value;

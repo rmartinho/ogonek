@@ -11,10 +11,10 @@
 
 // This file was automatically generated.
 
-// Unicode character database - Deprecated property
+// Unicode character database - $Full_Canonical_Decomposition_Mapping property
 
-#ifndef OGONEK_UCD_DEPRECATED_HPP
-#define OGONEK_UCD_DEPRECATED_HPP
+#ifndef OGONEK_UCD_FULL_CANONICAL_DECOMPOSITION_MAPPING_HPP
+#define OGONEK_UCD_FULL_CANONICAL_DECOMPOSITION_MAPPING_HPP
 
 #include <ogonek/detail/visibility.h++>
 #include <ogonek/types.h++>
@@ -24,15 +24,15 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            struct deprecated_properties {
+            struct full_canonical_decomposition_mapping_properties {
                 code_point start;
-                bool value;
+                code_point const* value;
             };
 
-            extern OGONEK_PUBLIC deprecated_properties const* deprecated_data;
-            extern OGONEK_PUBLIC std::size_t deprecated_data_size;
+            extern OGONEK_PUBLIC full_canonical_decomposition_mapping_properties const* full_canonical_decomposition_mapping_data;
+            extern OGONEK_PUBLIC std::size_t full_canonical_decomposition_mapping_data_size;
         } // namespace abiv0
     } // namespace ucd
 } // namespace ogonek
 
-#endif // OGONEK_UCD_DEPRECATED_HPP
+#endif // OGONEK_UCD_FULL_CANONICAL_DECOMPOSITION_MAPPING_HPP

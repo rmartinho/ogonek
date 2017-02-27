@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum class decomposition_type {
+enum class decomposition_type {
                 can,
                 com,
                 enc,
@@ -58,7 +58,6 @@ namespace ogonek {
                 super = sup,
                 vertical = vert,
             };
-
             struct decomposition_type_properties {
                 code_point start;
                 decomposition_type value;

@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum class joining_type {
+enum class joining_type {
                 c,
                 d,
                 l,
@@ -38,7 +38,6 @@ namespace ogonek {
                 transparent = t,
                 non_joining = u,
             };
-
             struct joining_type_properties {
                 code_point start;
                 joining_type value;

@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum class east_asian_width {
+enum class east_asian_width {
                 a,
                 f,
                 h,
@@ -38,7 +38,6 @@ namespace ogonek {
                 narrow = na,
                 wide = w,
             };
-
             struct east_asian_width_properties {
                 code_point start;
                 east_asian_width value;

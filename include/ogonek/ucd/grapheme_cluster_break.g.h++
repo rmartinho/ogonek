@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum class grapheme_cluster_break {
+enum class grapheme_cluster_break {
                 cn,
                 cr,
                 eb,
@@ -54,7 +54,6 @@ namespace ogonek {
                 spacing_mark = sm,
                 other = xx,
             };
-
             struct grapheme_cluster_break_properties {
                 code_point start;
                 grapheme_cluster_break value;

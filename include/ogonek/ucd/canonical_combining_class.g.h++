@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum combining_class {
+enum combining_class {
                 nr = 0,
                 not_reordered = nr,
                 ov = 1,
@@ -103,7 +103,6 @@ namespace ogonek {
                 ccc118 = 118,
                 ccc122 = 122,
             };
-
             struct canonical_combining_class_properties {
                 code_point start;
                 combining_class value;

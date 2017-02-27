@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum class bidi_class {
+enum class bidi_class {
                 al,
                 an,
                 b,
@@ -72,7 +72,6 @@ namespace ogonek {
                 segment_separator = s,
                 white_space = ws,
             };
-
             struct bidi_class_properties {
                 code_point start;
                 bidi_class value;

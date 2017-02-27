@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum class line_break {
+enum class line_break {
                 ai,
                 al,
                 b2,
@@ -107,7 +107,6 @@ namespace ogonek {
                 unknown = xx,
                 zwspace = zw,
             };
-
             struct line_break_properties {
                 code_point start;
                 line_break value;

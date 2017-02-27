@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum class version {
+enum class version {
                 _1_1,
                 _2_0,
                 _2_1,
@@ -64,7 +64,6 @@ namespace ogonek {
                 v9_0 = _9_0,
                 unassigned = na,
             };
-
             struct age_properties {
                 code_point start;
                 version value;

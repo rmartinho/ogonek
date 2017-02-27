@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum class block {
+enum class block {
                 adlam,
                 aegean_numbers,
                 ahom,
@@ -419,7 +419,6 @@ namespace ogonek {
                 variation_selectors_supplement = vs_sup,
                 yijing_hexagram_symbols = yijing,
             };
-
             struct block_properties {
                 code_point start;
                 block value;

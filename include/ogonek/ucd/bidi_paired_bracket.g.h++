@@ -24,8 +24,6 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            
-
             struct bidi_paired_bracket_properties {
                 code_point start;
                 code_point value;

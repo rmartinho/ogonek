@@ -34,7 +34,7 @@
 #include <ogonek/ucd/decomposition_mapping.g.h++>
 #include <ogonek/ucd/east_asian_width.g.h++>
 #include <ogonek/ucd/nfd_quick_check.g.h++>
-#include <ogonek/ucd/math.g.h++>
+#include <ogonek/ucd/logical_order_exception.g.h++>
 #include <ogonek/ucd/numeric_type.g.h++>
 #include <ogonek/ucd/indic_positional_category.g.h++>
 #include <ogonek/ucd/bidi_mirroring_glyph.g.h++>
@@ -52,6 +52,7 @@
 #include <ogonek/ucd/alphabetic.g.h++>
 #include <ogonek/ucd/quotation_mark.g.h++>
 #include <ogonek/ucd/soft_dotted.g.h++>
+#include <ogonek/ucd/changes_when_casefolded.g.h++>
 #include <ogonek/ucd/id_start.g.h++>
 #include <ogonek/ucd/id_continue.g.h++>
 #include <ogonek/ucd/changes_when_casemapped.g.h++>
@@ -63,16 +64,17 @@
 #include <ogonek/ucd/grapheme_cluster_break.g.h++>
 #include <ogonek/ucd/bidi_paired_bracket.g.h++>
 #include <ogonek/ucd/numeric_value.g.h++>
+#include <ogonek/ucd/math.g.h++>
 #include <ogonek/ucd/cased.g.h++>
 #include <ogonek/ucd/join_control.g.h++>
 #include <ogonek/ucd/full_composition_exclusion.g.h++>
 #include <ogonek/ucd/nfkc_casefold.g.h++>
-#include <ogonek/ucd/joining_type.g.h++>
+#include <ogonek/ucd/full_canonical_decomposition_mapping.g.h++>
 #include <ogonek/ucd/turkic_case_folding.g.h++>
 #include <ogonek/ucd/ids_binary_operator.g.h++>
 #include <ogonek/ucd/terminal_punctuation.g.h++>
 #include <ogonek/ucd/general_category.g.h++>
-#include <ogonek/ucd/changes_when_casefolded.g.h++>
+#include <ogonek/ucd/joining_type.g.h++>
 #include <ogonek/ucd/bidi_class.g.h++>
 #include <ogonek/ucd/simple_uppercase_mapping.g.h++>
 #include <ogonek/ucd/dash.g.h++>
@@ -87,7 +89,7 @@
 #include <ogonek/ucd/unified_ideograph.g.h++>
 #include <ogonek/ucd/decomposition_type.g.h++>
 #include <ogonek/ucd/simple_lowercase_mapping.g.h++>
-#include <ogonek/ucd/logical_order_exception.g.h++>
+#include <ogonek/ucd/full_compatibility_decomposition_mapping.g.h++>
 #include <ogonek/ucd/ascii_hex_digit.g.h++>
 #include <ogonek/ucd/xid_start.g.h++>
 #include <ogonek/ucd/jamo_short_name.g.h++>

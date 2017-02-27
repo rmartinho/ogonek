@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum class joining_group {
+enum class joining_group {
                 african_feh,
                 african_noon,
                 african_qaf,
@@ -116,7 +116,6 @@ namespace ogonek {
                 zhain,
                 hamza_on_heh_goal = teh_marbuta_goal,
             };
-
             struct joining_group_properties {
                 code_point start;
                 joining_group value;

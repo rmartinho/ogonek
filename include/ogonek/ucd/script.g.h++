@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum class script {
+enum class script {
                 adlm,
                 aghb,
                 ahom,
@@ -300,7 +300,6 @@ namespace ogonek {
                 common = zyyy,
                 unknown = zzzz,
             };
-
             struct script_properties {
                 code_point start;
                 script value;

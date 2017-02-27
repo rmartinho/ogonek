@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum class numeric_type {
+enum class numeric_type {
                 de,
                 di,
                 none,
@@ -33,7 +33,6 @@ namespace ogonek {
                 digit = di,
                 numeric = nu,
             };
-
             struct numeric_type_properties {
                 code_point start;
                 numeric_type value;

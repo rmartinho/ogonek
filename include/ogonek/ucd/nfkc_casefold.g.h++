@@ -24,8 +24,6 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            
-
             struct nfkc_casefold_properties {
                 code_point start;
                 code_point const* value;

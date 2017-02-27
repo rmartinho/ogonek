@@ -281,6 +281,30 @@ namespace ogonek {
         }
 
         /**
+         * .. function:: std::u32string get_full_decomposition(code_point u, bool canonical = true)
+         *
+         *     :returns: the full decomposition of ``u``. This is obtained by
+         *               recursive application of decomposition (as per the
+         *               *Decomposition_Mapping* property). If ``canonical`` is
+         *               true, only canonical decompositions are used (as per
+         *               the *Decomposition_Type* property).
+         */
+        namespace fun {
+            struct get_full_decomposition {
+                std::u32string operator()(code_point u, bool canonical = true) const {
+                    auto value = canonical
+                        ? detail::find_property_group(full_canonical_decomposition_mapping_data, full_canonical_decomposition_mapping_data_size, u).value
+                        : detail::find_property_group(full_compatibility_decomposition_mapping_data, full_compatibility_decomposition_mapping_data_size, u).value;
+                    if(value) return value;
+                    else return std::u32string(1, u);
+                }
+            };
+        } // namespace fun
+        inline namespace {
+            constexpr auto const& get_full_decomposition = ogonek::detail::static_const<fun::get_full_decomposition>::value;
+        }
+
+        /**
          * .. function:: bool is_excluded_from_composition(code_point u)
          *
          *     :returns: true if ``u`` has the *Full_Composition_Exclusion* property; false otherwise

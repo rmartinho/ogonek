@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum class bracket_type {
+enum class bracket_type {
                 c,
                 n,
                 o,
@@ -32,7 +32,6 @@ namespace ogonek {
                 none = n,
                 open = o,
             };
-
             struct bidi_paired_bracket_type_properties {
                 code_point start;
                 bracket_type value;

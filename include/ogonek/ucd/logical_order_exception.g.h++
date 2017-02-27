@@ -24,8 +24,6 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            
-
             struct logical_order_exception_properties {
                 code_point start;
                 bool value;

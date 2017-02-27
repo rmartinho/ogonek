@@ -24,8 +24,6 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            
-
             struct turkic_case_folding_properties {
                 code_point start;
                 code_point const* value;

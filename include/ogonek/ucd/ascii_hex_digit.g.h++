@@ -24,8 +24,6 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            
-
             struct ascii_hex_digit_properties {
                 code_point start;
                 bool value;

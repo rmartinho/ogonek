@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            enum class hangul_syllable_type {
+enum class hangul_syllable_type {
                 l,
                 lv,
                 lvt,
@@ -38,7 +38,6 @@ namespace ogonek {
                 trailing_jamo = t,
                 vowel_jamo = v,
             };
-
             struct hangul_syllable_type_properties {
                 code_point start;
                 hangul_syllable_type value;
