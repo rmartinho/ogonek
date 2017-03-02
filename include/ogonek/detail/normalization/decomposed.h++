@@ -29,7 +29,7 @@ namespace ogonek {
             decomposed_view<Rng>,
             ranges::is_finite<Rng>::value? ranges::finite : ranges::range_cardinality<Rng>::value> {
         private:
-            CONCEPT_ASSERT(InputRangeOf<code_point, Rng>());
+            CONCEPT_ASSERT(ForwardRangeOf<code_point, Rng>());
 
         public:
             friend ranges::range_access;
@@ -77,6 +77,7 @@ namespace ogonek {
                 void decompose_next() {
                     decomposed.clear();
                     if(first != last) {
+                        // TODO support input ranges
                         auto next_starter = std::find_if(first+1, last, [](auto u) {
                             return ucd::get_canonical_combining_class(u) == ucd::not_reordered;
                         });

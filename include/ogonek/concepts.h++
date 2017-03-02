@@ -89,7 +89,7 @@ namespace ogonek {
         using ranges::concepts::_2;
 
         using ranges::concepts::Range;
-        using ranges::concepts::InputRange;
+        using ranges::concepts::ForwardRange;
 
         struct EncodingForm {
         private:
@@ -205,13 +205,13 @@ namespace ogonek {
                 ));
         };
 
-        struct InputRangeOf
-        : refines<InputRange(_2)> {
+        struct ForwardRangeOf
+        : refines<ForwardRange(_2)> {
         public:
             template<typename V, typename T>
             auto requires_(V&&, T&&) -> decltype(
                 valid_expr(
-                    is_true(std::is_same<V, InputRange::value_t<T>>())
+                    is_true(std::is_same<V, ForwardRange::value_t<T>>())
                 ));
         };
 
@@ -251,11 +251,11 @@ namespace ogonek {
     using ranges::Invocable;
 
     using ranges::Range;
-    using ranges::InputRange;
+    using ranges::ForwardRange;
 
     // TODO docs?
     template <typename V, typename T>
-    using InputRangeOf = concepts::models<concepts::InputRangeOf, V, T>;
+    using ForwardRangeOf = concepts::models<concepts::ForwardRangeOf, V, T>;
 
     /**
      * .. concept:: template <typename E>\
