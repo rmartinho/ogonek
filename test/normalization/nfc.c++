@@ -9,10 +9,10 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-// Tests for the Normalization Form D
+// Tests for the Normalization Form C
 
 #include <ogonek/normalization.h++>
-#include <ogonek/normalization_forms/nfd.h++>
+#include <ogonek/normalization_forms/nfc.h++>
 
 #include <catch.hpp>
 #include "util.h++"
@@ -23,11 +23,11 @@
 
 using namespace test::string_literals;
 
-TEST_CASE("official NFD tests", "[normalization][official][nfd]") {
+TEST_CASE("official NFC tests", "[normalization][official][nfc]") {
     for(auto&& t : test::normalization_test_data) {
         INFO(t.input);
-        auto str = ogonek::normalize<ogonek::nfd>(ranges::view::all(t.input))
+        auto str = ogonek::normalize<ogonek::nfc>(ranges::view::all(t.input))
                  | ranges::to_<test::u32string>();
-        CHECK(str == t.nfd);
+        CHECK(str == t.nfc);
     }
 }

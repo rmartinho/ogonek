@@ -12,7 +12,11 @@
 #ifndef OGONEK_NORMALIZATION_FORMS_NFC_HPP
 #define OGONEK_NORMALIZATION_FORMS_NFC_HPP
 
+#include <ogonek/normalization_forms/nfd.h++>
+
 namespace ogonek {
+    struct nfc : nfd {};
+    CONCEPT_ASSERT(NormalizationForm<nfc>());
 } // namespace ogonek
 
 #endif // OGONEK_NORMALIZATION_FORMS_NFC_HPP

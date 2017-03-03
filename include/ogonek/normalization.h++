@@ -17,18 +17,29 @@
 #ifndef OGONEK_NORMALIZATION_HPP
 #define OGONEK_NORMALIZATION_HPP
 
+#include <ogonek/concepts.h++>
 #include <ogonek/detail/static_const.h++>
 #include <ogonek/detail/normalization/decomposed.h++>
 
-#include <vector> // TODO remove
-
 namespace ogonek {
+    /**
+     * .. function:: template <NormalizationForm Form, ForwardRange Rng>\
+     *               auto normalize(Rng rng)
+     *
+     *     Normalizes a range of |code-points| into ``Form``.
+     *
+     *     :param rng: The range of |code-points| to normalize
+     *
+     *     :returns: a range of the |code-points| that satisfies the normalization form ``Form``
+     */
     namespace fun {
         template <typename Form>
         struct normalize {
+            CONCEPT_ASSERT(NormalizationForm<Form>());
+
             template <typename Rng>
             auto operator()(Rng rng) const {
-                return detail::decomposed_view<Rng>(rng);
+                return detail::decomposed_view<Form, Rng>(rng);
             }
         };
     } // namespace fun

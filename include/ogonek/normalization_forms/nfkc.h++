@@ -12,7 +12,11 @@
 #ifndef OGONEK_NORMALIZATION_FORMS_NFKC_HPP
 #define OGONEK_NORMALIZATION_FORMS_NFKC_HPP
 
+#include <ogonek/normalization_forms/nfkd.h++>
+
 namespace ogonek {
+    struct nfkc : nfkd {};
+    CONCEPT_ASSERT(NormalizationForm<nfkc>());
 } // namespace ogonek
 
 #endif // OGONEK_NORMALIZATION_FORMS_NFKC_HPP

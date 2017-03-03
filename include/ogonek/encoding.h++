@@ -239,6 +239,8 @@ namespace ogonek {
      * .. function:: template <EncodingForm Encoding, ForwardRange Rng, EncodeErrorHandler Handler>\
      *               auto encode(Rng rng, Handler&& handler)
      *
+     *     Encodes a range of |code-points|, according to ``Encoding``.
+     *
      *     :param rng: The range of |code-points| to encode
      *
      *     :param handler: The strategy for error handling
@@ -266,7 +268,7 @@ namespace ogonek {
     }
 
     /**
-     * .. function:: template <EncodingForm Encoding, Iterator It, Sentinel St>\
+     * .. function:: template <EncodingForm Encoding, ForwardIterator It, Sentinel St>\
      *               std::pair<code_point, It> decode_one(It first, St last, coding_state_t<Encoding>& state)
      *
      *     Decodes the first |code-point| from the range [``first``, ``last``), according to ``Encoding``.
@@ -286,7 +288,9 @@ namespace ogonek {
         struct decode_one {
             CONCEPT_ASSERT(EncodingForm<Encoding>());
 
-            template <typename It, typename St>
+            template <typename It, typename St,
+                      CONCEPT_REQUIRES_(ForwardIterator<It>()),
+                      CONCEPT_REQUIRES_(Sentinel<St, It>())>
             auto operator()(It first, St last, coding_state_t<Encoding>& state) const {
                 return concepts::EncodingForm::decode_one<Encoding>(first, last, state);
             }
@@ -402,8 +406,10 @@ namespace ogonek {
     } // namespace detail
 
     /**
-     * .. function:: template <EncodingForm Encoding, ranges::Range Rng>\
-     *               auto decode(Rng rng)
+     * .. function:: template <EncodingForm Encoding, ForwardRange Rng, EncodeErrorHandler Handler>\
+     *               auto decode(Rng rng, Handler&& handler)
+     *
+     *     Decodes a range of |code-points|, according to ``Encoding``.
      *
      *     :param rng: The range of |code-points| to encode
      *

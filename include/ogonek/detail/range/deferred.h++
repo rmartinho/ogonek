@@ -27,7 +27,7 @@ namespace ogonek {
             deferred_view<Rng>,
             ranges::is_finite<Rng>::value? ranges::finite : ranges::range_cardinality<Rng>::value> {
         private:
-            CONCEPT_ASSERT(Range<Rng>());
+            CONCEPT_ASSERT(ForwardRange<Rng>());
 
             friend ranges::range_access;
 
@@ -110,7 +110,7 @@ namespace ogonek {
         };
 
         template <typename Rng,
-                CONCEPT_REQUIRES_(Range<Rng>())>
+                CONCEPT_REQUIRES_(ForwardRange<Rng>())>
         auto defer(Rng rng) {
             return deferred_view<Rng>(std::move(rng));
         }

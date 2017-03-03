@@ -17,18 +17,37 @@
 #include <ogonek/detail/container/small_vector.h++>
 
 #include <range/v3/view_facade.hpp>
+#include <range/v3/utility/iterator.hpp>
 
 #include <algorithm>
 #include <iterator>
 
 namespace ogonek {
+    namespace fun {
+        template <typename Form>
+        struct decompose_into {
+            CONCEPT_ASSERT(NormalizationForm<Form>());
+
+            template <typename Out,
+                      CONCEPT_REQUIRES_(OutputIterator<Out, code_point>())>
+            void operator()(code_point u, Out out) const {
+                concepts::NormalizationForm::decompose_into<Form>(u, out);
+            }
+        };
+    } // namespace fun
+    inline namespace {
+        template <typename Form>
+        constexpr auto const& decompose_into = detail::static_const<fun::decompose_into<Form>>::value;
+    }
+
     namespace detail {
-        template <typename Rng>
+        template <typename Form, typename Rng>
         struct decomposed_view
         : ranges::view_facade<
-            decomposed_view<Rng>,
+            decomposed_view<Form, Rng>,
             ranges::is_finite<Rng>::value? ranges::finite : ranges::range_cardinality<Rng>::value> {
         private:
+            CONCEPT_ASSERT(NormalizationForm<Form>());
             CONCEPT_ASSERT(ForwardRangeOf<code_point, Rng>());
 
         public:
@@ -82,14 +101,7 @@ namespace ogonek {
                             return ucd::get_canonical_combining_class(u) == ucd::not_reordered;
                         });
                         for(; first != next_starter; ++first) {
-                            auto u = *first;
-                            if(ucd::get_decomposition_type(u) == ucd::decomposition_type::canonical) { // TODO compat
-                                // TODO internals that return small_vector directly
-                                auto&& str = ucd::get_full_decomposition(u);
-                                std::copy(str.begin(), str.end(), std::back_inserter(decomposed));
-                            } else {
-                                decomposed.push_back(u);
-                            }
+                            decompose_into<Form>(*first, ranges::back_inserter(decomposed));
                         }
                         std::sort(decomposed.begin(), decomposed.end(), [](auto a, auto b) {
                             return ucd::get_canonical_combining_class(a) < ucd::get_canonical_combining_class(b);

@@ -32,23 +32,40 @@
 namespace ogonek {
     namespace archetypes {
         template <typename T>
-        struct InputIterator {
+        struct ForwardIterator {
             using value_type = T;
             using reference = T&;
             using difference_type = std::ptrdiff_t;
-            using iterator_category = std::input_iterator_tag;
+            using iterator_category = std::forward_iterator_tag;
 
-            InputIterator& operator++();
+            ForwardIterator& operator++();
             void operator++(int);
             T operator*() const;
         };
-        template <typename T, typename I = InputIterator<T>>
-        struct Sentinel {
-            friend bool operator==(Sentinel const&, I const&);
-            friend bool operator!=(Sentinel const&, I const&);
-            friend bool operator==(I const&, Sentinel const&);
-            friend bool operator!=(I const&, Sentinel const&);
+        template <typename T, typename I = ForwardIterator<T>>
+        struct ForwardSentinel {
+            friend bool operator==(ForwardSentinel const&, I const&);
+            friend bool operator!=(ForwardSentinel const&, I const&);
+            friend bool operator==(I const&, ForwardSentinel const&);
+            friend bool operator!=(I const&, ForwardSentinel const&);
         };
+        template <typename T>
+        struct OutputIterator {
+            using value_type = T;
+            using reference = T&;
+            using difference_type = std::ptrdiff_t;
+            using iterator_category = std::output_iterator_tag;
+
+            OutputIterator& operator++();
+            OutputIterator operator++(int);
+            T& operator*() const;
+        };
+        //CONCEPT_ASSERT(ranges::WeaklyIncrementable<OutputIterator<int>>());
+        //CONCEPT_ASSERT(ranges::Iterator<OutputIterator<int>>());
+        //CONCEPT_ASSERT(ranges::Movable<OutputIterator<int>>());
+        //CONCEPT_ASSERT(ranges::DefaultConstructible<OutputIterator<int>>());
+        //CONCEPT_ASSERT(ranges::Writable<OutputIterator<int>, int>());
+        CONCEPT_ASSERT(ranges::OutputIterator<OutputIterator<code_point>, code_point>());
 
         template <typename Encoding>
         struct EncodeErrorHandler {
@@ -88,7 +105,7 @@ namespace ogonek {
         using ranges::concepts::_1;
         using ranges::concepts::_2;
 
-        using ranges::concepts::Range;
+        using ranges::concepts::OutputIterator;
         using ranges::concepts::ForwardRange;
 
         struct EncodingForm {
@@ -153,7 +170,7 @@ namespace ogonek {
                 return T::decode_one(it, st);
             }
 
-            template<typename T>
+            template <typename T>
             auto requires_(T&&) -> decltype(
                 valid_expr(
                     model_of<Integral, code_unit_t<T>>(),
@@ -161,11 +178,11 @@ namespace ogonek {
                     is_true(std::integral_constant<bool, (max_width_v<T> > 0)>{}),
                     encode_one<T>(code_point(), std::declval<state_t<T>&>()),
                     // TODO encode_one<T>(code_point(), std::declval<state_t<T>&>(), std::declval<assume_valid_t>()),
-                    decode_one<T>(archetypes::InputIterator<code_unit_t<T>>(),
-                                  archetypes::Sentinel<code_unit_t<T>>(),
+                    decode_one<T>(archetypes::ForwardIterator<code_unit_t<T>>(),
+                                  archetypes::ForwardSentinel<code_unit_t<T>>(),
                                   std::declval<state_t<T>&>())
-                    // TODO decode_one<T>(archetypes::InputIterator<code_unit_t<T>>(),
-                    //              archetypes::Sentinel<code_unit_t<T>>(),
+                    // TODO decode_one<T>(archetypes::ForwardIterator<code_unit_t<T>>(),
+                    //              archetypes::ForwardSentinel<code_unit_t<T>>(),
                     //              std::declval<state_t<T>&>(),
                     //              std::declval<assume_valid_t>())
                 ));
@@ -184,7 +201,7 @@ namespace ogonek {
                 return T::decode_one(it, st);
             }
 
-            template<typename T>
+            template <typename T>
             auto requires_(T&&) -> decltype(
                 valid_expr(
                     is_true(std::is_empty<state_t<T>>())
@@ -196,7 +213,7 @@ namespace ogonek {
             template <typename T>
             using value_t = std::remove_reference_t<decltype(*std::declval<T const&>())>;
 
-            template<typename T>
+            template <typename T>
             auto requires_(T&&) -> decltype(
                 valid_expr(
                     model_of<DefaultConstructible, T>(),
@@ -208,7 +225,7 @@ namespace ogonek {
         struct ForwardRangeOf
         : refines<ForwardRange(_2)> {
         public:
-            template<typename V, typename T>
+            template <typename V, typename T>
             auto requires_(V&&, T&&) -> decltype(
                 valid_expr(
                     is_true(std::is_same<V, ForwardRange::value_t<T>>())
@@ -218,7 +235,7 @@ namespace ogonek {
         struct OptionalOf
         : refines<Optional(_2)> {
         public:
-            template<typename V, typename T>
+            template <typename V, typename T>
             auto requires_(V&&, T&&) -> decltype(
                 valid_expr(
                     is_true(std::is_same<V, Optional::value_t<T>>())
@@ -227,7 +244,7 @@ namespace ogonek {
 
         struct EncodeErrorHandler {
         public:
-            template<typename H, typename E,
+            template <typename H, typename E,
                      typename HandlerResult = Invocable::result_t<H const&, encode_error<E>>>
             auto requires_(H&&, E&&) -> decltype(
                 valid_expr(
@@ -238,7 +255,7 @@ namespace ogonek {
 
         struct DecodeErrorHandler {
         public:
-            template<typename H, typename E,
+            template <typename H, typename E,
                      typename HandlerResult = Invocable::result_t<H const&, decode_error<E>>>
             auto requires_(H&&, E&&) -> decltype(
                 valid_expr(
@@ -246,11 +263,25 @@ namespace ogonek {
                     model_of<OptionalOf, code_point, HandlerResult>()
                 ));
         };
+
+        struct NormalizationForm {
+        public:
+            template <typename T, typename Out>
+            static auto decompose_into(code_point u, Out out) -> decltype(T::decompose_into(u, out)) {
+                T::decompose_into(u, out);
+            }
+
+            template <typename N>
+            auto requires_(N&&) -> decltype(
+                valid_expr(
+                    (decompose_into<N>(code_point(), archetypes::OutputIterator<code_point>()), 42)
+                ));
+        };
     } // namespace concepts
 
-    using ranges::Invocable;
-
-    using ranges::Range;
+    using ranges::ForwardIterator;
+    using ranges::OutputIterator;
+    using ranges::Sentinel;
     using ranges::ForwardRange;
 
     // TODO docs?
@@ -315,6 +346,17 @@ namespace ogonek {
      */
     template <typename H, typename E>
     using DecodeErrorHandler = concepts::models<concepts::DecodeErrorHandler, H, E>;
+
+    /**
+     * .. concept:: template <typename N>\
+     *              NormalizationForm
+     *
+     *     ``N`` is a Unicode normalization form.
+     *
+     *     .. todo:: Document requirements
+     */
+    template <typename N>
+    using NormalizationForm = concepts::models<concepts::NormalizationForm, N>;
 } // namespace ogonek
 
 #endif // OGONEK_CONCEPTS_HPP
