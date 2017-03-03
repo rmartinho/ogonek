@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class sentence_break {
+            enum class sentence_break {
                 at,
                 cl,
                 cr,

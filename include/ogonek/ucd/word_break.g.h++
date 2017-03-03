@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class word_break {
+            enum class word_break {
                 cr,
                 dq,
                 eb,

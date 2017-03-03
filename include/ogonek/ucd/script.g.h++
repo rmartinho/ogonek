@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class script {
+            enum class script {
                 adlm,
                 aghb,
                 ahom,

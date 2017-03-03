@@ -12,10 +12,18 @@
 #ifndef OGONEK_NORMALIZATION_FORMS_NFC_HPP
 #define OGONEK_NORMALIZATION_FORMS_NFC_HPP
 
+#include <ogonek/types.h++>
+#include <ogonek/concepts.h++>
 #include <ogonek/normalization_forms/nfd.h++>
 
 namespace ogonek {
-    struct nfc : nfd {};
+    struct nfc : public nfd {
+        template <typename Rng,
+                  CONCEPT_REQUIRES_(ForwardRangeOf<Rng, code_point>()),
+                  CONCEPT_REQUIRES_(OutputRange<Rng, code_point>())>
+        static void compose(Rng rng) {
+        }
+    };
     CONCEPT_ASSERT(NormalizationForm<nfc>());
 } // namespace ogonek
 

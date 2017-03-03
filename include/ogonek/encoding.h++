@@ -10,8 +10,8 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 /**
- * Encoding ``<ogonek/encoding.h++>``
- * ==================================
+ * Encoding
+ * ========
  */
 
 #ifndef OGONEK_ENCODING_HPP

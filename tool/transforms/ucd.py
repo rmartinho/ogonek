@@ -19,7 +19,7 @@ import errno
 import math
 import string
 from contextlib import contextmanager
-from itertools import chain
+from itertools import chain, groupby
 if sys.version_info[0] > 2:
     from itertools import zip_longest
 else:
@@ -384,6 +384,19 @@ class Types:
         def __repr__(self):
             return '{0}*'.format(self.type)
 
+    class CompositionList(Type):
+        def cpp(self, value):
+            if value:
+                return '{{ {0} }}'.format(', '.join('{{ {0}, {1} }}'.format(*x) for x in value))
+            else:
+                return '{}'
+
+        def py(self, value):
+            return value
+
+        def __repr__(self):
+            return 'std::initializer_list<composition_entry>' # TODO
+
 class Value:
     def __init__(self, type, value):
         self.type = type
@@ -693,19 +706,24 @@ def extract_props(aliases, parsed):
         except StopIteration:
             pass
 
-    def gen_full_decomposition(records, types, canonical):
-        def in_range(x, r):
-            return r[0] <= x <= r[1]
-
+    def get_decomposition_types(types):
         def enumerate_types():
             for r, t in types:
                 r = r.py()
                 t = t.py()
                 for x in range(r[0], r[1] + 1):
                     yield (x, t[1] if t else 'Can')
-        type_map = { x: t for (x, t) in enumerate_types() }
+
+        return { x: t for (x, t) in enumerate_types() }
+
+    def gen_full_decomposition(records, types, canonical):
+        def in_range(x, r):
+            return r[0] <= x <= r[1]
+
 
         decompositions = { r[0].py()[0]: r[5] for r in records }
+
+        type_map = get_decomposition_types(types)
 
         def should_decompose(u):
             if u in decompositions and decompositions[u].py():
@@ -761,6 +779,35 @@ def extract_props(aliases, parsed):
     def gen_listed_bool_prop(listed, name):
         return ([r[0], Value(Types.Binary(), 'Y')] for r in listed if canon_equal(r[1].value, name))
 
+    def gen_canonical_compositions(records, types, full_exclusion):
+        type_map = get_decomposition_types(types)
+
+        def expand_ranges(ranges):
+            for r in ranges:
+                for x in range(r[0], r[1]+1):
+                    yield x
+        full_exclusion = set(expand_ranges(r[0].py() for r in full_exclusion if canon_equal(r[1].value, 'Full_Composition_Exclusion')))
+
+        def should_decompose(r):
+            u = r[0].py()[0]
+            d = r[5].py()
+            return d and u in type_map and type_map[u] == 'Can' and len(d) > 1 and not u in full_exclusion
+
+        def composition_entry(r):
+            d = r[5].py()
+            return (d[0], d[1], r[0].py()[0])
+
+        compositions = [composition_entry(r) for r in records if should_decompose(r)]
+
+        grouped = {}
+        for k, w, r in compositions:
+            if k in grouped:
+                grouped[k] += [(w, r)]
+            else:
+                grouped[k] = [(w, r)]
+        for k, g in grouped.items():
+            yield [Value(Types.Range(), '{0:X}'.format(k)), Value(Types.CompositionList(), g)]
+
     def gen_listed_prop(listed, name):
         return ([r[0], r[2]] for r in listed if canon_equal(r[1].value, name))
 
@@ -785,6 +832,7 @@ def extract_props(aliases, parsed):
         '$Full_Canonical_Decomposition_Mapping':        gen_full_decomposition(parsed['UnicodeData.txt'], parsed['extracted/DerivedDecompositionType.txt'], True),
         '$Full_Compatibility_Decomposition_Mapping':    gen_full_decomposition(parsed['UnicodeData.txt'], parsed['extracted/DerivedDecompositionType.txt'], False), # TODO remove entries redundant with canonical
         'Full_Composition_Exclusion':                   gen_listed_bool_prop(parsed['DerivedNormalizationProps.txt'], 'Full_Composition_Exclusion'),
+        '$Canonical_Compositions':                      gen_canonical_compositions(parsed['UnicodeData.txt'], parsed['extracted/DerivedDecompositionType.txt'], parsed['DerivedNormalizationProps.txt']),
         'NFC_Quick_Check':                              gen_listed_prop(parsed['DerivedNormalizationProps.txt'], 'NFC_Quick_Check'),
         'NFD_Quick_Check':                              gen_listed_prop(parsed['DerivedNormalizationProps.txt'], 'NFD_Quick_Check'),
         'NFKC_Quick_Check':                             gen_listed_prop(parsed['DerivedNormalizationProps.txt'], 'NFKC_Quick_Check'),
@@ -868,7 +916,6 @@ def coalesce_props(props, defaults):
         prop.sort(key = lambda t: t[0].py()[0])
     def coalesce_prop(prop, default):
         # TODO multiple default ranges
-        full_range = Value(Types.Range(), '0000..10FFFF')
 
         last = None
         next_cp = 0
@@ -923,7 +970,7 @@ def write_header_file(f, name, abi, file_info):
 #include <ogonek/types.h++>
 
 #include <cstddef>
-
+${includes}
 namespace ogonek {
     namespace ucd {
         inline namespace ${abi} {${type_defs}
@@ -1027,7 +1074,8 @@ def enum_def(type):
     num_canons = len(type.canonicals())
     underlying = '' if num_flags == 0 else ' : unsigned long long'
     enumerators = indent(e + f + a)
-    type_def = "\n" + indent('''enum{3} {0}{2} {{
+    type_def = indent('''
+enum{3} {0}{2} {{
     {1}
 }};'''.format(type.typename, enumerators, underlying, ' class' if num_canons else ''), 3)
     return type_def
@@ -1043,7 +1091,8 @@ def gen_enum(prop, type):
         'description': '{0} property'.format(prop),
         'type_defs': enum_def(type),
         'fields': type_field(type.typename),
-        'entries': prop_entries(props[prop])
+        'entries': prop_entries(props[prop]),
+        'includes': ''
     }
 
 def alias_def(type, alias):
@@ -1054,8 +1103,27 @@ def gen_builtin(prop, type):
         'description': '{0} property'.format(prop),
         'type_defs': '',
         'fields': type_field(type),
-        'entries': prop_entries(props[prop])
+        'entries': prop_entries(props[prop]),
+        'includes': ''
     }
+
+def include_headers(headers):
+    return ''.join('#include <{0}>\n'.format(h) for h in headers)
+
+def gen_custom(prop, typename, headers, extra):
+    return {
+        'description': '{0} property'.format(prop),
+        'type_defs': extra,
+        'fields': type_field(typename),
+        'entries': prop_entries(props[prop]),
+        'includes': include_headers(headers)
+    }
+
+composition_entry_def = indent('''
+struct composition_entry {
+    code_point with;
+    code_point result;
+};''')
 
 output_defs = {
     'age':                                      lambda: gen_enum(   'Age',                                       version_type),
@@ -1075,6 +1143,7 @@ output_defs = {
     'full_canonical_decomposition_mapping':     lambda: gen_builtin('$Full_Canonical_Decomposition_Mapping',     'code_point const*'),
     'full_compatibility_decomposition_mapping': lambda: gen_builtin('$Full_Compatibility_Decomposition_Mapping', 'code_point const*'),
     'full_composition_exclusion':               lambda: gen_builtin('Full_Composition_Exclusion',                'bool'),
+    'canonical_compositions':                   lambda: gen_custom( '$Canonical_Compositions',                   'std::initializer_list<composition_entry>', ['initializer_list'], composition_entry_def),
     'nfc_quick_check':                          lambda: gen_builtin('NFC_Quick_Check',                           'detail::trinary'),
     'nfd_quick_check':                          lambda: gen_builtin('NFD_Quick_Check',                           'bool'),
     'nfkc_quick_check':                         lambda: gen_builtin('NFKC_Quick_Check',                          'detail::trinary'),

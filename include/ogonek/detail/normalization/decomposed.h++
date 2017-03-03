@@ -45,16 +45,16 @@ namespace ogonek {
         struct compose {
             CONCEPT_ASSERT(NormalizationForm<Form>());
 
-            template <typename Rng
+            template <typename Rng,
                       CONCEPT_REQUIRES_(ForwardRangeOf<Rng, code_point>())>
-            void operator()(Rng) const {
-                concepts::NormalizationForm::decompose_into<Form>(u, out);
+            void operator()(Rng rng) const {
+                concepts::NormalizationForm::compose<Form>(rng);
             }
         };
     } // namespace fun
     inline namespace {
         template <typename Form>
-        constexpr auto const& decompose_into = detail::static_const<fun::decompose_into<Form>>::value;
+        constexpr auto const& compose = detail::static_const<fun::compose<Form>>::value;
     }
 
     namespace detail {

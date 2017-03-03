@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class general_category : unsigned long long {
+            enum class general_category : unsigned long long {
                 cc = 0x4,
                 cf = 0x8,
                 cn = 0x10,

@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class indic_positional_category {
+            enum class indic_positional_category {
                 bottom,
                 bottom_and_right,
                 left,

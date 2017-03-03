@@ -10,8 +10,8 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 /**
- * Concepts ``<ogonek/concepts.h++>``
- * ==================================
+ * Concepts
+ * ========
  */
 
 #ifndef OGONEK_CONCEPTS_HPP
@@ -304,10 +304,11 @@ namespace ogonek {
         };
     } // namespace concepts
 
-    using ranges::ForwardIterator; // TODO remove, use ranges consistently
+    using ranges::ForwardIterator;
     using ranges::OutputIterator;
     using ranges::Sentinel;
     using ranges::ForwardRange;
+    using ranges::OutputRange;
 
     // TODO docs?
     template <typename V, typename T>

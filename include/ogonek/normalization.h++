@@ -10,8 +10,8 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 /**
- * Normalization forms ``<ogonek/normalization.h++>``
- * ==================================================
+ * Normalization forms
+ * ===================
  */
 
 #ifndef OGONEK_NORMALIZATION_HPP

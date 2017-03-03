@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class grapheme_cluster_break {
+            enum class grapheme_cluster_break {
                 cn,
                 cr,
                 eb,

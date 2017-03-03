@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum combining_class {
+            enum combining_class {
                 nr = 0,
                 not_reordered = nr,
                 ov = 1,

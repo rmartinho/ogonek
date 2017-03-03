@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class indic_syllabic_category {
+            enum class indic_syllabic_category {
                 avagraha,
                 bindu,
                 brahmi_joining_number,

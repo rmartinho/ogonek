@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class hangul_syllable_type {
+            enum class hangul_syllable_type {
                 l,
                 lv,
                 lvt,

@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class version {
+            enum class version {
                 _1_1,
                 _2_0,
                 _2_1,

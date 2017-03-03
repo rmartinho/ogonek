@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class bracket_type {
+            enum class bracket_type {
                 c,
                 n,
                 o,

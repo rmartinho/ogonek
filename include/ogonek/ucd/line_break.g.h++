@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class line_break {
+            enum class line_break {
                 ai,
                 al,
                 b2,

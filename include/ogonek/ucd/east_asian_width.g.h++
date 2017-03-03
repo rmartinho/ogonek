@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class east_asian_width {
+            enum class east_asian_width {
                 a,
                 f,
                 h,

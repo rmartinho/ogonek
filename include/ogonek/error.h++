@@ -10,8 +10,8 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 /**
- * Error ``<ogonek/error.h++>``
- * =============================================
+ * Error handling
+ * ==============
  */
 
 #ifndef OGONEK_ERROR_HPP

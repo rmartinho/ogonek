@@ -10,8 +10,8 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 /**
- * Unicode character database ``<ogonek/ucd.h++>``
- * ===============================================
+ * Unicode character database
+ * ==========================
  */
 
 #ifndef OGONEK_UCD_HPP

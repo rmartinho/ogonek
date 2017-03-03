@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class bidi_class {
+            enum class bidi_class {
                 al,
                 an,
                 b,

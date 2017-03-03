@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class joining_type {
+            enum class joining_type {
                 c,
                 d,
                 l,

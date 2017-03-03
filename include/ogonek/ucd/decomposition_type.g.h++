@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class decomposition_type {
+            enum class decomposition_type {
                 can,
                 com,
                 enc,

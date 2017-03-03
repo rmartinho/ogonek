@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class block {
+            enum class block {
                 adlam,
                 aegean_numbers,
                 ahom,

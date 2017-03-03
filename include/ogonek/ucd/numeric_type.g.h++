@@ -24,7 +24,7 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-enum class numeric_type {
+            enum class numeric_type {
                 de,
                 di,
                 none,
