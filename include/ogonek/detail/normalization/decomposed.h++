@@ -121,14 +121,14 @@ namespace ogonek {
                             return ucd::get_canonical_combining_class(a) < ucd::get_canonical_combining_class(b);
                         };
 
-                        auto next_starter = std::find_if(first+1, last, is_starter);
+                        auto next_starter = std::find_if(std::next(first), last, is_starter);
                         for(; first != next_starter; ++first) {
                             decompose_into<Form>(*first, ranges::back_inserter(decomposed));
                         }
                         // TODO optimize for no-starter decompositions
                         auto l = decomposed.begin();
                         for(auto r = l; r != decomposed.end(); l = r) {
-                            r = std::find_if(r+1, decomposed.end(), is_starter);
+                            r = std::find_if(std::next(r), decomposed.end(), is_starter);
                             std::sort(l, r, by_canonical_combining_class);
                         }
                         position = 0;

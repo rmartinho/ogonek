@@ -331,22 +331,32 @@ namespace ogonek {
         }
 
         namespace detail {
-            namespace fun {
-                struct compose_two {
-                    ogonek::detail::optional<code_point> operator()(code_point u0, code_point u1) const {
-                        auto value = detail::find_property_group(canonical_compositions_data, canonical_compositions_data_size, u0).value;
+            struct composer {
+                std::initializer_list<composition_entry> compositions;
 
-                        auto composition = std::find_if(value.begin(), value.end(), [&u1](auto&& c) { return c.with == u1; });
-                        if(composition == value.end()) {
-                            return {};
-                        } else {
-                            return { composition->result };
-                        }
+                explicit operator bool() const {
+                    return compositions.size() > 0;
+                }
+
+                ogonek::detail::optional<code_point> operator()(code_point with) const{
+                    auto composition = std::find_if(compositions.begin(), compositions.end(), [&with](auto&& c) { return c.with == with; });
+                    if(composition == compositions.end()) {
+                        return {};
+                    } else {
+                        return { composition->result };
+                    }
+                }
+            };
+            namespace fun {
+                struct get_composer {
+                    composer operator()(code_point u) const {
+                        auto value = detail::find_property_group(canonical_compositions_data, canonical_compositions_data_size, u).value;
+                        return { value };
                     }
                 };
             } // namespace fun
             inline namespace {
-                constexpr auto const& compose_two = ogonek::detail::static_const<fun::compose_two>::value;
+                constexpr auto const& get_composer = ogonek::detail::static_const<fun::get_composer>::value;
             }
         } // namespace detail
 
