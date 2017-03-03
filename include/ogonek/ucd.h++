@@ -20,6 +20,7 @@
 #include <ogonek/ucd/ucd_all.g.h++>
 #include <ogonek/types.h++>
 #include <ogonek/detail/static_const.h++>
+#include <ogonek/detail/container/optional.h++>
 
 #include <boost/logic/tribool.hpp>
 #include <boost/optional.hpp>
@@ -329,6 +330,26 @@ namespace ogonek {
             constexpr auto const& get_full_decomposition = ogonek::detail::static_const<fun::get_full_decomposition>::value;
         }
 
+        namespace detail {
+            namespace fun {
+                struct compose_two {
+                    ogonek::detail::optional<code_point> operator()(code_point u0, code_point u1) const {
+                        auto value = detail::find_property_group(canonical_compositions_data, canonical_compositions_data_size, u0).value;
+
+                        auto composition = std::find_if(value.begin(), value.end(), [&u1](auto&& c) { return c.with == u1; });
+                        if(composition == value.end()) {
+                            return {};
+                        } else {
+                            return { composition->result };
+                        }
+                    }
+                };
+            } // namespace fun
+            inline namespace {
+                constexpr auto const& compose_two = ogonek::detail::static_const<fun::compose_two>::value;
+            }
+        } // namespace detail
+
         /**
          * .. function:: bool is_excluded_from_composition(code_point u)
          *
@@ -367,7 +388,7 @@ namespace ogonek {
         OGONEK_UCD_GETTER(numeric_type, numeric_type);
 
         /**
-         * .. function:: boost::optional get_numeric_value(code_point u)
+         * .. function:: boost::optional<boost::rational<long>> get_numeric_value(code_point u)
          *
          *     :returns: the *Numeric_Value* property of ``u``, if present; none otherwise
          */
