@@ -40,6 +40,23 @@ namespace ogonek {
         constexpr auto const& decompose_into = detail::static_const<fun::decompose_into<Form>>::value;
     }
 
+    namespace fun {
+        template <typename Form>
+        struct compose {
+            CONCEPT_ASSERT(NormalizationForm<Form>());
+
+            template <typename Rng
+                      CONCEPT_REQUIRES_(ForwardRangeOf<Rng, code_point>())>
+            void operator()(Rng) const {
+                concepts::NormalizationForm::decompose_into<Form>(u, out);
+            }
+        };
+    } // namespace fun
+    inline namespace {
+        template <typename Form>
+        constexpr auto const& decompose_into = detail::static_const<fun::decompose_into<Form>>::value;
+    }
+
     namespace detail {
         template <typename Form, typename Rng>
         struct decomposed_view
@@ -97,22 +114,30 @@ namespace ogonek {
                     decomposed.clear();
                     if(first != last) {
                         // TODO support input ranges
-                        auto next_starter = std::find_if(first+1, last, [](auto u) {
+                        auto is_starter = [](auto u) {
                             return ucd::get_canonical_combining_class(u) == ucd::not_reordered;
-                        });
+                        };
+                        auto by_canonical_combining_class = [](auto a, auto b) {
+                            return ucd::get_canonical_combining_class(a) < ucd::get_canonical_combining_class(b);
+                        };
+
+                        auto next_starter = std::find_if(first+1, last, is_starter);
                         for(; first != next_starter; ++first) {
                             decompose_into<Form>(*first, ranges::back_inserter(decomposed));
                         }
-                        std::sort(decomposed.begin(), decomposed.end(), [](auto a, auto b) {
-                            return ucd::get_canonical_combining_class(a) < ucd::get_canonical_combining_class(b);
-                        });
+                        // TODO optimize for no-starter decompositions
+                        auto l = decomposed.begin();
+                        for(auto r = l; r != decomposed.end(); l = r) {
+                            r = std::find_if(r+1, decomposed.end(), is_starter);
+                            std::sort(l, r, by_canonical_combining_class);
+                        }
                         position = 0;
                     }
                 }
                 // TODO extract this pattern into some flat_map-ish range
 
                 static constexpr auto max_decomposition = 18; // TODO generate this when code-generating UCD
-                using decomposed_character = small_vector<code_point, max_decomposition>;
+                using decomposed_character = small_vector<code_point, 4>;
 
                 iterator first;
                 iterator last;
