@@ -1,7 +1,5 @@
 cmake_minimum_required (VERSION 3.2)
 
-include (tests.cmake)
-
 set (UCD_DIR ${PROJECT_SOURCE_DIR}/data/ucd)
 set (INCLUDE_DIR ${PROJECT_SOURCE_DIR}/test/normalization)
 set (TEST_SRC_DIR ${PROJECT_SOURCE_DIR}/test/normalization)
@@ -17,7 +15,8 @@ add_custom_command (
     COMMENT "Translating normalization tests")
 
 file (GLOB_RECURSE test_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.c++)
-add_executable (test_runner ${test_SRC} ${normalization_test_gen_SRC})
+file (GLOB_RECURSE test_HDR ${CMAKE_CURRENT_SOURCE_DIR}/*.h++)
+add_executable (test_runner ${test_SRC} ${test_HDR} ${normalization_test_gen_SRC} ${normalization_test_gen_HPP})
 target_include_directories (test_runner PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries (test_runner Catch ogonek_ucd ogonek_codepages)
 

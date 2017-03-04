@@ -36,10 +36,11 @@ elif len(sys.argv) == 5:
     inc_dir = sys.argv[3]
     src_dir = sys.argv[4]
     dry_run = False
-elif len(sys.argv) == 3 and sys.argv[1] == '--files':
+elif len(sys.argv) == 4 and sys.argv[1] == '--files':
     dry_run = True
     list_files = True
-    src_dir = sys.argv[2]
+    inc_dir = sys.argv[2]
+    src_dir = sys.argv[3]
 else:
     print('usage: ' + os.path.basename(sys.argv[0]) + ' <ABI label> <UCD directory> <header output> <src output>')
     sys.exit(17)
@@ -1283,5 +1284,8 @@ elif list_files:
         for f in sorted(output_defs):
             impl_name = '{0}.g.c++'.format(f)
             yield os.path.join(src_dir, impl_name)
+            header_name = '{0}.g.h++'.format(f)
+            yield os.path.join(inc_dir, 'ogonek', 'ucd', header_name)
+        yield os.path.join(inc_dir, 'ucd_all.g.h++')
 
     sys.stdout.write(';'.join(filenames()))

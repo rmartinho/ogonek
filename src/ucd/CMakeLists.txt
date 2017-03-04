@@ -5,10 +5,10 @@ set (INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 set (UCD_SRC_DIR ${PROJECT_SOURCE_DIR}/src/ucd/gen)
 set (UCD_TRANSFORM_TOOL ${PROJECT_SOURCE_DIR}/tool/transforms/ucd.py)
 
-file (GLOB_RECURSE ucd_txt_SRC ${UCD_SRC_DIR}/*)
+file (GLOB_RECURSE ucd_txt_SRC ${UCD_SRC_DIR}/*.c++)
 
 execute_process (
-    COMMAND python ${UCD_TRANSFORM_TOOL} --files ${UCD_SRC_DIR}
+    COMMAND python ${UCD_TRANSFORM_TOOL} --files ${INCLUDE_DIR} ${UCD_SRC_DIR}
     OUTPUT_VARIABLE ucd_gen_SRC)
 
 add_custom_command (
