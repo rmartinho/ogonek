@@ -29,7 +29,7 @@ namespace test {
     namespace detail {
         template <typename T>
         void format_code_unit(std::ostream& os, T u) {
-            os.width(sizeof(T));
+            os.width(2*sizeof(T));
             os.fill('0');
             os << std::hex << std::uppercase << static_cast<unsigned long long>(static_cast<std::make_unsigned_t<T>>(u));
         }
