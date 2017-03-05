@@ -13,6 +13,12 @@ set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS OFF)
 
+if(MSVC)
+    add_definitions(/W4)
+elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+    add_definitions(-Wall -Wextra -pedantic -Werror)
+endif()
+
 set (OGONEK_ABI abiv0)
 
 include_directories (${PROJECT_SOURCE_DIR}/include)

@@ -71,9 +71,9 @@ namespace ogonek {
             T& operator[](std::ptrdiff_t index) { return array[index]; }
             T const& operator[](std::ptrdiff_t index) const { return array[index]; }
 
-            iterator erase(iterator first) {
-                std::copy(std::next(first), end(), first);
-                --count;
+            iterator erase(iterator first, iterator last) {
+                std::copy(last, end(), first);
+                count -= last - first;
                 return first;
             }
 

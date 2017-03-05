@@ -91,7 +91,7 @@ Unicode character database
 
     :returns: the *Numeric_Type* property of ``u``
 
-.. function:: boost::optional get_numeric_value(code_point u)
+.. function:: boost::optional<boost::rational<long>> get_numeric_value(code_point u)
 
     :returns: the *Numeric_Value* property of ``u``, if present; none otherwise
 

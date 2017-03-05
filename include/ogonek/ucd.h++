@@ -33,6 +33,7 @@
 
 #include <cstddef>
 #include <cstring>
+#include <cassert>
 
 namespace ogonek {
     /**
@@ -139,6 +140,44 @@ namespace ogonek {
                 } else {
                     return { lpart, vpart };
                 }
+            }
+            inline hangul_syllable_type get_hangul_syllable_type(code_point u) {
+                return detail::find_property_group(hangul_syllable_type_data, hangul_syllable_type_data_size, u).value;
+            }
+            inline bool can_compose(code_point u) {
+                auto value = detail::find_property_group(canonical_compositions_data, canonical_compositions_data_size, u).value;
+                if(value.size() > 0) {
+                    return true;
+                }
+                auto hst = get_hangul_syllable_type(u);
+                return hst == hangul_syllable_type::l || hst == hangul_syllable_type::lv;
+            }
+            inline bool can_compose(code_point u0, code_point u1) {
+                auto value = detail::find_property_group(canonical_compositions_data, canonical_compositions_data_size, u0).value;
+                auto comp = std::find_if(value.begin(), value.end(), [&u1](auto&& c) { return c.with == u1; });
+                if(comp != value.end()) {
+                    return true;
+                }
+                auto hst0 = get_hangul_syllable_type(u0);
+                auto hst1 = get_hangul_syllable_type(u1);
+                return (hst0 == hangul_syllable_type::l && hst1 == hangul_syllable_type::v)
+                    || (hst0 == hangul_syllable_type::lv && hst1 == hangul_syllable_type::t);
+            }
+            inline code_point compose(code_point u0, code_point u1) {
+                assert(can_compose(u0, u1));
+                auto value = detail::find_property_group(canonical_compositions_data, canonical_compositions_data_size, u0).value;
+                auto comp = std::find_if(value.begin(), value.end(), [&u1](auto&& c) { return c.with == u1; });
+                if(comp != value.end()) {
+                    return comp->result;
+                }
+                auto hst0 = get_hangul_syllable_type(u0);
+                auto hst1 = get_hangul_syllable_type(u1);
+                if(hst0 == hangul_syllable_type::l && hst1 == hangul_syllable_type::v) {
+                    return (u0 - 0x1100) * 588 + (u1 - 0x1161) * 28 + 44032;
+                } else if(hst0 == hangul_syllable_type::lv && hst1 == hangul_syllable_type::t) {
+                    return (u0 - 44032) + (u1 - 0x11A7) + 44032;
+                }
+                return 0xFFFFFFFF; // unreachable
             }
         } // namespace detail
 
@@ -331,33 +370,7 @@ namespace ogonek {
         }
 
         namespace detail {
-            struct composer {
-                std::initializer_list<composition_entry> compositions;
 
-                explicit operator bool() const {
-                    return compositions.size() > 0;
-                }
-
-                ogonek::detail::optional<code_point> operator()(code_point with) const{
-                    auto composition = std::find_if(compositions.begin(), compositions.end(), [&with](auto&& c) { return c.with == with; });
-                    if(composition == compositions.end()) {
-                        return {};
-                    } else {
-                        return { composition->result };
-                    }
-                }
-            };
-            namespace fun {
-                struct get_composer {
-                    composer operator()(code_point u) const {
-                        auto value = detail::find_property_group(canonical_compositions_data, canonical_compositions_data_size, u).value;
-                        return { value };
-                    }
-                };
-            } // namespace fun
-            inline namespace {
-                constexpr auto const& get_composer = ogonek::detail::static_const<fun::get_composer>::value;
-            }
         } // namespace detail
 
         /**
@@ -630,7 +643,16 @@ namespace ogonek {
          *
          *     :returns: the *Hangul_Syllable_Type* property of ``u``
          */
-        OGONEK_UCD_GETTER(hangul_syllable_type, hangul_syllable_type);
+        namespace fun {
+            struct get_hangul_syllable_type {
+                hangul_syllable_type operator()(code_point u) const {
+                    return detail::get_hangul_syllable_type(u);
+                }
+            };
+        } // namespace fun
+        inline namespace {
+            constexpr auto const& get_hangul_syllable_type = ogonek::detail::static_const<fun::get_hangul_syllable_type>::value;
+        }
 
         /**
          * .. function:: std::string get_jamo_short_name(code_point u)

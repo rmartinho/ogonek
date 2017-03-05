@@ -18,6 +18,7 @@
 
 #include <range/v3/view_facade.hpp>
 #include <range/v3/utility/iterator.hpp>
+#include <range/v3/view/all.hpp>
 
 #include <algorithm>
 #include <iterator>
@@ -46,9 +47,10 @@ namespace ogonek {
             CONCEPT_ASSERT(NormalizationForm<Form>());
 
             template <typename Rng,
-                      CONCEPT_REQUIRES_(ForwardRangeOf<Rng, code_point>())>
-            void operator()(Rng rng) const {
-                concepts::NormalizationForm::compose<Form>(rng);
+                      CONCEPT_REQUIRES_(ForwardRangeOf<code_point, Rng>()),
+                      CONCEPT_REQUIRES_(OutputRange<Rng, code_point>())>
+            auto operator()(Rng rng) const {
+                return concepts::NormalizationForm::compose<Form>(rng);
             }
         };
     } // namespace fun
@@ -114,6 +116,9 @@ namespace ogonek {
                     decomposed.clear();
                     if(first != last) {
                         // TODO support input ranges
+                        auto is_decomposition_boundary = [](auto u) {
+                            return ucd::get_canonical_combining_class(u) == ucd::not_reordered && ucd::get_hangul_syllable_type(u) != ucd::hangul_syllable_type::t;
+                        };
                         auto is_starter = [](auto u) {
                             return ucd::get_canonical_combining_class(u) == ucd::not_reordered;
                         };
@@ -121,8 +126,8 @@ namespace ogonek {
                             return ucd::get_canonical_combining_class(a) < ucd::get_canonical_combining_class(b);
                         };
 
-                        auto next_starter = std::find_if(std::next(first), last, is_starter);
-                        for(; first != next_starter; ++first) {
+                        auto next_boundary = std::find_if(std::next(first), last, is_decomposition_boundary);
+                        for(; first != next_boundary; ++first) {
                             decompose_into<Form>(*first, ranges::back_inserter(decomposed));
                         }
                         // TODO optimize for no-starter decompositions
@@ -131,6 +136,10 @@ namespace ogonek {
                             r = std::find_if(std::next(r), decomposed.end(), is_starter);
                             std::sort(l, r, by_canonical_combining_class);
                         }
+
+                        auto end = compose<Form>(ranges::view::all(decomposed));
+                        decomposed.erase(end, decomposed.end());
+
                         position = 0;
                     }
                 }

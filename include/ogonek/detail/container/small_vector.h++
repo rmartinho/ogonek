@@ -100,12 +100,13 @@ namespace ogonek {
             T& operator[](std::ptrdiff_t index) { return data()[index]; }
             T const& operator[](std::ptrdiff_t index) const { return data()[index]; }
 
-            iterator erase(iterator first) {
-                auto idx = std::distance(begin(), first);
+            iterator erase(iterator first, iterator last) {
+                auto first_idx = std::distance(begin(), first);
+                auto last_idx = std::distance(begin(), last);
                 if(is_small()) {
-                    return &*as_small().erase(as_small().begin() + idx);
+                    return &*as_small().erase(as_small().begin() + first_idx, as_small().begin() + last_idx);
                 } else {
-                    return &*as_large().erase(as_large().begin() + idx);
+                    return &*as_large().erase(as_large().begin() + first_idx, as_large().begin() + last_idx);
                 }
             }
 

@@ -12,10 +12,14 @@
 #ifndef OGONEK_NORMALIZATION_FORMS_NFKC_HPP
 #define OGONEK_NORMALIZATION_FORMS_NFKC_HPP
 
+#include <ogonek/normalization_forms/nfc.h++>
 #include <ogonek/normalization_forms/nfkd.h++>
 
 namespace ogonek {
-    struct nfkc : nfkd {};
+    struct nfkc : private nfkd, private nfc {
+        using nfkd::decompose_into;
+        using nfc::compose;
+    };
     CONCEPT_ASSERT(NormalizationForm<nfkc>());
 } // namespace ogonek
 

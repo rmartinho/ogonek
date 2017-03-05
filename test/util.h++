@@ -36,7 +36,9 @@ namespace test {
         template <typename T>
         void format_code_point(std::ostream& os, T u) {
             os << "U+";
-            format_code_unit(os, u);
+            os.width(4);
+            os.fill('0');
+            os << std::hex << std::uppercase << static_cast<unsigned>(u);
         }
         template <typename T, typename Str>
         std::string convert_string(Str const& str, void (*formatter)(std::ostream&, T)) {

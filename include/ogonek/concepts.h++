@@ -272,28 +272,32 @@ namespace ogonek {
         struct NormalizationForm {
         private:
             template <typename T, typename Rng>
-            struct has_compose {
+            struct has_compose_tester {
                 template <typename U = T>
                 static auto test(int) -> detail::always_true<decltype(U::compose(std::declval<Rng>()))>;
                 static auto test(...) -> std::false_type;
                 using type = decltype(test(0));
             };
+            template <typename T, typename Rng>
+            struct has_compose : has_compose_tester<T, Rng>::type {};
 
             template <typename T, typename Rng>
             static auto compose(Rng rng, std::true_type) {
-                T::compose(rng);
+                return T::compose(rng);
             }
             template <typename T, typename Rng>
-            static void compose(Rng, std::false_type) {}
+            static auto compose(Rng rng, std::false_type) {
+                return ranges::end(rng);
+            }
 
         public:
             template <typename T, typename Out>
             static auto decompose_into(code_point u, Out out) -> decltype(T::decompose_into(u, out)) {
-                T::decompose_into(u, out);
+                return T::decompose_into(u, out);
             }
             template <typename T, typename Rng>
-            static void compose(Rng rng) {
-                compose(rng, has_compose<T, Rng>());
+            static auto compose(Rng rng) {
+                return NormalizationForm::compose<T>(rng, has_compose<T, Rng>());
             }
 
             template <typename N>

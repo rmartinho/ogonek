@@ -17,43 +17,42 @@
 #include <ogonek/ucd.h++>
 #include <ogonek/normalization_forms/nfd.h++>
 
+#include <range/v3/iterator_range.hpp>
+
 namespace ogonek {
-    struct nfc : public nfd {
+    struct nfc : private nfd {
+        using nfd::decompose_into;
+
         template <typename Rng,
-                  CONCEPT_REQUIRES_(ForwardRangeOf<Rng, code_point>()), // TODO actually requires bidi-ranges :|
+                  CONCEPT_REQUIRES_(ForwardRangeOf<code_point, Rng>()), // TODO actually requires bidi-ranges :|
                   CONCEPT_REQUIRES_(OutputRange<Rng, code_point>())>
-        static void compose(Rng rng) {
+        static auto compose(Rng rng) {
             constexpr auto no_last_ccc = -1;
 
             auto is_blocked = [](code_point u, int last_ccc) {
                 return last_ccc != no_last_ccc && (last_ccc == 0 || last_ccc >= ucd::get_canonical_combining_class(u));
             };
-            for(auto l = ranges::begin(rng); l != ranges::end(rng); ++l) {
-                if(ucd::is_excluded_from_composition(*l)) {
-                    continue;
-                }
-
-                auto compose_with = ucd::detail::get_composer(*l);
-                if(!compose_with) {
+            auto begin = ranges::begin(rng);
+            auto end = ranges::end(rng);
+            for(auto l = begin; l != end; ++l) {
+                if(ucd::is_excluded_from_composition(*l) || !ucd::detail::can_compose(*l)) {
                     continue;
                 }
 
                 auto last_ccc = no_last_ccc;
-                auto end = ranges::end(rng);
                 for(auto r = std::next(l); r != end; ) {
-                    if(!is_blocked(*r, last_ccc)) {
-                       auto composed = compose_with(*r);
-                       if(composed) {
-                           *l = *composed;
-                           std::copy(std::next(r), end, r); // TODO optimize
-                           --end;
-                       }
+                    if(!is_blocked(*r, last_ccc) && ucd::detail::can_compose(*l, *r)) {
+                        *l = ucd::detail::compose(*l, *r);
+                        std::copy(std::next(r), end, r); // TODO optimize
+                        --end;
                     } else {
                         last_ccc = ucd::get_canonical_combining_class(*r);
                         ++r;
                     }
                 }
-            }}
+            }
+            return end;
+        }
     };
     CONCEPT_ASSERT(NormalizationForm<nfc>());
 } // namespace ogonek
