@@ -99,6 +99,9 @@ class Type:
            This is a list of pairs (canonical, alias)."""
         return []
 
+    def has_flags(self):
+        return False
+
     def all_flag_aliases(self):
         """Returns all the aliases of multi-bit values for flag enums"""
         return []
@@ -267,7 +270,7 @@ class Types:
             return 'C[{0}]'.format(self.typename)
 
     class Enumeration(Type):
-        def __init__(self, typename, aliases, flag_aliases=[]):
+        def __init__(self, typename, aliases, flag_aliases=None):
             self.typename = typename
             self.aliases = aliases
             self.flag_aliases = flag_aliases
@@ -275,8 +278,11 @@ class Types:
         def all_aliases(self):
             return self.aliases
 
+        def has_flags(self):
+            return self.flag_aliases != None
+
         def all_flag_aliases(self):
-            return self.flag_aliases
+            return self.flag_aliases or []
 
         def cpp(self, value):
             canon = self.canonical(value)
@@ -537,7 +543,12 @@ def parse_aliases(ucd_dir, file_defs):
         value_aliases['$name_alias_type'] = build_name_alias_types(meta_info['NameAliases.txt'])
         value_aliases['$case_condition'] = build_case_conditions(meta_info['SpecialCasing.txt'])
 
-        flag_aliases = { 'gc': extract_gc_flags(value_aliases) }
+        flag_aliases = {
+                'gc': extract_gc_flags(value_aliases),
+                'GCB': {},
+                'WB': {},
+                'SB': {},
+        }
 
         rearrange_ccc(value_aliases)
 
@@ -588,9 +599,9 @@ indic_positional_category_type = Types.Enumeration('indic_positional_category', 
 indic_syllabic_category_type   = Types.Enumeration('indic_syllabic_category', value_aliases['InSC'])
 alias_type_type                = Types.Enumeration('$name_alias_type', value_aliases['$name_alias_type'])
 case_condition_type            = Types.Catalog('$case_condition', value_aliases['$case_condition'])
-grapheme_cluster_break_type    = Types.Enumeration('grapheme_cluster_break', value_aliases['GCB'])
-sentence_break_type            = Types.Enumeration('sentence_break', value_aliases['SB'])
-word_break_type                = Types.Enumeration('word_break', value_aliases['WB'])
+grapheme_cluster_break_type    = Types.Enumeration('grapheme_cluster_break', value_aliases['GCB'], flag_aliases['GCB'])
+sentence_break_type            = Types.Enumeration('sentence_break', value_aliases['SB'], flag_aliases['SB'])
+word_break_type                = Types.Enumeration('word_break', value_aliases['WB'], flag_aliases['WB'])
 multiple_script_type           = Types.Multiple('script_list', script_type)
 
 def parse_unidata(split):
@@ -1036,14 +1047,14 @@ def cpp_enumerators(canonicals, flags):
         return ['{0},\n'.format(cpp_ize(canon)) for canon in canonicals]
     def flaggy():
         strings = []
-        i = 1
+        i = 0
         for canon in canonicals:
             if canon not in flags:
-                strings.append('{0} = 0x{1:X},\n'.format(cpp_ize(canon), 2 << i))
+                strings.append('{0} = 0x{1:X},\n'.format(cpp_ize(canon), 1 << i))
                 i += 1
         return strings
 
-    return '\n'.join(flaggy() if len(flags) else flagless())
+    return '\n'.join(flaggy() if flags != None else flagless())
 
 def cpp_flags(flags):
     strings = ['{0} = {1},\n'.format(cpp_ize(f), ' | '.join(cpp_ize(bit) for bit in flags[f])) for f in flags]
@@ -1068,7 +1079,7 @@ def indent(lines, level = 1):
     return '\n'.join(leaded())
 
 def enum_def(type):
-    e = cpp_enumerators(type.canonicals(), type.all_flag_aliases())
+    e = cpp_enumerators(type.canonicals(), type.all_flag_aliases() if type.has_flags() else None)
     f = cpp_flags(type.all_flag_aliases())
     a = cpp_aliases(type.all_aliases())
     num_flags = len(type.all_flag_aliases())
