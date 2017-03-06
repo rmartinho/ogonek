@@ -35,6 +35,8 @@ namespace ogonek {
      * .. function:: template <NormalizationForm Form, OutputIterator Out>\
      *               auto decompose_into(code_point u, Out out)
      *
+     *     .. warning:: |unstable-api|
+     *
      *     Writes the full decomposition of a |code-point| into an output iterator,
      *     according to ``Form``.
      *
@@ -59,10 +61,12 @@ namespace ogonek {
         constexpr auto const& decompose_into = detail::static_const<fun::decompose_into<Form>>::value;
     }
 
-    // TODO OutputRange requirement
+    // TODO Document OutputRange requirement
     /**
      * .. function:: template <NormalizationForm Form, ForwardRange Rng>\
      *               auto compose(Rng rng)
+     *
+     *     .. warning:: |unstable-api|
      *
      *     Applies the Canonical Composition Algorithm to range.
      *

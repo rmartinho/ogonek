@@ -17,4 +17,12 @@
 
 .. |valid-code-point| replace:: in the range [0..10FFFF\ :sub:`16`]
 
+.. |escape-hatch| replace:: This is a feature of last resort. It may be hard to
+    use correctly or is otherwise undesirable, and is only provided for
+    situations where no alternative is possible.
+
+.. |unstable-api| replace:: This part of the interface is still being worked
+    out; it is likely to change signficantly or to be removed before the next
+    release.
+
 .. vim:ft=rst:

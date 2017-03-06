@@ -99,6 +99,8 @@ namespace ogonek {
      * .. function:: template <EncodingForm Encoding>\
      *               coded_character_t<Encoding> encode_one(code_point u, coding_state_t<Encoding>& state)
      *
+     *     .. warning:: |unstable-api|
+     *
      *     Encodes ``u`` according to ``Encoding``.
      *
      *     :param u: the |code-point| to be encoded
@@ -271,6 +273,8 @@ namespace ogonek {
     /**
      * .. function:: template <EncodingForm Encoding, ForwardIterator It, Sentinel St>\
      *               std::pair<code_point, It> decode_one(It first, St last, coding_state_t<Encoding>& state)
+     *
+     *     .. warning:: |unstable-api|
      *
      *     Decodes the first |code-point| from the range [``first``, ``last``), according to ``Encoding``.
      *
