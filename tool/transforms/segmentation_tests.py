@@ -21,12 +21,19 @@ import string
 import os
 import io
 
-if len(sys.argv) != 3:
-    print('usage: ' + os.path.basename(sys.argv[0]) + ' <UCD folder> <output folder>')
+if len(sys.argv) != 10:
+    print('usage: ' + os.path.basename(sys.argv[0]) + ' <grapheme_in> <word_in> <sentence_in> <line_in> <header> <grapheme_impl> <word_impl> <sentence_impl> <line_impl>')
     sys.exit(17)
 
-ucd = sys.argv[1]
-output = sys.argv[2]
+grapheme_input = sys.argv[1]
+word_input = sys.argv[2]
+sentence_input = sys.argv[3]
+line_input = sys.argv[4]
+header = sys.argv[5]
+grapheme_out = sys.argv[6]
+word_out = sys.argv[7]
+sentence_out = sys.argv[8]
+line_out = sys.argv[9]
 
 def filtertests(lines):
     return list(l.split('#')[0] for l in lines if not l.startswith('#'))
@@ -66,7 +73,9 @@ copyrighttmpl = string.Template('''// Ogonek
 impltmpl = string.Template('''
 // Test data for ${description} tests
 
-#include "segmentation.g.h++"
+#include "${header}"
+
+using namespace test::string_literals;
 
 namespace test {
     break_test ${kind}_test_data[] = {
@@ -81,12 +90,13 @@ headertmpl = string.Template('''
 #ifndef OGONEK_TEST_SEGMENTATION_HPP
 #define OGONEK_TEST_SEGMENTATION_HPP
 
-#include <string>
+#include "util.h++"
+
 #include <vector>
 
 namespace test {
     struct break_test {
-        std::u32string input;
+        u32string input;
         std::vector<int> breaks;
     };
 
@@ -106,27 +116,27 @@ def writedata(file, kind, description, tests):
 
     file.write(copyrighttmpl.substitute())
     entries = '\n        '.join('{{ {0}, {{ {1} }} }},'.format(*t) for t in zip(strings, breakstrings))
-    file.write(impltmpl.substitute(kind=kind, description=description, entries=entries))
+    file.write(impltmpl.substitute(kind=kind, header=os.path.basename(header), description=description, entries=entries))
 
-with io.open(os.path.join(ucd, 'auxiliary/GraphemeBreakTest.txt'), 'r', encoding='utf-8') as graphemefile:
+with io.open(grapheme_input, 'r', encoding='utf-8') as graphemefile:
     graphemes = list(filtertests(graphemefile.readlines()))
-with io.open(os.path.join(ucd, 'auxiliary/WordBreakTest.txt'), 'r', encoding='utf-8') as wordfile:
+with io.open(word_input, 'r', encoding='utf-8') as wordfile:
     words = list(filtertests(wordfile.readlines()))
-with io.open(os.path.join(ucd, 'auxiliary/SentenceBreakTest.txt'), 'r', encoding='utf-8') as sentencefile:
+with io.open(sentence_input, 'r', encoding='utf-8') as sentencefile:
     sentences = list(filtertests(sentencefile.readlines()))
-with io.open(os.path.join(ucd, 'auxiliary/LineBreakTest.txt'), 'r', encoding='utf-8') as linefile:
+with io.open(line_input, 'r', encoding='utf-8') as linefile:
     lines = list(filtertests(linefile.readlines()))
 
-with open(os.path.join(output, 'segmentation.g.h++'), 'w') as headerfile:
+with open(header, 'w') as headerfile:
     headerfile.write(copyrighttmpl.substitute())
     headerfile.write(headertmpl.substitute(graphemes=len(graphemes), words=len(words), sentences=len(sentences), lines=len(lines)))
 
-with open(os.path.join(output, 'grapheme_test_data.g.c++'), 'w') as graphemefile:
+with open(grapheme_out, 'w') as graphemefile:
     writedata(graphemefile, 'grapheme', 'grapheme clusters', graphemes)
-with open(os.path.join(output, 'word_test_data.g.c++'), 'w') as wordfile:
+with open(word_out, 'w') as wordfile:
     writedata(wordfile, 'word', 'words', words)
-with open(os.path.join(output, 'sentence_test_data.g.c++'), 'w') as sentencefile:
+with open(sentence_out, 'w') as sentencefile:
     writedata(sentencefile, 'sentence', 'sentences', sentences)
-with open(os.path.join(output, 'line_test_data.g.c++'), 'w') as linefile:
+with open(line_out, 'w') as linefile:
     writedata(linefile, 'line', 'lines', lines)
 

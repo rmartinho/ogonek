@@ -10,6 +10,7 @@ file (GLOB_RECURSE ucd_txt_SRC ${UCD_SRC_DIR}/*.c++)
 execute_process (
     COMMAND python ${UCD_TRANSFORM_TOOL} --files ${INCLUDE_DIR} ${UCD_SRC_DIR}
     OUTPUT_VARIABLE ucd_gen_SRC)
+message(${ucd_gen_SRC})
 
 add_custom_command (
     OUTPUT ${ucd_gen_SRC}

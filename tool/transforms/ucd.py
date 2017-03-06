@@ -1286,6 +1286,6 @@ elif list_files:
             yield os.path.join(src_dir, impl_name)
             header_name = '{0}.g.h++'.format(f)
             yield os.path.join(inc_dir, 'ogonek', 'ucd', header_name)
-        yield os.path.join(inc_dir, 'ucd_all.g.h++')
+        yield os.path.join(inc_dir, 'ogonek', 'ucd', 'ucd_all.g.h++')
 
     sys.stdout.write(';'.join(filenames()))
