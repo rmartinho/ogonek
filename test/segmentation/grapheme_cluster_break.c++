@@ -9,14 +9,15 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-// Tests for the Normalization Form KD
+// Tests for grapheme cluster breaks
 
-#include <ogonek/normalization_forms/nfkd.h++>
+#include <ogonek/segmentation.h++>
+#include <ogonek/segmentation/grapheme_cluster.h++>
 
 #include <catch.hpp>
 #include "util.h++"
-#include "normalization/test_normalization.h++"
+#include "segmentation/test_segmentation.h++"
 
-TEST_CASE("official NFKD tests", "[normalization][official][nfkd]") {
-    test::test_normalization_form<ogonek::nfkd>();
+TEST_CASE("official grapheme cluster break tests", "[segmentation][official][grapheme_clusters]") {
+    test::test_segmentation_breaks<ogonek::grapheme_cluster>();
 }

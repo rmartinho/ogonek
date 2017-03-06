@@ -11,23 +11,12 @@
 
 // Tests for the Normalization Form KC
 
-#include <ogonek/normalization.h++>
 #include <ogonek/normalization_forms/nfkc.h++>
 
 #include <catch.hpp>
 #include "util.h++"
-#include "normalization/normalization_tests.g.h++"
+#include "normalization/test_normalization.h++"
 
-#include <range/v3/view/all.hpp>
-#include <range/v3/to_container.hpp>
-
-using namespace test::string_literals;
-
-TEST_CASE("official NKFC tests", "[normalization][official][nfkc]") {
-    for(auto&& t : test::normalization_test_data) {
-        INFO(t.input);
-        auto str = ogonek::normalize<ogonek::nfkc>(ranges::view::all(t.input))
-                 | ranges::to_<test::u32string>();
-        CHECK(str == t.nfkc);
-    }
+TEST_CASE("official NFKC tests", "[normalization][official][nfkc]") {
+    test::test_normalization_form<ogonek::nfkc>();
 }

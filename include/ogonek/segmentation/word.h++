@@ -9,14 +9,11 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-// Tests for the Normalization Form KD
+#ifndef OGONEK_SEGMENTATION_WORD_HPP
+#define OGONEK_SEGMENTATION_WORD_HPP
 
-#include <ogonek/normalization_forms/nfkd.h++>
+namespace ogonek {
+    struct word {};
+} // namespace ogonek
 
-#include <catch.hpp>
-#include "util.h++"
-#include "normalization/test_normalization.h++"
-
-TEST_CASE("official NFKD tests", "[normalization][official][nfkd]") {
-    test::test_normalization_form<ogonek::nfkd>();
-}
+#endif // OGONEK_SEGMENTATION_WORD_HPP

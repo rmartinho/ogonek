@@ -11,23 +11,12 @@
 
 // Tests for the Normalization Form D
 
-#include <ogonek/normalization.h++>
 #include <ogonek/normalization_forms/nfd.h++>
 
 #include <catch.hpp>
 #include "util.h++"
-#include "normalization/normalization_tests.g.h++"
-
-#include <range/v3/view/all.hpp>
-#include <range/v3/to_container.hpp>
-
-using namespace test::string_literals;
+#include "normalization/test_normalization.h++"
 
 TEST_CASE("official NFD tests", "[normalization][official][nfd]") {
-    for(auto&& t : test::normalization_test_data) {
-        INFO(t.input);
-        auto str = ogonek::normalize<ogonek::nfd>(ranges::view::all(t.input))
-                 | ranges::to_<test::u32string>();
-        CHECK(str == t.nfd);
-    }
+    test::test_normalization_form<ogonek::nfd>();
 }
