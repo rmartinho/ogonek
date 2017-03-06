@@ -21,6 +21,7 @@
 #include <ogonek/error_fwd.h++>
 #include <ogonek/concepts.h++>
 #include <ogonek/detail/static_const.h++>
+#include <ogonek/detail/container/optional.h++>
 #include <ogonek/detail/container/partial_array.h++>
 #include <ogonek/detail/range/deferred.h++>
 
@@ -339,12 +340,12 @@ namespace ogonek {
                 }
 
                 reference read() const {
-                    assert(decoded != invalid);
-                    return decoded;
+                    assert(static_cast<bool>(decoded));
+                    return *decoded;
                 }
 
                 void next() {
-                    decoded = invalid;
+                    decoded = {};
                     if(first != last) {
                         decode_next();
                     }
@@ -352,33 +353,30 @@ namespace ogonek {
 
                 bool equal(cursor const& pos) const {
                     assert(last == pos.last);
-                    return first == pos.first && (decoded == invalid) == (pos.decoded == invalid);
+                    return first == pos.first && !decoded == !pos.decoded;
                 }
 
                 bool equal(sentinel const&) const {
-                    return decoded == invalid;
+                    return !decoded;
                 }
 
             private:
                 void decode_next() {
-                    while(first != last && decoded == invalid) {
+                    while(first != last && !decoded) {
                         try {
-                            std::tie(decoded, first) = decode_one<Encoding>(first, last, state);
+                            code_point u;
+                            std::tie(u, first) = decode_one<Encoding>(first, last, state);
+                            decoded = { u };
                         } catch(decode_error<Encoding> const& e) {
-                            auto rep = (*handler)(e);
-                            if(rep) {
-                                decoded = *rep;
-                            }
+                            decoded = (*handler)(e);
                             ++first; // TODO advance this from encoding itself?
                         }
                     }
                 }
 
-                static constexpr code_point invalid = -1; // TODO replace with optional
-
                 iterator first;
                 iterator last;
-                code_point decoded = invalid;
+                detail::optional<code_point> decoded;
                 std::decay_t<Handler> const* handler = nullptr;
                 coding_state_t<Encoding> state {};
             };

@@ -396,7 +396,7 @@ class Types:
             return value
 
         def __repr__(self):
-            return 'std::initializer_list<composition_entry>' # TODO
+            return 'std::initializer_list<composition_entry>'
 
 class Value:
     def __init__(self, type, value):
