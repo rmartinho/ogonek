@@ -59,14 +59,6 @@ Unicode character database
 
     :returns: the *Decomposition_Mapping* property of ``u``
 
-.. function:: std::u32string get_full_decomposition(code_point u, bool canonical = true)
-
-    :returns: the full decomposition of ``u``. This is obtained by
-              recursive application of decomposition (as per the
-              *Decomposition_Mapping* property). If ``canonical`` is
-              true, only canonical decompositions are used (as per
-              the *Decomposition_Type* property).
-
 .. function:: bool is_excluded_from_composition(code_point u)
 
     :returns: true if ``u`` has the *Full_Composition_Exclusion* property; false otherwise

@@ -22,9 +22,7 @@ namespace ogonek {
                   CONCEPT_REQUIRES_(OutputIterator<Out, code_point>())>
         static void decompose_into(code_point u, Out out) {
             if(ucd::get_decomposition_type(u) != ucd::decomposition_type::none) {
-                // TODO internals that push_back directly?
-                auto&& str = ucd::get_full_decomposition(u, false);
-                std::copy(str.begin(), str.end(), out);
+                ucd::detail::get_full_decomposition(u, out, false);
             } else {
                 *out++ = u;
             }

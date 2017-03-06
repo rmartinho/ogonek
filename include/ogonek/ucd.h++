@@ -22,6 +22,9 @@
 #include <ogonek/detail/static_const.h++>
 #include <ogonek/detail/container/optional.h++>
 
+#include <range/v3/view/c_str.hpp>
+#include <range/v3/algorithm/copy.hpp>
+
 #include <boost/logic/tribool.hpp>
 #include <boost/optional.hpp>
 #include <boost/rational.hpp>
@@ -131,14 +134,28 @@ namespace ogonek {
                 if(tpart > 0) result += detail::get_jamo_short_name(tpart);
                 return result;
             }
-            inline std::u32string decompose_hangul_syllable(code_point u) {
+            template <typename Out>
+            void decompose_hangul_syllable(code_point u, Out out) {
                 char32_t lpart, vpart, tpart;
                 get_hangul_syllable_parts(u, lpart, vpart, tpart);
 
+                *out++ = lpart;
+                *out++ = vpart;
                 if(tpart > 0) {
-                    return { lpart, vpart, tpart };
+                    *out++ = tpart;
+                }
+            }
+            template <typename Out>
+            void get_full_decomposition(code_point u, Out out, bool canonical = true) {
+                auto value = canonical
+                    ? find_property_group(full_canonical_decomposition_mapping_data, full_canonical_decomposition_mapping_data_size, u).value
+                    : find_property_group(full_compatibility_decomposition_mapping_data, full_compatibility_decomposition_mapping_data_size, u).value;
+                if(!value) {
+                    *out++ = u;
+                } else if(*value == -1u) {
+                    decompose_hangul_syllable(u, out);
                 } else {
-                    return { lpart, vpart };
+                    ranges::copy(ranges::view::c_str(value), out);
                 }
             }
             inline hangul_syllable_type get_hangul_syllable_type(code_point u) {
@@ -338,40 +355,6 @@ namespace ogonek {
         inline namespace {
             constexpr auto const& get_decomposition_mapping = ogonek::detail::static_const<fun::get_decomposition_mapping>::value;
         }
-
-        /**
-         * .. function:: std::u32string get_full_decomposition(code_point u, bool canonical = true)
-         *
-         *     :returns: the full decomposition of ``u``. This is obtained by
-         *               recursive application of decomposition (as per the
-         *               *Decomposition_Mapping* property). If ``canonical`` is
-         *               true, only canonical decompositions are used (as per
-         *               the *Decomposition_Type* property).
-         */
-        namespace fun {
-            struct get_full_decomposition {
-                std::u32string operator()(code_point u, bool canonical = true) const {
-                    auto value = canonical
-                        ? detail::find_property_group(full_canonical_decomposition_mapping_data, full_canonical_decomposition_mapping_data_size, u).value
-                        : detail::find_property_group(full_compatibility_decomposition_mapping_data, full_compatibility_decomposition_mapping_data_size, u).value;
-                    if(!value) {
-                        return std::u32string(1, u);
-                    }
-                    if(*value == -1u) {
-                        return detail::decompose_hangul_syllable(u);
-                    }
-
-                    return value;
-                }
-            };
-        } // namespace fun
-        inline namespace {
-            constexpr auto const& get_full_decomposition = ogonek::detail::static_const<fun::get_full_decomposition>::value;
-        }
-
-        namespace detail {
-
-        } // namespace detail
 
         /**
          * .. function:: bool is_excluded_from_composition(code_point u)

@@ -150,22 +150,6 @@ TEST_CASE("Decomposition_Mapping can be queried", "[properties]") {
     CHECK(ucd::get_decomposition_mapping(U'\x3000') == U"\x0020"_s);
     // TODO Add Hangul tests
 }
-TEST_CASE("full canonical decomposition can be queried", "[properties]") {
-    CHECK(ucd::get_full_decomposition(U'\x0041', true) == U"\x0041"_s);
-    CHECK(ucd::get_full_decomposition(U'\x00A8', true) == U"\x00A8"_s);
-    CHECK(ucd::get_full_decomposition(U'\x00C5', true) == U"\x0041\x030A"_s);
-    CHECK(ucd::get_full_decomposition(U'\x1EA0', true) == U"\x0041\x0323"_s);
-    CHECK(ucd::get_full_decomposition(U'\x3000', true) == U"\x3000"_s);
-    // TODO contrast with normal decomposition
-}
-TEST_CASE("full compatibility decomposition can be queried", "[properties]") {
-    CHECK(ucd::get_full_decomposition(U'\x0041', false) == U"\x0041"_s);
-    CHECK(ucd::get_full_decomposition(U'\x00A8', false) == U"\x0020\x0308"_s);
-    CHECK(ucd::get_full_decomposition(U'\x00C5', false) == U"\x0041\x030A"_s);
-    CHECK(ucd::get_full_decomposition(U'\x1EA0', false) == U"\x0041\x0323"_s);
-    CHECK(ucd::get_full_decomposition(U'\x3000', false) == U"\x0020"_s);
-    // TODO contrast with normal decomposition
-}
 TEST_CASE("Full_Composition_Exclusion can be queried", "[properties]") {
     CHECK(ucd::is_excluded_from_composition(U'\x0041') == false);
     CHECK(ucd::is_excluded_from_composition(U'\x0344') == true);
