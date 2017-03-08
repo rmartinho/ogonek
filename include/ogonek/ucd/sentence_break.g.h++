@@ -53,7 +53,6 @@ namespace ogonek {
                 upper = up,
                 other = xx,
             };
-
             struct sentence_break_properties {
                 code_point start;
                 sentence_break value;

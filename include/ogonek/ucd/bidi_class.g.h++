@@ -72,7 +72,6 @@ namespace ogonek {
                 segment_separator = s,
                 white_space = ws,
             };
-
             struct bidi_class_properties {
                 code_point start;
                 bidi_class value;

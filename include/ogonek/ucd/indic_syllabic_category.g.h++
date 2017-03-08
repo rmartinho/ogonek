@@ -61,7 +61,6 @@ namespace ogonek {
                 vowel_dependent,
                 vowel_independent,
             };
-
             struct indic_syllabic_category_properties {
                 code_point start;
                 indic_syllabic_category value;

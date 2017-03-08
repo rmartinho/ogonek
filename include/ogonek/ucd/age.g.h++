@@ -64,7 +64,6 @@ namespace ogonek {
                 v9_0 = _9_0,
                 unassigned = na,
             };
-
             struct age_properties {
                 code_point start;
                 version value;

@@ -38,7 +38,6 @@ namespace ogonek {
                 narrow = na,
                 wide = w,
             };
-
             struct east_asian_width_properties {
                 code_point start;
                 east_asian_width value;

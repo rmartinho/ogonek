@@ -35,17 +35,16 @@ namespace ogonek {
 
             template <typename U>
             partial_array(partial_array<U, N> const& that)
-            : count(that.count), array() {
-                std::copy(that.begin(), that.end(), array.begin());
-            }
+            : partial_array(that.begin(), that.end()) {}
+
+            partial_array(std::size_t size)
+            : count(size), array() {}
 
             partial_array(std::array<T, N> const& array, std::size_t count)
-            : count(count), array(array) {}
+            : partial_array(array.begin(), array.begin() + count) {}
 
             partial_array(std::initializer_list<T> list)
-            : count(list.size()), array() {
-                std::copy(list.begin(), list.end(), array.begin());
-            }
+            : partial_array(list.begin(), list.end()) {}
 
             template <typename It>
             partial_array(It first, It last)
@@ -72,9 +71,9 @@ namespace ogonek {
             T& operator[](std::ptrdiff_t index) { return array[index]; }
             T const& operator[](std::ptrdiff_t index) const { return array[index]; }
 
-            iterator erase(iterator first) {
-                std::copy(std::next(first), end(), first);
-                --count;
+            iterator erase(iterator first, iterator last) {
+                std::copy(last, end(), first);
+                count -= last - first;
                 return first;
             }
 

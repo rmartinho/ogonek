@@ -38,7 +38,6 @@ namespace ogonek {
                 trailing_jamo = t,
                 vowel_jamo = v,
             };
-
             struct hangul_syllable_type_properties {
                 code_point start;
                 hangul_syllable_type value;

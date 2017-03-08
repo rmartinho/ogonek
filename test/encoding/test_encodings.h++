@@ -20,6 +20,9 @@
 #include <catch.hpp>
 #include "util.h++"
 
+#include <range/v3/view/all.hpp>
+#include <range/v3/to_container.hpp>
+
 #include <vector>
 #include <utility>
 
@@ -32,7 +35,7 @@ namespace test {
             return { u + 1 };
         }
         template <typename It, typename St>
-        static std::pair<ogonek::code_point, It> decode_one(It first, St last) {
+        static std::pair<ogonek::code_point, It> decode_one(It first, St) {
             return { *first - 1, ++first };
         }
     };
@@ -45,7 +48,7 @@ namespace test {
             return { static_cast<code_unit>(u / 0x10000), static_cast<code_unit>(u % 0x10000) };
         }
         template <typename It, typename St>
-        static std::pair<ogonek::code_point, It> decode_one(It first, St last) {
+        static std::pair<ogonek::code_point, It> decode_one(It first, St) {
             ogonek::code_point u = *first++ * 0x10000;
             u += *first++;
             return { u, first };
@@ -66,7 +69,7 @@ namespace test {
             }
         }
         template <typename It, typename St>
-        static std::pair<ogonek::code_point, It> decode_one(It first, St last, state& s) {
+        static std::pair<ogonek::code_point, It> decode_one(It first, St, state& s) {
             if(not s.bom_encoded) {
                 s.bom_encoded = true;
                 auto bom = *first++;
@@ -85,7 +88,7 @@ namespace test {
             return { u };
         }
         template <typename It, typename St>
-        static std::pair<ogonek::code_point, It> decode_one(It first, St last) {
+        static std::pair<ogonek::code_point, It> decode_one(It first, St) {
             return { *first, ++first };
         }
     };

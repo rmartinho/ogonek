@@ -58,7 +58,6 @@ namespace ogonek {
                 super = sup,
                 vertical = vert,
             };
-
             struct decomposition_type_properties {
                 code_point start;
                 decomposition_type value;

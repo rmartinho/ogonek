@@ -19,7 +19,7 @@ import errno
 import math
 import string
 from contextlib import contextmanager
-from itertools import chain
+from itertools import chain, groupby
 if sys.version_info[0] > 2:
     from itertools import zip_longest
 else:
@@ -36,10 +36,11 @@ elif len(sys.argv) == 5:
     inc_dir = sys.argv[3]
     src_dir = sys.argv[4]
     dry_run = False
-elif len(sys.argv) == 3 and sys.argv[1] == '--files':
+elif len(sys.argv) == 4 and sys.argv[1] == '--files':
     dry_run = True
     list_files = True
-    src_dir = sys.argv[2]
+    inc_dir = sys.argv[2]
+    src_dir = sys.argv[3]
 else:
     print('usage: ' + os.path.basename(sys.argv[0]) + ' <ABI label> <UCD directory> <header output> <src output>')
     sys.exit(17)
@@ -260,7 +261,7 @@ class Types:
 
         def py(self, value):
             canon = self.canonical(value)
-            return (typename, canon)
+            return (self.typename, canon)
 
         def __repr__(self):
             return 'C[{0}]'.format(self.typename)
@@ -283,7 +284,7 @@ class Types:
 
         def py(self, value):
             canon = self.canonical(value)
-            return (typename, canon)
+            return (self.typename, canon)
 
         def __repr__(self):
             return 'E[{0}]'.format(self.typename)
@@ -383,6 +384,19 @@ class Types:
 
         def __repr__(self):
             return '{0}*'.format(self.type)
+
+    class CompositionList(Type):
+        def cpp(self, value):
+            if value:
+                return '{{ {0} }}'.format(', '.join('{{ {0}, {1} }}'.format(*x) for x in value))
+            else:
+                return '{}'
+
+        def py(self, value):
+            return value
+
+        def __repr__(self):
+            return 'std::initializer_list<composition_entry>'
 
 class Value:
     def __init__(self, type, value):
@@ -693,6 +707,64 @@ def extract_props(aliases, parsed):
         except StopIteration:
             pass
 
+    def get_decomposition_types(types):
+        def enumerate_types():
+            for r, t in types:
+                r = r.py()
+                t = t.py()
+                for x in range(r[0], r[1] + 1):
+                    yield (x, t[1] if t else 'Can')
+
+        return { x: t for (x, t) in enumerate_types() }
+
+    def gen_full_decomposition(records, types, canonical):
+        def in_range(x, r):
+            return r[0] <= x <= r[1]
+
+
+        decompositions = { r[0].py()[0]: r[5] for r in records }
+
+        type_map = get_decomposition_types(types)
+
+        def should_decompose(u):
+            if u in decompositions and decompositions[u].py():
+                if canonical:
+                    return type_map[u] == 'Can'
+                return True
+            return False
+
+        def full_decompose(u):
+            if should_decompose(u):
+                for d in decompositions[u].py():
+                        for x in full_decompose(d):
+                            yield x
+            else:
+                yield u
+
+        def full_decomposition_of(r):
+            u = r[0].py()[0]
+
+            if not should_decompose(u):
+                return Value(Types.String(), None)
+
+            full_decomp = ' '.join('{0:X}'.format(x) for x in full_decompose(u))
+            return Value(Types.String(), full_decomp)
+
+        gen = (r for r in records)
+        try:
+            while True:
+                r = next(gen)
+                if r[1].py() == '<Hangul Syllable, First>':
+                    r2 = next(gen)
+                    start = r[1].py().split(',')[0]
+                    assert r2[1].py().startswith(start)
+                    assert r2[1].py().endswith(', Last>')
+                    yield [Value(Types.Range(), '{0}..{1}'.format(r[0].value, r2[0].value)), Value(Types.String(), 'FFFFFFFF')]
+                else:
+                    yield [r[0], full_decomposition_of(r)]
+        except StopIteration:
+            pass
+
     def gen_indexed_prop(records, index):
         return ([r[0], r[index]] for r in records)
 
@@ -708,6 +780,35 @@ def extract_props(aliases, parsed):
     def gen_listed_bool_prop(listed, name):
         return ([r[0], Value(Types.Binary(), 'Y')] for r in listed if canon_equal(r[1].value, name))
 
+    def gen_canonical_compositions(records, types, full_exclusion):
+        type_map = get_decomposition_types(types)
+
+        def expand_ranges(ranges):
+            for r in ranges:
+                for x in range(r[0], r[1]+1):
+                    yield x
+        full_exclusion = set(expand_ranges(r[0].py() for r in full_exclusion if canon_equal(r[1].value, 'Full_Composition_Exclusion')))
+
+        def should_decompose(r):
+            u = r[0].py()[0]
+            d = r[5].py()
+            return d and u in type_map and type_map[u] == 'Can' and len(d) > 1 and not u in full_exclusion
+
+        def composition_entry(r):
+            d = r[5].py()
+            return (d[0], d[1], r[0].py()[0])
+
+        compositions = [composition_entry(r) for r in records if should_decompose(r)]
+
+        grouped = {}
+        for k, w, r in compositions:
+            if k in grouped:
+                grouped[k] += [(w, r)]
+            else:
+                grouped[k] = [(w, r)]
+        for k, g in grouped.items():
+            yield [Value(Types.Range(), '{0:X}'.format(k)), Value(Types.CompositionList(), g)]
+
     def gen_listed_prop(listed, name):
         return ([r[0], r[2]] for r in listed if canon_equal(r[1].value, name))
 
@@ -715,91 +816,94 @@ def extract_props(aliases, parsed):
         return (r for r in parsed['SpecialCasing.txt'] if r[4].value == '')
 
     prop_defs = {
-        'Age':                          parsed['DerivedAge.txt'],
-        'Name':                         gen_names(gen_indexed_prop(parsed['UnicodeData.txt'], 1)), # (Range, Name)
-#        'Name_Alias':                   gen_aliases(parsed['NameAliases.txt']), # (Range, [(Name_Alias_Type, Name_Alias)])
-        'Block':                        parsed['Blocks.txt'],
-        'General_Category':             parsed['extracted/DerivedGeneralCategory.txt'],
-        'Canonical_Combining_Class':    parsed['extracted/DerivedCombiningClass.txt'],
-        'Bidi_Class':                   parsed['extracted/DerivedBidiClass.txt'],
-        'Bidi_Mirrored':                gen_listed_bool_prop(parsed['extracted/DerivedBinaryProperties.txt'], 'Bidi_Mirrored'),
-        'Bidi_Mirroring_Glyph':         parsed['BidiMirroring.txt'],
-        'Bidi_Control':                 gen_listed_bool_prop(parsed['PropList.txt'], 'Bidi_Control'),
-        'Bidi_Paired_Bracket':          gen_indexed_prop(parsed['BidiBrackets.txt'], 1),
-        'Bidi_Paired_Bracket_Type':     gen_indexed_prop(parsed['BidiBrackets.txt'], 2),
-        'Decomposition_Mapping':        gen_indexed_prop(parsed['UnicodeData.txt'], 5),
-        'Decomposition_Type':           parsed['extracted/DerivedDecompositionType.txt'],
-        'Full_Composition_Exclusion':   gen_listed_bool_prop(parsed['DerivedNormalizationProps.txt'], 'Full_Composition_Exclusion'),
-        'NFC_Quick_Check':              gen_listed_prop(parsed['DerivedNormalizationProps.txt'], 'NFC_Quick_Check'),
-        'NFD_Quick_Check':              gen_listed_prop(parsed['DerivedNormalizationProps.txt'], 'NFD_Quick_Check'),
-        'NFKC_Quick_Check':             gen_listed_prop(parsed['DerivedNormalizationProps.txt'], 'NFKC_Quick_Check'),
-        'NFKD_Quick_Check':             gen_listed_prop(parsed['DerivedNormalizationProps.txt'], 'NFKD_Quick_Check'),
-        'Numeric_Type':                 parsed['extracted/DerivedNumericType.txt'],
-        'Numeric_Value':                gen_indexed_prop(parsed['extracted/DerivedNumericValues.txt'], 3),
-        'Joining_Type':                 parsed['extracted/DerivedJoiningType.txt'],
-        'Joining_Group':                parsed['extracted/DerivedJoiningGroup.txt'],
-        'Join_Control':                 gen_listed_bool_prop(parsed['PropList.txt'], 'Join_Control'),
-        'Line_Break':                   parsed['extracted/DerivedLineBreak.txt'],
-        'East_Asian_Width':             parsed['extracted/DerivedEastAsianWidth.txt'],
-        'Uppercase':                    gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Uppercase'),
-        'Lowercase':                    gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Lowercase'),
-        'Simple_Uppercase_Mapping':     gen_indexed_prop(parsed['UnicodeData.txt'], 12),
-        'Simple_Lowercase_Mapping':     gen_indexed_prop(parsed['UnicodeData.txt'], 13),
-        'Simple_Titlecase_Mapping':     gen_indexed_prop(parsed['UnicodeData.txt'], 14), # TODO null
-        'Uppercase_Mapping':            gen_indexed_prop(gen_unconditional_special_casing(), 3),
-        'Lowercase_Mapping':            gen_indexed_prop(gen_unconditional_special_casing(), 1),
-        'Titlecase_Mapping':            gen_indexed_prop(gen_unconditional_special_casing(), 2), # TODO contextual casing
-        'Simple_Case_Folding':          ((r[0], Value(Types.CodePoint(), r[2].value)) for r in parsed['CaseFolding.txt'] if r[1].value in {'C', 'S'}),
-        'Case_Folding':                 ((r[0], r[2]) for r in parsed['CaseFolding.txt'] if r[1].value == 'F'),
-        '$Turkic_Case_Folding':         ((r[0], r[2]) for r in parsed['CaseFolding.txt'] if r[1].value == 'T'),
-        'Case_Ignorable':               gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Case_Ignorable'),
-        'Cased':                        gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Cased'),
-        'Changes_When_Lowercased':      gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Changes_When_Lowercased'),
-        'Changes_When_Uppercased':      gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Changes_When_Uppercased'),
-        'Changes_When_Titlecased':      gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Changes_When_Titlecased'),
-        'Changes_When_Casefolded':      gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Changes_When_Casefolded'),
-        'Changes_When_Casemapped':      gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Changes_When_Casemapped'),
-        'Changes_When_NFKC_Casefolded': gen_listed_bool_prop(parsed['DerivedNormalizationProps.txt'], 'Changes_When_NFKC_Casefolded'),
-        'NFKC_Casefold':                gen_listed_prop(parsed['DerivedNormalizationProps.txt'], 'NFKC_Casefold'),
-        'Script':                       parsed['Scripts.txt'],
-        'Script_Extensions':            parsed['ScriptExtensions.txt'], # (Range, [Script])
-        'Hangul_Syllable_Type':         parsed['HangulSyllableType.txt'],
-        'Jamo_Short_Name':              parsed['Jamo.txt'],
-        'Indic_Positional_Category':    parsed['IndicPositionalCategory.txt'],
-        'Indic_Syllabic_Category':      parsed['IndicSyllabicCategory.txt'],
-        'ID_Start':                     gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'ID_Start'),
-        'ID_Continue':                  gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'ID_Continue'),
-        'XID_Start':                    gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'XID_Start'),
-        'XID_Continue':                 gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'XID_Continue'),
-        'Pattern_Syntax':               gen_listed_bool_prop(parsed['PropList.txt'], 'Pattern_Syntax'),
-        'Pattern_White_Space':          gen_listed_bool_prop(parsed['PropList.txt'], 'Pattern_White_Space'),
-        'Dash':                         gen_listed_bool_prop(parsed['PropList.txt'], 'Dash'),
-        'Quotation_Mark':               gen_listed_bool_prop(parsed['PropList.txt'], 'Quotation_Mark'),
-        'Terminal_Punctuation':         gen_listed_bool_prop(parsed['PropList.txt'], 'Terminal_Punctuation'),
-        'STerm':                        gen_listed_bool_prop(parsed['PropList.txt'], 'STerm'),
-        'Diacritic':                    gen_listed_bool_prop(parsed['PropList.txt'], 'Diacritic'),
-        'Extender':                     gen_listed_bool_prop(parsed['PropList.txt'], 'Extender'),
-        'Soft_Dotted':                  gen_listed_bool_prop(parsed['PropList.txt'], 'Soft_Dotted'),
-        'Hex_Digit':                    gen_listed_bool_prop(parsed['PropList.txt'], 'Hex_Digit'),
-        'ASCII_Hex_Digit':              gen_listed_bool_prop(parsed['PropList.txt'], 'ASCII_Hex_Digit'),
-        'Logical_Order_Exception':      gen_listed_bool_prop(parsed['PropList.txt'], 'Logical_Order_Exception'),
-        'White_Space':                  gen_listed_bool_prop(parsed['PropList.txt'], 'White_Space'),
-        'Variation_Selector':           gen_listed_bool_prop(parsed['PropList.txt'], 'Variation_Selector'),
-        'Alphabetic':                   gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Alphabetic'),
-        'Math':                         gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Math'),
-        'Default_Ignorable_Code_Point': gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Default_Ignorable_Code_Point'),
-        'Grapheme_Base':                gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Grapheme_Base'),
-        'Grapheme_Extend':              gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Grapheme_Extend'),
-        'Grapheme_Cluster_Break':       parsed['auxiliary/GraphemeBreakProperty.txt'],
-        'Word_Break':                   parsed['auxiliary/WordBreakProperty.txt'],
-        'Sentence_Break':               parsed['auxiliary/SentenceBreakProperty.txt'],
-        'Ideographic':                  gen_listed_bool_prop(parsed['PropList.txt'], 'Ideographic'),
-        'Unified_Ideograph':            gen_listed_bool_prop(parsed['PropList.txt'], 'Unified_Ideograph'),
-        'IDS_Binary_Operator':          gen_listed_bool_prop(parsed['PropList.txt'], 'IDS_Binary_Operator'),
-        'IDS_Trinary_Operator':         gen_listed_bool_prop(parsed['PropList.txt'], 'IDS_Trinary_Operator'),
-        'Radical':                      gen_listed_bool_prop(parsed['PropList.txt'], 'Radical'),
-        'Deprecated':                   gen_listed_bool_prop(parsed['PropList.txt'], 'Deprecated'),
-        'Noncharacter_Code_Point':      gen_listed_bool_prop(parsed['PropList.txt'], 'Noncharacter_Code_Point'),
+        'Age':                                          parsed['DerivedAge.txt'],
+        'Name':                                         gen_names(gen_indexed_prop(parsed['UnicodeData.txt'], 1)), # (Range, Name)
+#        'Name_Alias':                                   gen_aliases(parsed['NameAliases.txt']), # (Range, [(Name_Alias_Type, Name_Alias)])
+        'Block':                                        parsed['Blocks.txt'],
+        'General_Category':                             parsed['extracted/DerivedGeneralCategory.txt'],
+        'Canonical_Combining_Class':                    parsed['extracted/DerivedCombiningClass.txt'],
+        'Bidi_Class':                                   parsed['extracted/DerivedBidiClass.txt'],
+        'Bidi_Mirrored':                                gen_listed_bool_prop(parsed['extracted/DerivedBinaryProperties.txt'], 'Bidi_Mirrored'),
+        'Bidi_Mirroring_Glyph':                         parsed['BidiMirroring.txt'],
+        'Bidi_Control':                                 gen_listed_bool_prop(parsed['PropList.txt'], 'Bidi_Control'),
+        'Bidi_Paired_Bracket':                          gen_indexed_prop(parsed['BidiBrackets.txt'], 1),
+        'Bidi_Paired_Bracket_Type':                     gen_indexed_prop(parsed['BidiBrackets.txt'], 2),
+        'Decomposition_Mapping':                        gen_indexed_prop(parsed['UnicodeData.txt'], 5),
+        'Decomposition_Type':                           parsed['extracted/DerivedDecompositionType.txt'],
+        '$Full_Canonical_Decomposition_Mapping':        gen_full_decomposition(parsed['UnicodeData.txt'], parsed['extracted/DerivedDecompositionType.txt'], True),
+        '$Full_Compatibility_Decomposition_Mapping':    gen_full_decomposition(parsed['UnicodeData.txt'], parsed['extracted/DerivedDecompositionType.txt'], False), # TODO remove entries redundant with canonical
+        'Full_Composition_Exclusion':                   gen_listed_bool_prop(parsed['DerivedNormalizationProps.txt'], 'Full_Composition_Exclusion'),
+        '$Canonical_Compositions':                      gen_canonical_compositions(parsed['UnicodeData.txt'], parsed['extracted/DerivedDecompositionType.txt'], parsed['DerivedNormalizationProps.txt']),
+        'NFC_Quick_Check':                              gen_listed_prop(parsed['DerivedNormalizationProps.txt'], 'NFC_Quick_Check'),
+        'NFD_Quick_Check':                              gen_listed_prop(parsed['DerivedNormalizationProps.txt'], 'NFD_Quick_Check'),
+        'NFKC_Quick_Check':                             gen_listed_prop(parsed['DerivedNormalizationProps.txt'], 'NFKC_Quick_Check'),
+        'NFKD_Quick_Check':                             gen_listed_prop(parsed['DerivedNormalizationProps.txt'], 'NFKD_Quick_Check'),
+        'Numeric_Type':                                 parsed['extracted/DerivedNumericType.txt'],
+        'Numeric_Value':                                gen_indexed_prop(parsed['extracted/DerivedNumericValues.txt'], 3),
+        'Joining_Type':                                 parsed['extracted/DerivedJoiningType.txt'],
+        'Joining_Group':                                parsed['extracted/DerivedJoiningGroup.txt'],
+        'Join_Control':                                 gen_listed_bool_prop(parsed['PropList.txt'], 'Join_Control'),
+        'Line_Break':                                   parsed['extracted/DerivedLineBreak.txt'],
+        'East_Asian_Width':                             parsed['extracted/DerivedEastAsianWidth.txt'],
+        'Uppercase':                                    gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Uppercase'),
+        'Lowercase':                                    gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Lowercase'),
+        'Simple_Uppercase_Mapping':                     gen_indexed_prop(parsed['UnicodeData.txt'], 12),
+        'Simple_Lowercase_Mapping':                     gen_indexed_prop(parsed['UnicodeData.txt'], 13),
+        'Simple_Titlecase_Mapping':                     gen_indexed_prop(parsed['UnicodeData.txt'], 14), # TODO null
+        'Uppercase_Mapping':                            gen_indexed_prop(gen_unconditional_special_casing(), 3),
+        'Lowercase_Mapping':                            gen_indexed_prop(gen_unconditional_special_casing(), 1),
+        'Titlecase_Mapping':                            gen_indexed_prop(gen_unconditional_special_casing(), 2), # TODO contextual casing
+        'Simple_Case_Folding':                          ((r[0], Value(Types.CodePoint(), r[2].value)) for r in parsed['CaseFolding.txt'] if r[1].value in {'C', 'S'}),
+        'Case_Folding':                                 ((r[0], r[2]) for r in parsed['CaseFolding.txt'] if r[1].value == 'F'),
+        '$Turkic_Case_Folding':                         ((r[0], r[2]) for r in parsed['CaseFolding.txt'] if r[1].value == 'T'),
+        'Case_Ignorable':                               gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Case_Ignorable'),
+        'Cased':                                        gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Cased'),
+        'Changes_When_Lowercased':                      gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Changes_When_Lowercased'),
+        'Changes_When_Uppercased':                      gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Changes_When_Uppercased'),
+        'Changes_When_Titlecased':                      gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Changes_When_Titlecased'),
+        'Changes_When_Casefolded':                      gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Changes_When_Casefolded'),
+        'Changes_When_Casemapped':                      gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Changes_When_Casemapped'),
+        'Changes_When_NFKC_Casefolded':                 gen_listed_bool_prop(parsed['DerivedNormalizationProps.txt'], 'Changes_When_NFKC_Casefolded'),
+        'NFKC_Casefold':                                gen_listed_prop(parsed['DerivedNormalizationProps.txt'], 'NFKC_Casefold'),
+        'Script':                                       parsed['Scripts.txt'],
+        'Script_Extensions':                            parsed['ScriptExtensions.txt'], # (Range, [Script])
+        'Hangul_Syllable_Type':                         parsed['HangulSyllableType.txt'],
+        'Jamo_Short_Name':                              parsed['Jamo.txt'],
+        'Indic_Positional_Category':                    parsed['IndicPositionalCategory.txt'],
+        'Indic_Syllabic_Category':                      parsed['IndicSyllabicCategory.txt'],
+        'ID_Start':                                     gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'ID_Start'),
+        'ID_Continue':                                  gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'ID_Continue'),
+        'XID_Start':                                    gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'XID_Start'),
+        'XID_Continue':                                 gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'XID_Continue'),
+        'Pattern_Syntax':                               gen_listed_bool_prop(parsed['PropList.txt'], 'Pattern_Syntax'),
+        'Pattern_White_Space':                          gen_listed_bool_prop(parsed['PropList.txt'], 'Pattern_White_Space'),
+        'Dash':                                         gen_listed_bool_prop(parsed['PropList.txt'], 'Dash'),
+        'Quotation_Mark':                               gen_listed_bool_prop(parsed['PropList.txt'], 'Quotation_Mark'),
+        'Terminal_Punctuation':                         gen_listed_bool_prop(parsed['PropList.txt'], 'Terminal_Punctuation'),
+        'STerm':                                        gen_listed_bool_prop(parsed['PropList.txt'], 'STerm'),
+        'Diacritic':                                    gen_listed_bool_prop(parsed['PropList.txt'], 'Diacritic'),
+        'Extender':                                     gen_listed_bool_prop(parsed['PropList.txt'], 'Extender'),
+        'Soft_Dotted':                                  gen_listed_bool_prop(parsed['PropList.txt'], 'Soft_Dotted'),
+        'Hex_Digit':                                    gen_listed_bool_prop(parsed['PropList.txt'], 'Hex_Digit'),
+        'ASCII_Hex_Digit':                              gen_listed_bool_prop(parsed['PropList.txt'], 'ASCII_Hex_Digit'),
+        'Logical_Order_Exception':                      gen_listed_bool_prop(parsed['PropList.txt'], 'Logical_Order_Exception'),
+        'White_Space':                                  gen_listed_bool_prop(parsed['PropList.txt'], 'White_Space'),
+        'Variation_Selector':                           gen_listed_bool_prop(parsed['PropList.txt'], 'Variation_Selector'),
+        'Alphabetic':                                   gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Alphabetic'),
+        'Math':                                         gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Math'),
+        'Default_Ignorable_Code_Point':                 gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Default_Ignorable_Code_Point'),
+        'Grapheme_Base':                                gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Grapheme_Base'),
+        'Grapheme_Extend':                              gen_listed_bool_prop(parsed['DerivedCoreProperties.txt'], 'Grapheme_Extend'),
+        'Grapheme_Cluster_Break':                       parsed['auxiliary/GraphemeBreakProperty.txt'],
+        'Word_Break':                                   parsed['auxiliary/WordBreakProperty.txt'],
+        'Sentence_Break':                               parsed['auxiliary/SentenceBreakProperty.txt'],
+        'Ideographic':                                  gen_listed_bool_prop(parsed['PropList.txt'], 'Ideographic'),
+        'Unified_Ideograph':                            gen_listed_bool_prop(parsed['PropList.txt'], 'Unified_Ideograph'),
+        'IDS_Binary_Operator':                          gen_listed_bool_prop(parsed['PropList.txt'], 'IDS_Binary_Operator'),
+        'IDS_Trinary_Operator':                         gen_listed_bool_prop(parsed['PropList.txt'], 'IDS_Trinary_Operator'),
+        'Radical':                                      gen_listed_bool_prop(parsed['PropList.txt'], 'Radical'),
+        'Deprecated':                                   gen_listed_bool_prop(parsed['PropList.txt'], 'Deprecated'),
+        'Noncharacter_Code_Point':                      gen_listed_bool_prop(parsed['PropList.txt'], 'Noncharacter_Code_Point'),
     }
 
     for p in sorted(prop_defs):
@@ -813,7 +917,6 @@ def coalesce_props(props, defaults):
         prop.sort(key = lambda t: t[0].py()[0])
     def coalesce_prop(prop, default):
         # TODO multiple default ranges
-        full_range = Value(Types.Range(), '0000..10FFFF')
 
         last = None
         next_cp = 0
@@ -868,12 +971,10 @@ def write_header_file(f, name, abi, file_info):
 #include <ogonek/types.h++>
 
 #include <cstddef>
-
+${includes}
 namespace ogonek {
     namespace ucd {
-        inline namespace ${abi} {
-            ${type_defs}
-
+        inline namespace ${abi} {${type_defs}
             struct ${cpp_name}_properties {
                 code_point start;
                 ${fields}
@@ -974,7 +1075,8 @@ def enum_def(type):
     num_canons = len(type.canonicals())
     underlying = '' if num_flags == 0 else ' : unsigned long long'
     enumerators = indent(e + f + a)
-    type_def = indent('''enum{3} {0}{2} {{
+    type_def = indent('''
+enum{3} {0}{2} {{
     {1}
 }};'''.format(type.typename, enumerators, underlying, ' class' if num_canons else ''), 3)
     return type_def
@@ -990,7 +1092,8 @@ def gen_enum(prop, type):
         'description': '{0} property'.format(prop),
         'type_defs': enum_def(type),
         'fields': type_field(type.typename),
-        'entries': prop_entries(props[prop])
+        'entries': prop_entries(props[prop]),
+        'includes': ''
     }
 
 def alias_def(type, alias):
@@ -1001,95 +1104,117 @@ def gen_builtin(prop, type):
         'description': '{0} property'.format(prop),
         'type_defs': '',
         'fields': type_field(type),
-        'entries': prop_entries(props[prop])
+        'entries': prop_entries(props[prop]),
+        'includes': ''
     }
 
+def include_headers(headers):
+    return ''.join('#include <{0}>\n'.format(h) for h in headers)
+
+def gen_custom(prop, typename, headers, extra):
+    return {
+        'description': '{0} property'.format(prop),
+        'type_defs': extra,
+        'fields': type_field(typename),
+        'entries': prop_entries(props[prop]),
+        'includes': include_headers(headers)
+    }
+
+composition_entry_def = indent('''
+struct composition_entry {
+    code_point with;
+    code_point result;
+};''')
+
 output_defs = {
-    'age':                          lambda: gen_enum(   'Age',                          version_type),
-    'name':                         lambda: gen_builtin('Name',                         'char const*'),
+    'age':                                      lambda: gen_enum(   'Age',                                       version_type),
+    'name':                                     lambda: gen_builtin('Name',                                      'char const*'),
 # TODO name_alias
-    'block':                        lambda: gen_enum(   'Block',                        block_type),
-    'general_category':             lambda: gen_enum(   'General_Category',             general_category_type),
-    'canonical_combining_class':    lambda: gen_enum(   'Canonical_Combining_Class',    combining_class_type),
-    'bidi_class':                   lambda: gen_enum(   'Bidi_Class',                   bidi_class_type),
-    'bidi_mirrored':                lambda: gen_builtin('Bidi_Mirrored',                'bool'),
-    'bidi_mirroring_glyph':         lambda: gen_builtin('Bidi_Mirroring_Glyph',         'code_point'),
-    'bidi_control':                 lambda: gen_builtin('Bidi_Control',                 'bool'),
-    'bidi_paired_bracket':          lambda: gen_builtin('Bidi_Paired_Bracket',          'code_point'),
-    'bidi_paired_bracket_type':     lambda: gen_enum(   'Bidi_Paired_Bracket_Type',     bracket_type_type),
-    'decomposition_mapping':        lambda: gen_builtin('Decomposition_Mapping',        'code_point const*'),
-    'decomposition_type':           lambda: gen_enum(   'Decomposition_Type',           decomposition_type_type),
-    'full_composition_exclusion':   lambda: gen_builtin('Full_Composition_Exclusion',   'bool'),
-    'nfc_quick_check':              lambda: gen_builtin('NFC_Quick_Check',              'detail::trinary'),
-    'nfd_quick_check':              lambda: gen_builtin('NFD_Quick_Check',              'bool'),
-    'nfkc_quick_check':             lambda: gen_builtin('NFKC_Quick_Check',             'detail::trinary'),
-    'nfkd_quick_check':             lambda: gen_builtin('NFKD_Quick_Check',             'bool'),
-    'numeric_type':                 lambda: gen_enum(   'Numeric_Type',                 numeric_type_type),
-    'numeric_value':                lambda: gen_builtin('Numeric_Value',                'detail::fraction'),
-    'joining_type':                 lambda: gen_enum(   'Joining_Type',                 joining_type_type),
-    'joining_group':                lambda: gen_enum(   'Joining_Group',                joining_group_type),
-    'join_control':                 lambda: gen_builtin('Join_Control',                 'bool'),
-    'line_break':                   lambda: gen_enum(   'Line_Break',                   line_break_type),
-    'east_asian_width':             lambda: gen_enum(   'East_Asian_Width',             east_asian_width_type),
-    'uppercase':                    lambda: gen_builtin('Uppercase',                    'bool'),
-    'lowercase':                    lambda: gen_builtin('Lowercase',                    'bool'),
-    'simple_uppercase_mapping':     lambda: gen_builtin('Simple_Uppercase_Mapping',     'code_point'),
-    'simple_lowercase_mapping':     lambda: gen_builtin('Simple_Lowercase_Mapping',     'code_point'),
-    'simple_titlecase_mapping':     lambda: gen_builtin('Simple_Titlecase_Mapping',     'code_point'),
-    'uppercase_mapping':            lambda: gen_builtin('Uppercase_Mapping',            'code_point const*'),
-    'lowercase_mapping':            lambda: gen_builtin('Lowercase_Mapping',            'code_point const*'),
-    'titlecase_mapping':            lambda: gen_builtin('Titlecase_Mapping',            'code_point const*'),
-    'simple_case_folding':          lambda: gen_builtin('Simple_Case_Folding',          'code_point'),
-    'case_folding':                 lambda: gen_builtin('Case_Folding',                 'code_point const*'),
-    'turkic_case_folding':          lambda: gen_builtin('$Turkic_Case_Folding',         'code_point const*'), # TODO fold into regular Case_Folding
-    'case_ignorable':               lambda: gen_builtin('Case_Ignorable',               'bool'),
-    'cased':                        lambda: gen_builtin('Cased',                        'bool'),
-    'changes_when_lowercased':      lambda: gen_builtin('Changes_When_Lowercased',      'bool'),
-    'changes_when_uppercased':      lambda: gen_builtin('Changes_When_Uppercased',      'bool'),
-    'changes_when_titlecased':      lambda: gen_builtin('Changes_When_Titlecased',      'bool'),
-    'changes_when_casefolded':      lambda: gen_builtin('Changes_When_Casefolded',      'bool'),
-    'changes_when_casemapped':      lambda: gen_builtin('Changes_When_Casemapped',      'bool'),
-    'changes_when_nfkc_casefolded': lambda: gen_builtin('Changes_When_NFKC_Casefolded', 'bool'),
-    'nfkc_casefold':                lambda: gen_builtin('NFKC_Casefold',                'code_point const*'),
-    'script':                       lambda: gen_enum(   'Script',                       script_type),
+    'block':                                    lambda: gen_enum(   'Block',                                     block_type),
+    'general_category':                         lambda: gen_enum(   'General_Category',                          general_category_type),
+    'canonical_combining_class':                lambda: gen_enum(   'Canonical_Combining_Class',                 combining_class_type),
+    'bidi_class':                               lambda: gen_enum(   'Bidi_Class',                                bidi_class_type),
+    'bidi_mirrored':                            lambda: gen_builtin('Bidi_Mirrored',                             'bool'),
+    'bidi_mirroring_glyph':                     lambda: gen_builtin('Bidi_Mirroring_Glyph',                      'code_point'),
+    'bidi_control':                             lambda: gen_builtin('Bidi_Control',                              'bool'),
+    'bidi_paired_bracket':                      lambda: gen_builtin('Bidi_Paired_Bracket',                       'code_point'),
+    'bidi_paired_bracket_type':                 lambda: gen_enum(   'Bidi_Paired_Bracket_Type',                  bracket_type_type),
+    'decomposition_mapping':                    lambda: gen_builtin('Decomposition_Mapping',                     'code_point const*'),
+    'decomposition_type':                       lambda: gen_enum(   'Decomposition_Type',                        decomposition_type_type),
+    'full_canonical_decomposition_mapping':     lambda: gen_builtin('$Full_Canonical_Decomposition_Mapping',     'code_point const*'),
+    'full_compatibility_decomposition_mapping': lambda: gen_builtin('$Full_Compatibility_Decomposition_Mapping', 'code_point const*'),
+    'full_composition_exclusion':               lambda: gen_builtin('Full_Composition_Exclusion',                'bool'),
+    'canonical_compositions':                   lambda: gen_custom( '$Canonical_Compositions',                   'std::initializer_list<composition_entry>', ['initializer_list'], composition_entry_def),
+    'nfc_quick_check':                          lambda: gen_builtin('NFC_Quick_Check',                           'detail::trinary'),
+    'nfd_quick_check':                          lambda: gen_builtin('NFD_Quick_Check',                           'bool'),
+    'nfkc_quick_check':                         lambda: gen_builtin('NFKC_Quick_Check',                          'detail::trinary'),
+    'nfkd_quick_check':                         lambda: gen_builtin('NFKD_Quick_Check',                          'bool'),
+    'numeric_type':                             lambda: gen_enum(   'Numeric_Type',                              numeric_type_type),
+    'numeric_value':                            lambda: gen_builtin('Numeric_Value',                             'detail::fraction'),
+    'joining_type':                             lambda: gen_enum(   'Joining_Type',                              joining_type_type),
+    'joining_group':                            lambda: gen_enum(   'Joining_Group',                             joining_group_type),
+    'join_control':                             lambda: gen_builtin('Join_Control',                              'bool'),
+    'line_break':                               lambda: gen_enum(   'Line_Break',                                line_break_type),
+    'east_asian_width':                         lambda: gen_enum(   'East_Asian_Width',                          east_asian_width_type),
+    'uppercase':                                lambda: gen_builtin('Uppercase',                                 'bool'),
+    'lowercase':                                lambda: gen_builtin('Lowercase',                                 'bool'),
+    'simple_uppercase_mapping':                 lambda: gen_builtin('Simple_Uppercase_Mapping',                  'code_point'),
+    'simple_lowercase_mapping':                 lambda: gen_builtin('Simple_Lowercase_Mapping',                  'code_point'),
+    'simple_titlecase_mapping':                 lambda: gen_builtin('Simple_Titlecase_Mapping',                  'code_point'),
+    'uppercase_mapping':                        lambda: gen_builtin('Uppercase_Mapping',                         'code_point const*'),
+    'lowercase_mapping':                        lambda: gen_builtin('Lowercase_Mapping',                         'code_point const*'),
+    'titlecase_mapping':                        lambda: gen_builtin('Titlecase_Mapping',                         'code_point const*'),
+    'simple_case_folding':                      lambda: gen_builtin('Simple_Case_Folding',                       'code_point'),
+    'case_folding':                             lambda: gen_builtin('Case_Folding',                              'code_point const*'),
+    'turkic_case_folding':                      lambda: gen_builtin('$Turkic_Case_Folding',                      'code_point const*'), # TODO fold into regular Case_Folding
+    'case_ignorable':                           lambda: gen_builtin('Case_Ignorable',                            'bool'),
+    'cased':                                    lambda: gen_builtin('Cased',                                     'bool'),
+    'changes_when_lowercased':                  lambda: gen_builtin('Changes_When_Lowercased',                   'bool'),
+    'changes_when_uppercased':                  lambda: gen_builtin('Changes_When_Uppercased',                   'bool'),
+    'changes_when_titlecased':                  lambda: gen_builtin('Changes_When_Titlecased',                   'bool'),
+    'changes_when_casefolded':                  lambda: gen_builtin('Changes_When_Casefolded',                   'bool'),
+    'changes_when_casemapped':                  lambda: gen_builtin('Changes_When_Casemapped',                   'bool'),
+    'changes_when_nfkc_casefolded':             lambda: gen_builtin('Changes_When_NFKC_Casefolded',              'bool'),
+    'nfkc_casefold':                            lambda: gen_builtin('NFKC_Casefold',                             'code_point const*'),
+    'script':                                   lambda: gen_enum(   'Script',                                    script_type),
 # TODO script_extensions
-    'hangul_syllable_type':         lambda: gen_enum(   'Hangul_Syllable_Type',         hangul_syllable_type_type),
-    'jamo_short_name':              lambda: gen_builtin('Jamo_Short_Name',              'char const*'),
-    'indic_positional_category':    lambda: gen_enum(   'Indic_Positional_Category',    indic_positional_category_type),
-    'indic_syllabic_category':      lambda: gen_enum(   'Indic_Syllabic_Category',      indic_syllabic_category_type),
-    'id_start':                     lambda: gen_builtin('ID_Start',                     'bool'),
-    'id_continue':                  lambda: gen_builtin('ID_Continue',                  'bool'),
-    'xid_start':                    lambda: gen_builtin('XID_Start',                    'bool'),
-    'xid_continue':                 lambda: gen_builtin('XID_Continue',                 'bool'),
-    'pattern_syntax':               lambda: gen_builtin('Pattern_Syntax',               'bool'),
-    'pattern_white_space':          lambda: gen_builtin('Pattern_White_Space',          'bool'),
-    'dash':                         lambda: gen_builtin('Dash',                         'bool'),
-    'quotation_mark':               lambda: gen_builtin('Quotation_Mark',               'bool'),
-    'terminal_punctuation':         lambda: gen_builtin('Terminal_Punctuation',         'bool'),
-    'sterm':                        lambda: gen_builtin('STerm',                        'bool'),
-    'diacritic':                    lambda: gen_builtin('Diacritic',                    'bool'),
-    'extender':                     lambda: gen_builtin('Extender',                     'bool'),
-    'soft_dotted':                  lambda: gen_builtin('Soft_Dotted',                  'bool'),
-    'hex_digit':                    lambda: gen_builtin('Hex_Digit',                    'bool'),
-    'ascii_hex_digit':              lambda: gen_builtin('ASCII_Hex_Digit',              'bool'),
-    'logical_order_exception':      lambda: gen_builtin('Logical_Order_Exception',      'bool'),
-    'white_space':                  lambda: gen_builtin('White_Space',                  'bool'),
-    'variation_selector':           lambda: gen_builtin('Variation_Selector',           'bool'),
-    'alphabetic':                   lambda: gen_builtin('Alphabetic',                   'bool'),
-    'math':                         lambda: gen_builtin('Math',                         'bool'),
-    'default_ignorable_code_point': lambda: gen_builtin('Default_Ignorable_Code_Point', 'bool'),
-    'grapheme_base':                lambda: gen_builtin('Grapheme_Base',                'bool'),
-    'grapheme_extend':              lambda: gen_builtin('Grapheme_Extend',              'bool'),
-    'grapheme_cluster_break':       lambda: gen_enum(   'Grapheme_Cluster_Break',       grapheme_cluster_break_type),
-    'word_break':                   lambda: gen_enum(   'Word_Break',                   word_break_type),
-    'sentence_break':               lambda: gen_enum(   'Sentence_Break',               sentence_break_type),
-    'ideographic':                  lambda: gen_builtin('Ideographic',                  'bool'),
-    'unified_ideograph':            lambda: gen_builtin('Unified_Ideograph',            'bool'),
-    'ids_binary_operator':          lambda: gen_builtin('IDS_Binary_Operator',          'bool'),
-    'ids_trinary_operator':         lambda: gen_builtin('IDS_Trinary_Operator',         'bool'),
-    'radical':                      lambda: gen_builtin('Radical',                      'bool'),
-    'deprecated':                   lambda: gen_builtin('Deprecated',                   'bool'),
-    'noncharacter_code_point':      lambda: gen_builtin('Noncharacter_Code_Point',      'bool'),
+    'hangul_syllable_type':                     lambda: gen_enum(   'Hangul_Syllable_Type',                      hangul_syllable_type_type),
+    'jamo_short_name':                          lambda: gen_builtin('Jamo_Short_Name',                           'char const*'),
+    'indic_positional_category':                lambda: gen_enum(   'Indic_Positional_Category',                 indic_positional_category_type),
+    'indic_syllabic_category':                  lambda: gen_enum(   'Indic_Syllabic_Category',                   indic_syllabic_category_type),
+    'id_start':                                 lambda: gen_builtin('ID_Start',                                  'bool'),
+    'id_continue':                              lambda: gen_builtin('ID_Continue',                               'bool'),
+    'xid_start':                                lambda: gen_builtin('XID_Start',                                 'bool'),
+    'xid_continue':                             lambda: gen_builtin('XID_Continue',                              'bool'),
+    'pattern_syntax':                           lambda: gen_builtin('Pattern_Syntax',                            'bool'),
+    'pattern_white_space':                      lambda: gen_builtin('Pattern_White_Space',                       'bool'),
+    'dash':                                     lambda: gen_builtin('Dash',                                      'bool'),
+    'quotation_mark':                           lambda: gen_builtin('Quotation_Mark',                            'bool'),
+    'terminal_punctuation':                     lambda: gen_builtin('Terminal_Punctuation',                      'bool'),
+    'sterm':                                    lambda: gen_builtin('STerm',                                     'bool'),
+    'diacritic':                                lambda: gen_builtin('Diacritic',                                 'bool'),
+    'extender':                                 lambda: gen_builtin('Extender',                                  'bool'),
+    'soft_dotted':                              lambda: gen_builtin('Soft_Dotted',                               'bool'),
+    'hex_digit':                                lambda: gen_builtin('Hex_Digit',                                 'bool'),
+    'ascii_hex_digit':                          lambda: gen_builtin('ASCII_Hex_Digit',                           'bool'),
+    'logical_order_exception':                  lambda: gen_builtin('Logical_Order_Exception',                   'bool'),
+    'white_space':                              lambda: gen_builtin('White_Space',                               'bool'),
+    'variation_selector':                       lambda: gen_builtin('Variation_Selector',                        'bool'),
+    'alphabetic':                               lambda: gen_builtin('Alphabetic',                                'bool'),
+    'math':                                     lambda: gen_builtin('Math',                                      'bool'),
+    'default_ignorable_code_point':             lambda: gen_builtin('Default_Ignorable_Code_Point',              'bool'),
+    'grapheme_base':                            lambda: gen_builtin('Grapheme_Base',                             'bool'),
+    'grapheme_extend':                          lambda: gen_builtin('Grapheme_Extend',                           'bool'),
+    'grapheme_cluster_break':                   lambda: gen_enum(   'Grapheme_Cluster_Break',                    grapheme_cluster_break_type),
+    'word_break':                               lambda: gen_enum(   'Word_Break',                                word_break_type),
+    'sentence_break':                           lambda: gen_enum(   'Sentence_Break',                            sentence_break_type),
+    'ideographic':                              lambda: gen_builtin('Ideographic',                               'bool'),
+    'unified_ideograph':                        lambda: gen_builtin('Unified_Ideograph',                         'bool'),
+    'ids_binary_operator':                      lambda: gen_builtin('IDS_Binary_Operator',                       'bool'),
+    'ids_trinary_operator':                     lambda: gen_builtin('IDS_Trinary_Operator',                      'bool'),
+    'radical':                                  lambda: gen_builtin('Radical',                                   'bool'),
+    'deprecated':                               lambda: gen_builtin('Deprecated',                                'bool'),
+    'noncharacter_code_point':                  lambda: gen_builtin('Noncharacter_Code_Point',                   'bool'),
 }
 
 def generate_all(inc_dir, src_dir, abi, file_defs):
@@ -1136,6 +1261,9 @@ def generate_master(inc_dir, abi, file_defs):
         with open(os.path.join(inc_dir, 'ucd_all.g.h++'), 'w') as file:
             write_master_header(file, abi, file_defs)
 
+def find_range(prop, i):
+    for r, s in i:
+        w
 if not dry_run:
     parsed = parse_all(ucd_dir, input_defs)
     new_defaults = Props(prop_aliases)
@@ -1156,5 +1284,8 @@ elif list_files:
         for f in sorted(output_defs):
             impl_name = '{0}.g.c++'.format(f)
             yield os.path.join(src_dir, impl_name)
+            header_name = '{0}.g.h++'.format(f)
+            yield os.path.join(inc_dir, 'ogonek', 'ucd', header_name)
+        yield os.path.join(inc_dir, 'ucd_all.g.h++')
 
     sys.stdout.write(';'.join(filenames()))

@@ -10,8 +10,8 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 /**
- * Core types ``<ogonek/types.h++>``
- * =================================
+ * Core types
+ * ==========
  */
 
 #ifndef OGONEK_TYPES_HPP

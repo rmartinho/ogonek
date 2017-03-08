@@ -40,7 +40,6 @@ namespace ogonek {
                 top_and_right,
                 visual_order_left,
             };
-
             struct indic_positional_category_properties {
                 code_point start;
                 indic_positional_category value;

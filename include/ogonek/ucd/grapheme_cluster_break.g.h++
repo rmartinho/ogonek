@@ -54,7 +54,6 @@ namespace ogonek {
                 spacing_mark = sm,
                 other = xx,
             };
-
             struct grapheme_cluster_break_properties {
                 code_point start;
                 grapheme_cluster_break value;

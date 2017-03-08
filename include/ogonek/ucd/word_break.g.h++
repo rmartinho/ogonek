@@ -66,7 +66,6 @@ namespace ogonek {
                 single_quote = sq,
                 other = xx,
             };
-
             struct word_break_properties {
                 code_point start;
                 word_break value;

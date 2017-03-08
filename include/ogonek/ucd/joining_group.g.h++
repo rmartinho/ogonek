@@ -116,7 +116,6 @@ namespace ogonek {
                 zhain,
                 hamza_on_heh_goal = teh_marbuta_goal,
             };
-
             struct joining_group_properties {
                 code_point start;
                 joining_group value;

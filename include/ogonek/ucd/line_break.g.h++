@@ -107,7 +107,6 @@ namespace ogonek {
                 unknown = xx,
                 zwspace = zw,
             };
-
             struct line_break_properties {
                 code_point start;
                 line_break value;

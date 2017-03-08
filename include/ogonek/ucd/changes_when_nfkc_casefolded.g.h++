@@ -24,8 +24,6 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            
-
             struct changes_when_nfkc_casefolded_properties {
                 code_point start;
                 bool value;

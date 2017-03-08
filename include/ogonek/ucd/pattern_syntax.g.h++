@@ -24,8 +24,6 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            
-
             struct pattern_syntax_properties {
                 code_point start;
                 bool value;

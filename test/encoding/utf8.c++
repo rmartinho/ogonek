@@ -80,13 +80,13 @@ TEST_CASE("UTF-8 encoding works as expected", "[encoding]") {
             test::test_decode_with_error<ogonek::utf8>(all_continuation_bytes, n_replacements(64), U""_s);
         }
         SECTION("lonely start characters") {
-            auto all_2byte_starters_followed_by_space = intersperse_bytes_with_space(0xC0, 32);
+            auto all_2byte_starters_followed_by_space = intersperse_bytes_with_space(0xC0u, 32u);
             test::test_decode_with_error<ogonek::utf8>(all_2byte_starters_followed_by_space, intersperse_replacements_with_space(32), std::u32string(32, ' '));
 
-            auto all_3byte_starters_followed_by_space = intersperse_bytes_with_space(0xE0, 16);
+            auto all_3byte_starters_followed_by_space = intersperse_bytes_with_space(0xE0u, 16u);
             test::test_decode_with_error<ogonek::utf8>(all_3byte_starters_followed_by_space, intersperse_replacements_with_space(16), std::u32string(16, ' '));
 
-            auto all_4byte_starters_followed_by_space = intersperse_bytes_with_space(0xF0, 5);
+            auto all_4byte_starters_followed_by_space = intersperse_bytes_with_space(0xF0u, 5u);
             test::test_decode_with_error<ogonek::utf8>(all_4byte_starters_followed_by_space, intersperse_replacements_with_space(5), std::u32string(5, ' '));
         }
         SECTION("last continuation missing") {

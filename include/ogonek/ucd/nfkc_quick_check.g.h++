@@ -24,8 +24,6 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            
-
             struct nfkc_quick_check_properties {
                 code_point start;
                 detail::trinary value;

@@ -24,8 +24,6 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            
-
             struct default_ignorable_code_point_properties {
                 code_point start;
                 bool value;

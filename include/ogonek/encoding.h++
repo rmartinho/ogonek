@@ -10,8 +10,8 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 /**
- * Encoding ``<ogonek/encoding.h++>``
- * ==================================
+ * Encoding
+ * ========
  */
 
 #ifndef OGONEK_ENCODING_HPP
@@ -20,10 +20,11 @@
 #include <ogonek/types.h++>
 #include <ogonek/error_fwd.h++>
 #include <ogonek/concepts.h++>
+#include <ogonek/detail/static_const.h++>
+#include <ogonek/detail/container/optional.h++>
 #include <ogonek/detail/container/partial_array.h++>
 #include <ogonek/detail/range/deferred.h++>
 
-#include <range/v3/view_adaptor.hpp>
 #include <range/v3/view_facade.hpp>
 
 #include <functional>
@@ -98,6 +99,8 @@ namespace ogonek {
      * .. function:: template <EncodingForm Encoding>\
      *               coded_character_t<Encoding> encode_one(code_point u, coding_state_t<Encoding>& state)
      *
+     *     .. warning:: |unstable-api|
+     *
      *     Encodes ``u`` according to ``Encoding``.
      *
      *     :param u: the |code-point| to be encoded
@@ -108,10 +111,19 @@ namespace ogonek {
      *
      *     :throws: :type:`encode_error` when the input cannot be encoded by ``Encoding``
      */
-    template <typename Encoding,
-              CONCEPT_REQUIRES_(EncodingForm<Encoding>())>
-    auto encode_one(code_point u, coding_state_t<Encoding>& state) {
-        return concepts::EncodingForm::encode_one<Encoding>(u, state);
+    namespace fun {
+        template <typename Encoding>
+        struct encode_one {
+            CONCEPT_ASSERT(EncodingForm<Encoding>());
+
+            auto operator()(code_point u, coding_state_t<Encoding>& state) const {
+                return concepts::EncodingForm::encode_one<Encoding>(u, state);
+            }
+        };
+    } // namespace fun
+    inline namespace {
+        template <typename Encoding>
+        constexpr auto const& encode_one = detail::static_const<fun::encode_one<Encoding>>::value;
     }
 
     /**
@@ -130,7 +142,7 @@ namespace ogonek {
             encoded_view<Encoding, Rng, Handler>,
             ranges::is_finite<Rng>::value? ranges::finite : ranges::range_cardinality<Rng>::value> {
         private:
-            CONCEPT_ASSERT(InputRangeOf<code_point, Rng>());
+            CONCEPT_ASSERT(ForwardRangeOf<code_point, Rng>());
             CONCEPT_ASSERT(EncodingForm<Encoding>());
             CONCEPT_ASSERT(EncodeErrorHandler<std::decay_t<Handler>, Encoding>());
 
@@ -227,8 +239,10 @@ namespace ogonek {
     } // namespace detail
 
     /**
-     * .. function:: template <EncodingForm Encoding, InputRange Rng, EncodeErrorHandler Handler>\
+     * .. function:: template <EncodingForm Encoding, ForwardRange Rng, EncodeErrorHandler Handler>\
      *               auto encode(Rng rng, Handler&& handler)
+     *
+     *     Encodes a range of |code-points|, according to ``Encoding``.
      *
      *     :param rng: The range of |code-points| to encode
      *
@@ -238,17 +252,29 @@ namespace ogonek {
      *
      *     :validation: as performed by ``Encoding``; errors are handled by ``handler``
      */
-    template <typename Encoding, typename Rng, typename Handler,
-              CONCEPT_REQUIRES_(EncodingForm<Encoding>()),
-              CONCEPT_REQUIRES_(InputRangeOf<code_point, Rng>()),
-              CONCEPT_REQUIRES_(EncodeErrorHandler<std::decay_t<Handler>, Encoding>())>
-    auto encode(Rng rng, Handler&& handler) {
-        return detail::defer(detail::encoded_view<Encoding, Rng, Handler>(std::move(rng), std::forward<Handler>(handler)));
+    namespace fun {
+        template <typename Encoding>
+        struct encode {
+            CONCEPT_ASSERT(EncodingForm<Encoding>());
+
+            template <typename Rng, typename Handler,
+                      CONCEPT_REQUIRES_(ForwardRangeOf<code_point, Rng>()),
+                      CONCEPT_REQUIRES_(EncodeErrorHandler<std::decay_t<Handler>, Encoding>())>
+            auto operator()(Rng rng, Handler&& handler) const {
+                return detail::defer(detail::encoded_view<Encoding, Rng, Handler>(std::move(rng), std::forward<Handler>(handler)));
+            }
+        };
+    } // namespace fun
+    inline namespace {
+        template <typename Encoding>
+        constexpr auto const& encode = detail::static_const<fun::encode<Encoding>>::value;
     }
 
     /**
-     * .. function:: template <EncodingForm Encoding, Iterator It, Sentinel St>\
+     * .. function:: template <EncodingForm Encoding, ForwardIterator It, Sentinel St>\
      *               std::pair<code_point, It> decode_one(It first, St last, coding_state_t<Encoding>& state)
+     *
+     *     .. warning:: |unstable-api|
      *
      *     Decodes the first |code-point| from the range [``first``, ``last``), according to ``Encoding``.
      *
@@ -262,9 +288,22 @@ namespace ogonek {
      *
      *     :throws: :type:`decode_error` when the input cannot be decoded by ``Encoding``
      */
-    template <typename Encoding, typename It, typename St>
-    auto decode_one(It first, St last, coding_state_t<Encoding>& state) {
-        return concepts::EncodingForm::decode_one<Encoding>(first, last, state);
+    namespace fun {
+        template <typename Encoding>
+        struct decode_one {
+            CONCEPT_ASSERT(EncodingForm<Encoding>());
+
+            template <typename It, typename St,
+                      CONCEPT_REQUIRES_(ForwardIterator<It>()),
+                      CONCEPT_REQUIRES_(Sentinel<St, It>())>
+            auto operator()(It first, St last, coding_state_t<Encoding>& state) const {
+                return concepts::EncodingForm::decode_one<Encoding>(first, last, state);
+            }
+        };
+    } // namespace fun
+    inline namespace {
+        template <typename Encoding>
+        constexpr auto const& decode_one = detail::static_const<fun::decode_one<Encoding>>::value;
     }
 
     namespace detail {
@@ -278,8 +317,8 @@ namespace ogonek {
                 decoded_view<Encoding, Rng, Handler>,
                 ranges::is_finite<Rng>::value? ranges::finite : ranges::range_cardinality<Rng>::value>;
 
-            CONCEPT_ASSERT(InputRangeOf<code_unit_t<Encoding>, Rng>());
             CONCEPT_ASSERT(EncodingForm<Encoding>());
+            CONCEPT_ASSERT(ForwardRangeOf<code_unit_t<Encoding>, Rng>());
             CONCEPT_ASSERT(DecodeErrorHandler<std::decay_t<Handler>, Encoding>());
 
             friend ranges::range_access;
@@ -305,12 +344,12 @@ namespace ogonek {
                 }
 
                 reference read() const {
-                    assert(decoded != invalid);
-                    return decoded;
+                    assert(static_cast<bool>(decoded));
+                    return *decoded;
                 }
 
                 void next() {
-                    decoded = invalid;
+                    decoded = {};
                     if(first != last) {
                         decode_next();
                     }
@@ -318,33 +357,30 @@ namespace ogonek {
 
                 bool equal(cursor const& pos) const {
                     assert(last == pos.last);
-                    return first == pos.first && (decoded == invalid) == (pos.decoded == invalid);
+                    return first == pos.first && !decoded == !pos.decoded;
                 }
 
                 bool equal(sentinel const&) const {
-                    return decoded == invalid;
+                    return !decoded;
                 }
 
             private:
                 void decode_next() {
-                    while(first != last && decoded == invalid) {
+                    while(first != last && !decoded) {
                         try {
-                            std::tie(decoded, first) = decode_one<Encoding>(first, last, state);
+                            code_point u;
+                            std::tie(u, first) = decode_one<Encoding>(first, last, state);
+                            decoded = { u };
                         } catch(decode_error<Encoding> const& e) {
-                            auto rep = (*handler)(e);
-                            if(rep) {
-                                decoded = *rep;
-                            }
+                            decoded = (*handler)(e);
                             ++first; // TODO advance this from encoding itself?
                         }
                     }
                 }
 
-                static constexpr code_point invalid = -1; // TODO replace with optional
-
                 iterator first;
                 iterator last;
-                code_point decoded = invalid;
+                detail::optional<code_point> decoded;
                 std::decay_t<Handler> const* handler = nullptr;
                 coding_state_t<Encoding> state {};
             };
@@ -372,8 +408,10 @@ namespace ogonek {
     } // namespace detail
 
     /**
-     * .. function:: template <EncodingForm Encoding, ranges::Range Rng>\
-     *               auto decode(Rng rng)
+     * .. function:: template <EncodingForm Encoding, ForwardRange Rng, EncodeErrorHandler Handler>\
+     *               auto decode(Rng rng, Handler&& handler)
+     *
+     *     Decodes a range of |code-points|, according to ``Encoding``.
      *
      *     :param rng: The range of |code-points| to encode
      *
@@ -383,12 +421,21 @@ namespace ogonek {
      *
      *     :validation: as performed by ``Encoding``; errors are handled by ``handler``
      */
-    template <typename Encoding, typename Rng, typename Handler,
-              CONCEPT_REQUIRES_(EncodingForm<Encoding>()),
-              CONCEPT_REQUIRES_(InputRangeOf<code_unit_t<Encoding>, Rng>()),
-              CONCEPT_REQUIRES_(DecodeErrorHandler<std::decay_t<Handler>, Encoding>())>
-    auto decode(Rng rng, Handler&& handler) {
-        return detail::defer(detail::decoded_view<Encoding, Rng, Handler>(std::move(rng), std::forward<Handler>(handler)));
+    namespace fun {
+        template <typename Encoding>
+        struct decode {
+            CONCEPT_ASSERT(EncodingForm<Encoding>());
+            template <typename Rng, typename Handler,
+                    CONCEPT_REQUIRES_(ForwardRangeOf<code_unit_t<Encoding>, Rng>()),
+                    CONCEPT_REQUIRES_(DecodeErrorHandler<std::decay_t<Handler>, Encoding>())>
+            auto operator()(Rng rng, Handler&& handler) const {
+                return detail::defer(detail::decoded_view<Encoding, Rng, Handler>(std::move(rng), std::forward<Handler>(handler)));
+            }
+        };
+    } // namespace fun
+    inline namespace {
+        template <typename Encoding>
+        constexpr auto const& decode = detail::static_const<fun::decode<Encoding>>::value;
     }
 
     /**

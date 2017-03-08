@@ -106,7 +106,6 @@ namespace ogonek {
                 paragraph_separator = zp,
                 space_separator = zs,
             };
-
             struct general_category_properties {
                 code_point start;
                 general_category value;

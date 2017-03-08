@@ -32,7 +32,6 @@ namespace ogonek {
                 none = n,
                 open = o,
             };
-
             struct bidi_paired_bracket_type_properties {
                 code_point start;
                 bracket_type value;

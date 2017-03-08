@@ -38,7 +38,6 @@ namespace ogonek {
                 transparent = t,
                 non_joining = u,
             };
-
             struct joining_type_properties {
                 code_point start;
                 joining_type value;

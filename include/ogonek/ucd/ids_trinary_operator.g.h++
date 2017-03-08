@@ -24,8 +24,6 @@
 namespace ogonek {
     namespace ucd {
         inline namespace abiv0 {
-            
-
             struct ids_trinary_operator_properties {
                 code_point start;
                 bool value;

@@ -300,7 +300,6 @@ namespace ogonek {
                 common = zyyy,
                 unknown = zzzz,
             };
-
             struct script_properties {
                 code_point start;
                 script value;

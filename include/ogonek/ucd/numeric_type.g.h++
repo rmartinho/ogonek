@@ -33,7 +33,6 @@ namespace ogonek {
                 digit = di,
                 numeric = nu,
             };
-
             struct numeric_type_properties {
                 code_point start;
                 numeric_type value;

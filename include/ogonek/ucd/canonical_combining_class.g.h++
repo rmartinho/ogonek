@@ -103,7 +103,6 @@ namespace ogonek {
                 ccc118 = 118,
                 ccc122 = 122,
             };
-
             struct canonical_combining_class_properties {
                 code_point start;
                 combining_class value;
