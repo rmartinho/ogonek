@@ -1,4 +1,4 @@
-Concepts
+Encoding
 ========
 
 .. concept:: template <typename E>\
@@ -19,13 +19,6 @@ Concepts
 
     .. todo:: Document requirements
 
-.. concept:: template <typename O>\
-             Optional
-
-    A type of objects that contain an optional value.
-
-    .. todo:: Document requirements
-
 .. concept:: template <typename H, typename E>\
              EncodeErrorHandler
 
@@ -37,13 +30,6 @@ Concepts
              DecodeErrorHandler
 
     ``H`` is an error handler that can handle errors when encoding with ``E``.
-
-    .. todo:: Document requirements
-
-.. concept:: template <typename N>\
-             NormalizationForm
-
-    ``N`` is a Unicode normalization form.
 
     .. todo:: Document requirements
 

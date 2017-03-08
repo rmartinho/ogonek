@@ -19,7 +19,7 @@
 
 #include <ogonek/error_fwd.h++>
 
-#include <ogonek/concepts.h++>
+#include <ogonek/concepts/encoding.h++>
 #include <ogonek/encoding.h++>
 #include <ogonek/detail/container/optional.h++>
 

@@ -15,7 +15,7 @@
 #define OGONEK_ENCODINGS_UTF8_HPP
 
 #include <ogonek/types.h++>
-#include <ogonek/concepts.h++>
+#include <ogonek/concepts/encoding.h++>
 #include <ogonek/encoding.h++>
 #include <ogonek/error.h++>
 

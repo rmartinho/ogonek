@@ -32,7 +32,7 @@ function (extract_docs out_var)
     foreach (header ${ARGN})
         file (RELATIVE_PATH short_header ${INCLUDE_DIR} ${header})
         string (REGEX MATCH "^(.*)\\.[^.]*$" dummy ${short_header})
-        set (extracted ${CMAKE_CURRENT_SOURCE_DIR}/extracted/${CMAKE_MATCH_1}.g.rst)
+        set (extracted ${CMAKE_CURRENT_SOURCE_DIR}/reference/${CMAKE_MATCH_1}.g.rst)
 
         add_custom_command (OUTPUT ${extracted}
             COMMAND awk -f ${AUTODOC_SCRIPT} ${header} > ${extracted}

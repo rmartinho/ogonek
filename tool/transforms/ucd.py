@@ -573,7 +573,7 @@ meta_defs = {
 
 def dry_aliases():
     enum_catalog_props = ['sc', 'bc', 'ccc', 'dt', 'ea', 'gc', 'jg', 'jt', 'lb', 'nt', 'bpt', 'blk', '$case_folding_status', 'age', 'hst', 'InPC', 'InSC', '$name_alias_type', '$case_condition', 'GCB', 'SB', 'WB']
-    return {}, { x: [] for x in enum_catalog_props }, { 'gc': [] }
+    return {}, { x: [] for x in enum_catalog_props }, { x: [] for x in ['gc', 'GCB', 'WB', 'SB'] }
 
 if dry_run:
     prop_aliases, value_aliases, flag_aliases = dry_aliases()

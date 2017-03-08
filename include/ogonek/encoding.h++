@@ -19,7 +19,7 @@
 
 #include <ogonek/types.h++>
 #include <ogonek/error_fwd.h++>
-#include <ogonek/concepts.h++>
+#include <ogonek/concepts/encoding.h++>
 #include <ogonek/detail/static_const.h++>
 #include <ogonek/detail/container/optional.h++>
 #include <ogonek/detail/container/partial_array.h++>

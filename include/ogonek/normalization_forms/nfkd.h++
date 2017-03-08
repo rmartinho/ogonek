@@ -12,7 +12,7 @@
 #ifndef OGONEK_NORMALIZATION_FORMS_NFKD_HPP
 #define OGONEK_NORMALIZATION_FORMS_NFKD_HPP
 
-#include <ogonek/concepts.h++>
+#include <ogonek/concepts/normalization.h++>
 #include <ogonek/types.h++>
 #include <ogonek/ucd.h++>
 

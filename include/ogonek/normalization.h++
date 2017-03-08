@@ -18,7 +18,7 @@
 #define OGONEK_NORMALIZATION_HPP
 
 #include <ogonek/types.h++>
-#include <ogonek/concepts.h++>
+#include <ogonek/concepts/normalization.h++>
 #include <ogonek/ucd.h++>
 #include <ogonek/detail/static_const.h++>
 #include <ogonek/detail/container/small_vector.h++>

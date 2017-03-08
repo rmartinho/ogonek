@@ -14,7 +14,7 @@
 #ifndef OGONEK_DETAIL_RANGE_DEFERRED_HPP
 #define OGONEK_DETAIL_RANGE_DEFERRED_HPP
 
-#include <ogonek/concepts.h++>
+#include <ogonek/concepts/core.h++>
 #include <ogonek/detail/container/either.h++>
 
 #include <range/v3/view_facade.hpp>

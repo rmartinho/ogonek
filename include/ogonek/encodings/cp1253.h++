@@ -17,7 +17,7 @@
 #define OGONEK_ENCODINGS_CP1253_HPP
 
 #include <ogonek/types.h++>
-#include <ogonek/concepts.h++>
+#include <ogonek/concepts/encoding.h++>
 #include <ogonek/detail/encoding/simple_byte_mapping_encoding.h++>
 #include <ogonek/detail/visibility.h++>
 

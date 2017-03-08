@@ -17,7 +17,7 @@
 #define OGONEK_ENCODINGS_ISO_8859_16_HPP
 
 #include <ogonek/types.h++>
-#include <ogonek/concepts.h++>
+#include <ogonek/concepts/encoding.h++>
 #include <ogonek/detail/encoding/simple_byte_mapping_encoding.h++>
 #include <ogonek/detail/visibility.h++>
 

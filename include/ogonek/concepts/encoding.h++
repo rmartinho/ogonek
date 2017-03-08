@@ -10,68 +10,24 @@
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 /**
- * Concepts
+ * Encoding
  * ========
  */
 
-#ifndef OGONEK_CONCEPTS_HPP
-#define OGONEK_CONCEPTS_HPP
+#ifndef OGONEK_CONCEPTS_ENCODING_HPP
+#define OGONEK_CONCEPTS_ENCODING_HPP
 
 #include <ogonek/types.h++>
+#include <ogonek/concepts/core.h++>
 #include <ogonek/error_fwd.h++>
 
-#include <range/v3/range_concepts.hpp>
-#include <range/v3/utility/concepts.hpp>
-#include <range/v3/utility/functional.hpp>
-
-#include <iterator>
 #include <array>
 #include <type_traits>
 
 #include <cstddef>
 
 namespace ogonek {
-    namespace detail {
-        template <typename...>
-        struct always_true : std::true_type {};
-    } // namespace detail
     namespace archetypes {
-        template <typename T>
-        struct ForwardIterator {
-            using value_type = T;
-            using reference = T&;
-            using difference_type = std::ptrdiff_t;
-            using iterator_category = std::forward_iterator_tag;
-
-            ForwardIterator& operator++();
-            void operator++(int);
-            T operator*() const;
-        };
-        template <typename T, typename I = ForwardIterator<T>>
-        struct ForwardSentinel {
-            friend bool operator==(ForwardSentinel const&, I const&);
-            friend bool operator!=(ForwardSentinel const&, I const&);
-            friend bool operator==(I const&, ForwardSentinel const&);
-            friend bool operator!=(I const&, ForwardSentinel const&);
-        };
-        template <typename T>
-        struct OutputIterator {
-            using value_type = T;
-            using reference = T&;
-            using difference_type = std::ptrdiff_t;
-            using iterator_category = std::output_iterator_tag;
-
-            OutputIterator& operator++();
-            OutputIterator operator++(int);
-            T& operator*() const;
-        };
-        //CONCEPT_ASSERT(ranges::WeaklyIncrementable<OutputIterator<int>>());
-        //CONCEPT_ASSERT(ranges::Iterator<OutputIterator<int>>());
-        //CONCEPT_ASSERT(ranges::Movable<OutputIterator<int>>());
-        //CONCEPT_ASSERT(ranges::DefaultConstructible<OutputIterator<int>>());
-        //CONCEPT_ASSERT(ranges::Writable<OutputIterator<int>, int>());
-        CONCEPT_ASSERT(ranges::OutputIterator<OutputIterator<code_point>, code_point>());
-
         template <typename Encoding>
         struct EncodeErrorHandler {
             code_point* operator()(encode_error<Encoding>) const;
@@ -92,27 +48,6 @@ namespace ogonek {
     } // namespace archetypes
 
     namespace concepts {
-        using ranges::concepts::models;
-        using ranges::concepts::refines;
-
-        using ranges::concepts::valid_expr;
-        using ranges::concepts::model_of;
-        using ranges::concepts::is_true;
-        using ranges::concepts::has_type;
-
-        using ranges::concepts::DefaultConstructible;
-        using ranges::concepts::Same;
-        using ranges::concepts::SemiRegular;
-        using ranges::concepts::ConvertibleTo;
-        using ranges::concepts::Integral;
-        using ranges::concepts::Invocable;
-
-        using ranges::concepts::_1;
-        using ranges::concepts::_2;
-
-        using ranges::concepts::OutputIterator;
-        using ranges::concepts::ForwardRange;
-
         struct EncodingForm {
         private:
             template <typename T>
@@ -213,40 +148,6 @@ namespace ogonek {
                 ));
         };
 
-        struct Optional {
-        public:
-            template <typename T>
-            using value_t = std::remove_reference_t<decltype(*std::declval<T const&>())>;
-
-            template <typename T>
-            auto requires_(T&&) -> decltype(
-                valid_expr(
-                    model_of<DefaultConstructible, T>(),
-                    *std::declval<T const&>(),
-                    static_cast<bool>(std::declval<T const&>())
-                ));
-        };
-
-        struct ForwardRangeOf
-        : refines<ForwardRange(_2)> {
-        public:
-            template <typename V, typename T>
-            auto requires_(V&&, T&&) -> decltype(
-                valid_expr(
-                    is_true(std::is_same<V, ForwardRange::value_t<T>>())
-                ));
-        };
-
-        struct OptionalOf
-        : refines<Optional(_2)> {
-        public:
-            template <typename V, typename T>
-            auto requires_(V&&, T&&) -> decltype(
-                valid_expr(
-                    is_true(std::is_same<V, Optional::value_t<T>>())
-                ));
-        };
-
         struct EncodeErrorHandler {
         public:
             template <typename H, typename E,
@@ -268,55 +169,7 @@ namespace ogonek {
                     model_of<OptionalOf, code_point, HandlerResult>()
                 ));
         };
-
-        struct NormalizationForm {
-        private:
-            template <typename T, typename Rng>
-            struct has_compose_tester {
-                template <typename U = T>
-                static auto test(int) -> detail::always_true<decltype(U::compose(std::declval<Rng>()))>;
-                static auto test(...) -> std::false_type;
-                using type = decltype(test(0));
-            };
-            template <typename T, typename Rng>
-            struct has_compose : has_compose_tester<T, Rng>::type {};
-
-            template <typename T, typename Rng>
-            static auto compose(Rng rng, std::true_type) {
-                return T::compose(rng);
-            }
-            template <typename T, typename Rng>
-            static auto compose(Rng rng, std::false_type) {
-                return ranges::end(rng);
-            }
-
-        public:
-            template <typename T, typename Out>
-            static auto decompose_into(code_point u, Out out) -> decltype(T::decompose_into(u, out)) {
-                return T::decompose_into(u, out);
-            }
-            template <typename T, typename Rng>
-            static auto compose(Rng rng) {
-                return NormalizationForm::compose<T>(rng, has_compose<T, Rng>());
-            }
-
-            template <typename N>
-            auto requires_(N&&) -> decltype(
-                valid_expr(
-                    (decompose_into<N>(code_point(), archetypes::OutputIterator<code_point>()), 42)
-                ));
-        };
     } // namespace concepts
-
-    using ranges::ForwardIterator;
-    using ranges::OutputIterator;
-    using ranges::Sentinel;
-    using ranges::ForwardRange;
-    using ranges::OutputRange;
-
-    // TODO docs?
-    template <typename V, typename T>
-    using ForwardRangeOf = concepts::models<concepts::ForwardRangeOf, V, T>;
 
     /**
      * .. concept:: template <typename E>\
@@ -345,17 +198,6 @@ namespace ogonek {
     using StatelessEncodingForm = concepts::models<concepts::StatelessEncodingForm, T>;
 
     /**
-     * .. concept:: template <typename O>\
-     *              Optional
-     * 
-     *     A type of objects that contain an optional value.
-     *
-     *     .. todo:: Document requirements
-     */
-    template <typename T>
-    using Optional = concepts::models<concepts::Optional, T>;
-
-    /**
      * .. concept:: template <typename H, typename E>\
      *              EncodeErrorHandler
      *
@@ -376,17 +218,7 @@ namespace ogonek {
      */
     template <typename H, typename E>
     using DecodeErrorHandler = concepts::models<concepts::DecodeErrorHandler, H, E>;
-
-    /**
-     * .. concept:: template <typename N>\
-     *              NormalizationForm
-     *
-     *     ``N`` is a Unicode normalization form.
-     *
-     *     .. todo:: Document requirements
-     */
-    template <typename N>
-    using NormalizationForm = concepts::models<concepts::NormalizationForm, N>;
 } // namespace ogonek
 
 #endif // OGONEK_CONCEPTS_HPP
+

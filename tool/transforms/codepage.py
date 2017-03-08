@@ -97,7 +97,7 @@ header_tmpl = string.Template('''#ifndef OGONEK_ENCODINGS_${pp_symbol}_HPP
 #define OGONEK_ENCODINGS_${pp_symbol}_HPP
 
 #include <ogonek/types.h++>
-#include <ogonek/concepts.h++>
+#include <ogonek/concepts/encoding.h++>
 #include <ogonek/detail/encoding/simple_byte_mapping_encoding.h++>
 #include <ogonek/detail/visibility.h++>
 

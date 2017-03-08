@@ -13,7 +13,7 @@
 #define OGONEK_NORMALIZATION_FORMS_NFC_HPP
 
 #include <ogonek/types.h++>
-#include <ogonek/concepts.h++>
+#include <ogonek/concepts/normalization.h++>
 #include <ogonek/ucd.h++>
 #include <ogonek/normalization_forms/nfd.h++>
 
