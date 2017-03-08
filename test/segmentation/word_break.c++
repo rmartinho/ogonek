@@ -19,5 +19,5 @@
 #include "segmentation/test_segmentation.h++"
 
 TEST_CASE("official word break tests", "[segmentation][official][words]") {
-    test::test_segmentation_breaks<ogonek::word>();
+    test::test_segmentation<ogonek::word>();
 }

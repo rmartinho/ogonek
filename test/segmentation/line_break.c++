@@ -19,5 +19,5 @@
 #include "segmentation/test_segmentation.h++"
 
 TEST_CASE("official line break tests", "[segmentation][official][lines]") {
-    test::test_segmentation_breaks<ogonek::line>();
+    test::test_segmentation<ogonek::line>();
 }

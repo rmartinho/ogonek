@@ -54,7 +54,7 @@ def parsebreaks(line):
             if c == u'÷':
                 yield i
 
-    return list(fn(line))[1:]
+    return list(fn(line))
 
 copyrighttmpl = string.Template('''// Ogonek
 //

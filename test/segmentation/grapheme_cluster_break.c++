@@ -19,5 +19,5 @@
 #include "segmentation/test_segmentation.h++"
 
 TEST_CASE("official grapheme cluster break tests", "[segmentation][official][grapheme_clusters]") {
-    test::test_segmentation_breaks<ogonek::grapheme_cluster>();
+    test::test_segmentation<ogonek::grapheme_cluster>();
 }

@@ -32,17 +32,6 @@ namespace ogonek {
 
 namespace test {
     namespace detail {
-        template <typename Rng>
-        auto collect_iterators(Rng rng) {
-            auto first = ranges::begin(rng);
-            auto last = ranges::end(rng);
-            std::vector<decltype(ranges::begin(rng))> result;
-            for(auto it = first; it != last; ++it) {
-                result.push_back(it);
-            }
-            return result;
-        }
-
         template <typename B>
         struct test_data;
         template <>
@@ -64,14 +53,14 @@ namespace test {
     } // namespace detail
 
     template <typename B>
-    void test_segmentation_breaks() {
+    void test_segmentation() {
         for(auto&& t : detail::test_data<B>::get()) {
             INFO(t.input);
             auto in = ranges::view::all(t.input);
-            auto break_iterators = detail::collect_iterators(ogonek::breaks<B>(in));
-            auto breaks = ranges::view::all(break_iterators)
+            auto breaks = ogonek::boundaries<B>(in)
                         | ranges::view::transform([&in](auto it) { return int(it - ranges::begin(in)); })
                         | ranges::to_vector;
+            breaks.push_back(t.input.size());
             CHECK(breaks == t.breaks);
         }
     }
