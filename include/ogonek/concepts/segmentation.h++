@@ -73,7 +73,7 @@ namespace ogonek {
 
             template <typename T, typename Rng, std::size_t... I>
             static auto is_boundary(Rng rng, std::index_sequence<I...>) {
-                return BoundaryCondition::is_boundary<T>(rng[I]...);
+                return T::is_boundary(rng[I]...);
             }
 
         public:
