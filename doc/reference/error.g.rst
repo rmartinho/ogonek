@@ -38,7 +38,7 @@ Error handling
     doesn't support it, some encoding-specific character is used
     instead.
 
-.. var:: auto replace_errors
+.. var:: auto throw_error
 
     An error handler for encoding/decoding functions that throws when an
     error is found in the input.

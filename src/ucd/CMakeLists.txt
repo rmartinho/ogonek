@@ -8,12 +8,12 @@ set (UCD_TRANSFORM_TOOL ${PROJECT_SOURCE_DIR}/tool/transforms/ucd.py)
 file (GLOB_RECURSE ucd_txt_SRC ${UCD_SRC_DIR}/*.c++)
 
 execute_process (
-    COMMAND python ${UCD_TRANSFORM_TOOL} --files ${INCLUDE_DIR} ${UCD_SRC_DIR}
+    COMMAND python2 ${UCD_TRANSFORM_TOOL} --files ${INCLUDE_DIR} ${UCD_SRC_DIR}
     OUTPUT_VARIABLE ucd_gen_SRC)
 
 add_custom_command (
     OUTPUT ${ucd_gen_SRC}
-    COMMAND python ${UCD_TRANSFORM_TOOL} ${OGONEK_ABI} ${UCD_DIR} ${INCLUDE_DIR} ${UCD_SRC_DIR}
+    COMMAND python2 ${UCD_TRANSFORM_TOOL} ${OGONEK_ABI} ${UCD_DIR} ${INCLUDE_DIR} ${UCD_SRC_DIR}
     DEPENDS ${UCD_TRANSFORM_TOOL}
     COMMENT "Translating UCD")
 

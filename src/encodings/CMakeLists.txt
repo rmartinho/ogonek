@@ -133,7 +133,7 @@ function (transform_codepages out_header_var out_impl_var)
         set (impl ${CODEPAGE_SRC_DIR}/${codepage_cxx_file}.g.c++)
 
         add_custom_command (OUTPUT ${header} ${impl}
-            COMMAND python ${CODEPAGE_TRANSFORM_TOOL} ${codepage_src_fmt} ${codepage_src_file} ${header} ${impl} ${codepage_str_name}
+            COMMAND python2 ${CODEPAGE_TRANSFORM_TOOL} ${codepage_src_fmt} ${codepage_src_file} ${header} ${impl} ${codepage_str_name}
             DEPENDS ${CODEPAGE_TRANSFORM_TOOL}
             COMMENT "Translating codepage ${codepage_str_name}"
         )

@@ -129,7 +129,7 @@ namespace ogonek {
     CONCEPT_ASSERT(DecodeErrorHandler<replace_errors_t, archetypes::EncodingForm>());
 
     /**
-     * .. var:: auto replace_errors
+     * .. var:: auto throw_error
      *
      *     An error handler for encoding/decoding functions that throws when an
      *     error is found in the input.
