@@ -10,7 +10,7 @@ set (normalization_test_gen_SRC ${TEST_SRC_DIR}/normalization_tests.g.c++)
 
 add_custom_command (
     OUTPUT ${normalization_test_gen_SRC} ${normalization_test_gen_HPP}
-    COMMAND python ${TEST_TRANSFORM_TOOL} ${UCD_DIR}/NormalizationTest.txt ${normalization_test_gen_HPP} ${normalization_test_gen_SRC}
+    COMMAND python2 ${TEST_TRANSFORM_TOOL} ${UCD_DIR}/NormalizationTest.txt ${normalization_test_gen_HPP} ${normalization_test_gen_SRC}
     DEPENDS ${TEST_TRANSFORM_TOOL}
     COMMENT "Translating normalization tests")
 
