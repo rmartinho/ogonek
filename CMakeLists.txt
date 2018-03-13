@@ -4,6 +4,8 @@ project (Ogonek)
 include (deps/catch.cmake)
 include (deps/range-v3.cmake)
 
+option (USE_BOOST "Enable boost interoperability" OFF)
+
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

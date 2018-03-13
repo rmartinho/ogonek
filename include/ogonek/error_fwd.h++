@@ -13,7 +13,6 @@
 #define OGONEK_ERROR_FWD_HPP
 
 namespace ogonek {
-
     struct unicode_error;
     template <typename Encoding>
     struct encode_error;

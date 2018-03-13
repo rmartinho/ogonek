@@ -170,11 +170,11 @@ class Types:
         def cpp(self, value):
             canon = self.canonical(value)
             if canon == 'Y':
-                return '{ 1 }'
+                return 'true'
             elif canon == 'N':
-                return '{ 0 }'
+                return 'false'
             else:
-                return '{ -1 }'
+                return 'maybe'
 
         def py(self, value):
             canon = self.canonical(value)
@@ -1145,9 +1145,9 @@ output_defs = {
     'full_compatibility_decomposition_mapping': lambda: gen_builtin('$Full_Compatibility_Decomposition_Mapping', 'code_point const*'),
     'full_composition_exclusion':               lambda: gen_builtin('Full_Composition_Exclusion',                'bool'),
     'canonical_compositions':                   lambda: gen_custom( '$Canonical_Compositions',                   'std::initializer_list<composition_entry>', ['initializer_list'], composition_entry_def),
-    'nfc_quick_check':                          lambda: gen_builtin('NFC_Quick_Check',                           'detail::trinary'),
+    'nfc_quick_check':                          lambda: gen_builtin('NFC_Quick_Check',                           'tribool'),
     'nfd_quick_check':                          lambda: gen_builtin('NFD_Quick_Check',                           'bool'),
-    'nfkc_quick_check':                         lambda: gen_builtin('NFKC_Quick_Check',                          'detail::trinary'),
+    'nfkc_quick_check':                         lambda: gen_builtin('NFKC_Quick_Check',                          'tribool'),
     'nfkd_quick_check':                         lambda: gen_builtin('NFKD_Quick_Check',                          'bool'),
     'numeric_type':                             lambda: gen_enum(   'Numeric_Type',                              numeric_type_type),
     'numeric_value':                            lambda: gen_builtin('Numeric_Value',                             'detail::fraction'),

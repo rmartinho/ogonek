@@ -26,7 +26,7 @@ namespace ogonek {
         inline namespace abiv0 {
             struct nfkc_quick_check_properties {
                 code_point start;
-                detail::trinary value;
+                tribool value;
             };
 
             extern OGONEK_PUBLIC nfkc_quick_check_properties const* nfkc_quick_check_data;

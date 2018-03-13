@@ -19,6 +19,8 @@
 
 #include <cstdint>
 
+#include <ogonek/tribool.h++>
+
 namespace ogonek {
 
     /**
@@ -47,7 +49,6 @@ namespace ogonek {
 
     namespace detail {
         struct fraction { long num, den; };
-        struct trinary { int value; };
     } // namespace detail
 } // namespace ogonek
 

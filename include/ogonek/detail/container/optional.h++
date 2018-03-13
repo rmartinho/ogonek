@@ -17,10 +17,35 @@
 #include <ogonek/concepts.h++>
 #include <ogonek/types.h++>
 
+#ifdef OGONEK_USE_BOOST
+#   include <boost/optional.hpp>
+#endif
+
+#ifdef __has_include
+#   if __cplusplus >= 201703L && __has_include(<optional>)
+#       include <optional>
+#       define OGONEK_HAS_STD_OPTIONAL
+#   elif !defined(_LIBCPP_VERSION) && __has_include(<experimental/optional>)
+#       include <experimental/optional>
+#       define OGONEK_HAS_STD_OPTIONAL
+#       define OGONEK_HAS_STD_EXPERIMENTAL_OPTIONAL
+#   endif
+#endif
+
 #include <cassert>
 
 namespace ogonek {
     namespace detail {
+#if defined(OGONEK_HAS_STD_EXPERIMENTAL_OPTIONAL)
+        template <typename T>
+        using std_optional = std::experimental::optional<T>;
+        constexpr auto std_nullopt = std::experimental::nullopt;
+#elif defined(OGONEK_HAS_STD_OPTIONAL)
+        template <typename T>
+        using std_optional = std::optional<T>;
+        constexpr auto std_nullopt = std::nullopt;
+#endif
+
         template <typename T>
         struct optional;
 
@@ -48,6 +73,23 @@ namespace ogonek {
                 return u != invalid;
             }
 
+#ifdef OGONEK_HAS_STD_OPTIONAL
+            constexpr optional(std_optional<code_point> const& o)
+            : u(o.value_or(invalid)) {}
+
+            constexpr operator std_optional<code_point>() const {
+                return u != invalid? std_optional<code_point>(u) : std_nullopt;
+            }
+#endif
+
+#ifdef OGONEK_USE_BOOST
+            optional(boost::optional<code_point> const& o)
+            : u(o.value_or(invalid)) {}
+
+            operator boost::optional<code_point>() const {
+                return boost::make_optional(u != invalid, u);
+            }
+#endif
         private:
             code_point u;
         };
