@@ -12,8 +12,16 @@
 #ifndef OGONEK_SEGMENTATION_SENTENCE_HPP
 #define OGONEK_SEGMENTATION_SENTENCE_HPP
 
+#include <ogonek/types.h++>
+#include <ogonek/concepts/segmentation.h++>
+
 namespace ogonek {
-    struct sentence {};
+    struct sentence {
+        static bool is_boundary(code_point, code_point) {
+            return false;
+        }
+    };
+    CONCEPT_ASSERT(BoundaryCondition<sentence>());
 } // namespace ogonek
 
 #endif // OGONEK_SEGMENTATION_SENTENCE_HPP

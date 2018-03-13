@@ -12,8 +12,16 @@
 #ifndef OGONEK_SEGMENTATION_GRAPHEME_CLUSTER_HPP
 #define OGONEK_SEGMENTATION_GRAPHEME_CLUSTER_HPP
 
+#include <ogonek/types.h++>
+#include <ogonek/concepts/segmentation.h++>
+
 namespace ogonek {
-    struct grapheme_cluster {};
+    struct grapheme_cluster {
+        static bool is_boundary(code_point, code_point) {
+            return false;
+        }
+    };
+    CONCEPT_ASSERT(BoundaryCondition<grapheme_cluster>());
 } // namespace ogonek
 
 #endif // OGONEK_SEGMENTATION_GRAPHEME_CLUSTER_HPP
