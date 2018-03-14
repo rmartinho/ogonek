@@ -17,7 +17,7 @@
 #ifndef OGONEK_CONCEPTS_HPP
 #define OGONEK_CONCEPTS_HPP
 
-#include <ogonek/types.h++>
+#include <ogonek/types/core.h++>
 #include <ogonek/error_fwd.h++>
 
 #include <range/v3/range_concepts.hpp>

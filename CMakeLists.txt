@@ -4,6 +4,8 @@ project (Ogonek)
 include (deps/catch.cmake)
 include (deps/range-v3.cmake)
 
+option (USE_BOOST "Enable boost interoperability" OFF)
+
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -18,6 +20,7 @@ if(MSVC)
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     add_definitions(-Wall -Wextra -pedantic -Werror)
 endif()
+add_definitions(-fcolor-diagnostics)
 
 set (OGONEK_ABI abiv0)
 

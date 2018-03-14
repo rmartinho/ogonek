@@ -67,6 +67,16 @@ namespace test {
                 return convert_string<char32_t>(str, &format_code_point);
             }
         };
+        template <typename T>
+        struct optional_converter {
+            static std::string convert(ogonek::optional<T> const& opt) {
+                if(opt) {
+                    return Catch::StringMaker<T>::convert(*opt);
+                } else {
+                    return "<none>";
+                }
+            }
+        };
     } // namespace detail
 
     struct u8string : std::string {
@@ -103,6 +113,8 @@ namespace Catch {
     struct StringMaker<std::u16string> : ::test::detail::code_unit_converter<char16_t> {};
     template <>
     struct StringMaker<std::u32string> : ::test::detail::code_point_converter {};
+    template <typename T>
+    struct StringMaker<::ogonek::optional<T>> : ::test::detail::optional_converter<T> {};
 } // namespace Catch
 
 #endif // TEST_UTIL_HPP
