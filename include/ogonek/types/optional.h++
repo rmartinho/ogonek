@@ -9,7 +9,10 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-// Simple optional<T> implementation for our own types
+/**
+ * Optional type
+ * =============
+ */
 
 #ifndef OGONEK_TYPES_OPTIONAL_HPP
 #define OGONEK_TYPES_OPTIONAL_HPP
@@ -35,20 +38,32 @@
 #include <cassert>
 
 namespace ogonek {
+    namespace detail {
 #if defined(OGONEK_HAS_STD_EXPERIMENTAL_OPTIONAL)
-    template <typename T>
-    using std_optional = std::experimental::optional<T>;
-    constexpr auto std_nullopt = std::experimental::nullopt;
+        template <typename T>
+        using std_optional = std::experimental::optional<T>;
+        constexpr auto std_nullopt = std::experimental::nullopt;
 #elif defined(OGONEK_HAS_STD_OPTIONAL)
-    template <typename T>
-    using std_optional = std::optional<T>;
-    constexpr auto std_nullopt = std::nullopt;
+        template <typename T>
+        using std_optional = std::optional<T>;
+        constexpr auto std_nullopt = std::nullopt;
 #endif
+    } // namespace detail
 
+    /**
+     * .. class:: none_t
+     *
+     *     The unit type of the :var:`none` constant.
+     *
+     * .. var:: constexpr none_t none
+     *
+     *     A constant used to create empty optional objects.
+     *
+     */
     struct none_t {
 #ifdef OGONEK_HAS_STD_OPTIONAL
-        constexpr none_t(decltype(std_nullopt)) noexcept {}
-        constexpr operator decltype(std_nullopt)() const noexcept {
+        constexpr none_t(decltype(detail::std_nullopt)) noexcept {}
+        constexpr operator decltype(detail::std_nullopt)() const noexcept {
             return std_nullopt;
         }
 #endif
@@ -61,9 +76,97 @@ namespace ogonek {
 #endif
     } constexpr none = {};
 
+    /**
+     * .. class:: template <typename T>\
+     *            optional
+     *
+     *     An optional object that may or may not contain a value.
+     */
     template <typename T>
     struct optional;
+    /**
+     *     .. function:: constexpr optional() noexcept
+     *
+     *         Creates a new empty optional object.
+     */
+    /**
+     *     .. function:: constexpr optional(none_t) noexcept
+     *
+     *         Creates a new empty optional object.
+     */
+    /**
+     *     .. function:: constexpr optional(T t) noexcept
+     *
+     *         Creates a new optional object.
+     *
+     *         :param t: the value of the new optional object
+     */
+    /**
+     *     .. function:: constexpr T operator*() const noexcept
+     *
+     *         :requires: this optional isn't empty.
+     *
+     *         :returns: the value of this optional.
+     */
+    /**
+     *     .. function:: constexpr explicit operator bool() const noexcept
+     *
+     *         :returns: ``true`` if this optional has a value; ``false`` if it's empty.
+     */
+    /**
+     *     .. note:: |std17|
+     *
+     *         .. function:: constexpr optional(std::optional<T> o) noexcept
+     *
+     *             Creates a new optional from a ``std::optional``.
+     *
+     *             :param o: the source
+     *
+     *             :returns: an optional with the same value as ``o``
+     */
+    /**
+     *         .. function:: constexpr operator std::optional<T>() const noexcept
+     *
+     *             Converts an optional to ``std::optional``.
+     *
+     *             :returns: a ``std::optional`` with the same value as this optional
+     */
+    /**
+     *     .. note:: |boost|
+     *
+     *         .. function:: constexpr optional(boost::optional<T> o) noexcept
+     *
+     *             Creates a new optional from a ``boost::optional``.
+     *
+     *             :param o: the source
+     *
+     *             :returns: an optional with the same value as ``o``
+     */
+    /**
+     *         .. function:: constexpr operator boost::optional<T>() const noexcept
+     *
+     *             Converts an optional to ``boost::optional``.
+     *
+     *             :returns: a ``boost::optional`` with the same value as this optional
+     */
 
+    /**
+     * .. function:: template <typename T, typename U>\
+     *               constexpr bool operator==(optional<T> const& lhs, optional<U> const& rhs) noexcept
+     * .. function:: template <typename T>\
+     *               constexpr bool operator==(optional<T> const& lhs, T const& rhs) noexcept
+     * .. function:: template <typename T>\
+     *               constexpr bool operator==(T const& lhs, optional<T> const& rhs) noexcept
+     * .. function:: template <typename T>\
+     *               constexpr bool operator==(optional<T> const& lhs, none_t) noexcept
+     * .. function:: template <typename T>\
+     *               constexpr bool operator==(none_t, optional<T> const& rhs) noexcept
+     *
+     *     Compares optional for equality.
+     *
+     *     :returns: ``true`` if both sides have the same value, or if neither
+     *               side has a value; ``false`` otherwise.
+     */
     template <typename T, typename U>
     constexpr bool operator==(optional<T> const& lhs, optional<U> const& rhs) noexcept {
         return (!lhs && !rhs) || (lhs && rhs && *lhs == *rhs);
@@ -85,6 +188,22 @@ namespace ogonek {
         return !rhs;
     }
 
+    /**
+     * .. function:: template <typename T, typename U>\
+     *               constexpr bool operator!=(optional<T> const& lhs, optional<U> const& rhs) noexcept
+     * .. function:: template <typename T>\
+     *               constexpr bool operator!=(optional<T> const& lhs, T const& rhs) noexcept
+     * .. function:: template <typename T>\
+     *               constexpr bool operator!=(T const& lhs, optional<T> const& rhs) noexcept
+     * .. function:: template <typename T>\
+     *               constexpr bool operator!=(optional<T> const& lhs, none_t) noexcept
+     * .. function:: template <typename T>\
+     *               constexpr bool operator!=(none_t, optional<T> const& rhs) noexcept
+     *
+     *     Compares optional for inequality.
+     *
+     *     :returns: ``!(lhs == rhs)``
+     */
     template <typename T, typename U>
     constexpr bool operator!=(optional<T> const& lhs, optional<U> const& rhs) noexcept {
         return !(lhs == rhs);
@@ -129,16 +248,16 @@ namespace ogonek {
             return u;
         }
 
-        explicit constexpr operator bool() const noexcept {
+        constexpr explicit operator bool() const noexcept {
             return u != invalid;
         }
 
 #ifdef OGONEK_HAS_STD_OPTIONAL
-        constexpr optional(std_optional<code_point> const& o) noexcept
+        constexpr optional(detail::std_optional<code_point> const& o) noexcept
         : u(o.value_or(invalid)) {}
 
-        constexpr operator std_optional<code_point>() const noexcept {
-            return u != invalid? std_optional<code_point>(u) : std_nullopt;
+        constexpr operator detail::std_optional<code_point>() const noexcept {
+            return u != invalid? detail::std_optional<code_point>(u) : detail::std_nullopt;
         }
 #endif
 
