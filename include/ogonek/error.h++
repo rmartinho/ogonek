@@ -20,8 +20,8 @@
 #include <ogonek/error_fwd.h++>
 
 #include <ogonek/concepts.h++>
+#include <ogonek/types.h++>
 #include <ogonek/encoding.h++>
-#include <ogonek/detail/container/optional.h++>
 
 #include <range/v3/range_concepts.hpp>
 #include <range/v3/range_traits.hpp>
@@ -95,7 +95,7 @@ namespace ogonek {
      */
     struct discard_errors_t {
         template <typename E>
-        detail::optional<code_point> operator()(E) const {
+        optional<code_point> operator()(E) const {
             return {};
         }
     } constexpr discard_errors {};
@@ -115,12 +115,12 @@ namespace ogonek {
     struct replace_errors_t {
         template <typename Encoding,
                   CONCEPT_REQUIRES_(EncodingForm<Encoding>())>
-        detail::optional<code_point> operator()(encode_error<Encoding>) const {
+        optional<code_point> operator()(encode_error<Encoding>) const {
             return replacement_character_v<Encoding>;
         }
         template <typename Encoding,
                   CONCEPT_REQUIRES_(EncodingForm<Encoding>())>
-        detail::optional<code_point> operator()(decode_error<Encoding>) const {
+        optional<code_point> operator()(decode_error<Encoding>) const {
             return { U'\uFFFD' };
         }
     } constexpr replace_errors {};
@@ -136,7 +136,7 @@ namespace ogonek {
      */
     struct throw_error_t {
         template <typename E>
-        detail::optional<code_point> operator()(E e) const {
+        optional<code_point> operator()(E e) const {
             throw e;
         }
     } constexpr throw_error {};

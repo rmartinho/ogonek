@@ -20,6 +20,7 @@ if(MSVC)
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     add_definitions(-Wall -Wextra -pedantic -Werror)
 endif()
+add_definitions(-fcolor-diagnostics)
 
 set (OGONEK_ABI abiv0)
 

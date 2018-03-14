@@ -26,7 +26,7 @@ namespace ogonek {
         inline namespace abiv0 {
             struct numeric_value_properties {
                 code_point start;
-                detail::fraction value;
+                optional<fraction> value;
             };
 
             extern OGONEK_PUBLIC numeric_value_properties const* numeric_value_data;

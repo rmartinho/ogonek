@@ -16,8 +16,6 @@
 #include <catch.hpp>
 #include "util.h++"
 
-#include <boost/optional/optional_io.hpp>
-
 namespace ucd = ogonek::ucd;
 
 using namespace test::string_literals;
@@ -188,10 +186,10 @@ TEST_CASE("Numeric_Type can be queried", "[properties]") {
     CHECK(ucd::get_numeric_type(U'\xA831') == ucd::numeric_type::numeric);
 }
 TEST_CASE("Numeric_Value can be queried", "[properties]") {
-    CHECK(ucd::get_numeric_value(U'\x0041') == boost::none);
-    CHECK(ucd::get_numeric_value(U'\xA621') == boost::rational<long>(1));
-    CHECK(ucd::get_numeric_value(U'\x00B2') == boost::rational<long>(2));
-    CHECK(ucd::get_numeric_value(U'\xA831') == boost::rational<long>(1, 2));
+    CHECK(ucd::get_numeric_value(U'\x0041') == ogonek::none);
+    CHECK(ucd::get_numeric_value(U'\xA621') == ogonek::fraction(1, 1));
+    CHECK(ucd::get_numeric_value(U'\x00B2') == ogonek::fraction(2, 1));
+    CHECK(ucd::get_numeric_value(U'\xA831') == ogonek::fraction(1, 2));
 }
 TEST_CASE("Joining_Type can be queried", "[properties]") {
     CHECK(ucd::get_joining_type(U'\x0041') == ucd::joining_type::u);

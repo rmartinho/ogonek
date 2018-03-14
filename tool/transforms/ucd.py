@@ -234,9 +234,9 @@ class Types:
         def cpp(self, value):
             frac = self.py(value)
             if frac is None:
-                return '{ 0, 0 }'
+                return '{}'
             else:
-                return '{{ {0}, {1} }}'.format(frac.numerator, frac.denominator)
+                return '{{{{ {0}, {1} }}}}'.format(frac.numerator, frac.denominator)
 
         def py(self, value):
             if value == 'NaN':
@@ -1150,7 +1150,7 @@ output_defs = {
     'nfkc_quick_check':                         lambda: gen_builtin('NFKC_Quick_Check',                          'tribool'),
     'nfkd_quick_check':                         lambda: gen_builtin('NFKD_Quick_Check',                          'bool'),
     'numeric_type':                             lambda: gen_enum(   'Numeric_Type',                              numeric_type_type),
-    'numeric_value':                            lambda: gen_builtin('Numeric_Value',                             'detail::fraction'),
+    'numeric_value':                            lambda: gen_builtin('Numeric_Value',                             'optional<fraction>'),
     'joining_type':                             lambda: gen_enum(   'Joining_Type',                              joining_type_type),
     'joining_group':                            lambda: gen_enum(   'Joining_Group',                             joining_group_type),
     'join_control':                             lambda: gen_builtin('Join_Control',                              'bool'),

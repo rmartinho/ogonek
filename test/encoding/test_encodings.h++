@@ -15,7 +15,6 @@
 #include <ogonek/error.h++>
 #include <ogonek/encoding.h++>
 #include <ogonek/detail/encoding/simple_byte_mapping_encoding.h++>
-#include <ogonek/detail/container/optional.h++>
 
 #include <catch.hpp>
 #include "util.h++"

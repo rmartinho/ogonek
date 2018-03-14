@@ -9,8 +9,8 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-#ifndef OGONEK_TRIBOOL_HPP
-#define OGONEK_TRIBOOL_HPP
+#ifndef OGONEK_TYPES_TRIBOOL_HPP
+#define OGONEK_TYPES_TRIBOOL_HPP
 
 #ifdef OGONEK_USE_BOOST
 #   include <boost/tribool.hpp>
@@ -20,6 +20,12 @@ namespace ogonek {
     struct tribool;
 
     struct maybe_t {
+#ifdef OGONEK_USE_BOOST
+        constexpr maybe_t(decltype(boost::indeterminate)) noexcept {}
+        constexpr operator decltype(boost::indeterminate)() const noexcept {
+            return boost::indeterminate;
+        }
+#endif
         constexpr bool operator()(tribool t) const noexcept;
     } constexpr maybe = {};
 
@@ -155,4 +161,4 @@ namespace ogonek {
     }
 } // namespace ogonek
 
-#endif // OGONEK_TRIBOOL_HPP
+#endif // OGONEK_TYPES_TRIBOOL_HPP

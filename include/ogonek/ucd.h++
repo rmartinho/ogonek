@@ -20,13 +20,9 @@
 #include <ogonek/ucd/ucd_all.g.h++>
 #include <ogonek/types.h++>
 #include <ogonek/detail/static_const.h++>
-#include <ogonek/detail/container/optional.h++>
 
 #include <range/v3/view/c_str.hpp>
 #include <range/v3/algorithm/copy.hpp>
-
-#include <boost/optional.hpp>
-#include <boost/rational.hpp>
 
 #include <algorithm>
 #include <iterator>
@@ -43,11 +39,6 @@ namespace ogonek {
      */
     namespace ucd {
         namespace detail {
-            inline boost::optional<boost::rational<long>> to_rational(ogonek::detail::fraction f) {
-                if(f.den == 0) return boost::none;
-                else return boost::rational<long>(f.num, f.den);
-            }
-
             template <typename It>
             std::reverse_iterator<It> make_reverse(It it) {
                 return std::reverse_iterator<It>(it);
@@ -378,15 +369,15 @@ namespace ogonek {
         OGONEK_UCD_GETTER(numeric_type, numeric_type);
 
         /**
-         * .. function:: boost::optional<boost::rational<long>> get_numeric_value(code_point u)
+         * .. function:: optional<fraction> get_numeric_value(code_point u)
          *
          *     :returns: the *Numeric_Value* property of ``u``, if present; none otherwise
          */
         namespace fun {
             struct get_numeric_value {
-                boost::optional<boost::rational<long>> operator()(code_point u) const {
+                optional<fraction> operator()(code_point u) const {
                     auto value = detail::find_property_group(numeric_value_data, numeric_value_data_size, u).value;
-                    return detail::to_rational(value);
+                    return value;
                 }
             };
         } // namespace fun
