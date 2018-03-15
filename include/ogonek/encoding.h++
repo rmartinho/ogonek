@@ -21,7 +21,6 @@
 #include <ogonek/error_fwd.h++>
 #include <ogonek/concepts/encoding.h++>
 #include <ogonek/detail/static_const.h++>
-#include <ogonek/detail/container/optional.h++>
 #include <ogonek/detail/container/partial_array.h++>
 #include <ogonek/detail/range/deferred.h++>
 
@@ -380,7 +379,7 @@ namespace ogonek {
 
                 iterator first;
                 iterator last;
-                detail::optional<code_point> decoded;
+                optional<code_point> decoded;
                 std::decay_t<Handler> const* handler = nullptr;
                 coding_state_t<Encoding> state {};
             };

@@ -20,14 +20,9 @@
 #include <ogonek/ucd/ucd_all.g.h++>
 #include <ogonek/types.h++>
 #include <ogonek/detail/static_const.h++>
-#include <ogonek/detail/container/optional.h++>
 
 #include <range/v3/view/c_str.hpp>
 #include <range/v3/algorithm/copy.hpp>
-
-#include <boost/logic/tribool.hpp>
-#include <boost/optional.hpp>
-#include <boost/rational.hpp>
 
 #include <algorithm>
 #include <iterator>
@@ -43,27 +38,7 @@ namespace ogonek {
      * .. note:: The items in this section are in the namespace ``ogonek::ucd``.
      */
     namespace ucd {
-        /**
-        * .. var:: constexpr auto maybe = boost::indeterminate
-        *
-        *     An alternative name for ``boost::indeterminate``.
-        */
-        BOOST_TRIBOOL_THIRD_STATE(maybe)
-
         namespace detail {
-            inline boost::tribool to_tribool(ogonek::detail::trinary t) {
-                switch(t.value) {
-                    case -1:
-                        return maybe;
-                    default:
-                        return t.value;
-                }
-            }
-            inline boost::optional<boost::rational<long>> to_rational(ogonek::detail::fraction f) {
-                if(f.den == 0) return boost::none;
-                else return boost::rational<long>(f.num, f.den);
-            }
-
             template <typename It>
             std::reverse_iterator<It> make_reverse(It it) {
                 return std::reverse_iterator<It>(it);
@@ -215,9 +190,9 @@ namespace ogonek {
 #define OGONEK_UCD_TESTER3(name) \
         namespace fun {\
             struct get_##name {\
-                boost::tribool operator()(code_point u) const {\
+                tribool operator()(code_point u) const {\
                     auto value = detail::find_property_group(name##_data, name##_data_size, u).value;\
-                    return detail::to_tribool(value);\
+                    return value;\
                 }\
             };\
         } /* namespace fun */ \
@@ -363,7 +338,7 @@ namespace ogonek {
          */
         OGONEK_UCD_QUERY(bool, full_composition_exclusion, is_excluded_from_composition);
         /**
-         * .. function:: boost::tribool get_nfc_quick_check(code_point u)
+         * .. function:: tribool get_nfc_quick_check(code_point u)
          *
          *     :returns: the *NFC_Quick_Check* property of ``u``
          */
@@ -375,7 +350,7 @@ namespace ogonek {
          */
         OGONEK_UCD_GETTER(bool, nfd_quick_check);
         /**
-         * .. function:: boost::tribool get_nfkc_quick_check(code_point u)
+         * .. function:: tribool get_nfkc_quick_check(code_point u)
          *
          *     :returns: the *NFKC_Quick_Check* property of ``u``
          */
@@ -394,15 +369,15 @@ namespace ogonek {
         OGONEK_UCD_GETTER(numeric_type, numeric_type);
 
         /**
-         * .. function:: boost::optional<boost::rational<long>> get_numeric_value(code_point u)
+         * .. function:: optional<fraction> get_numeric_value(code_point u)
          *
          *     :returns: the *Numeric_Value* property of ``u``, if present; none otherwise
          */
         namespace fun {
             struct get_numeric_value {
-                boost::optional<boost::rational<long>> operator()(code_point u) const {
+                optional<fraction> operator()(code_point u) const {
                     auto value = detail::find_property_group(numeric_value_data, numeric_value_data_size, u).value;
-                    return detail::to_rational(value);
+                    return value;
                 }
             };
         } // namespace fun

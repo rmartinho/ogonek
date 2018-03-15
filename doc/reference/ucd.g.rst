@@ -3,10 +3,6 @@ Unicode character database
 
 .. note:: The items in this section are in the namespace ``ogonek::ucd``.
 
-.. var:: constexpr auto maybe = boost::indeterminate
-
-    An alternative name for ``boost::indeterminate``.
-
 .. function:: version get_age(code_point u)
 
     :returns: the *Age* property of ``u``
@@ -63,7 +59,7 @@ Unicode character database
 
     :returns: true if ``u`` has the *Full_Composition_Exclusion* property; false otherwise
 
-.. function:: boost::tribool get_nfc_quick_check(code_point u)
+.. function:: tribool get_nfc_quick_check(code_point u)
 
     :returns: the *NFC_Quick_Check* property of ``u``
 
@@ -71,7 +67,7 @@ Unicode character database
 
     :returns: the *NFD_Quick_Check* property of ``u``
 
-.. function:: boost::tribool get_nfkc_quick_check(code_point u)
+.. function:: tribool get_nfkc_quick_check(code_point u)
 
     :returns: the *NFKC_Quick_Check* property of ``u``
 
@@ -83,7 +79,7 @@ Unicode character database
 
     :returns: the *Numeric_Type* property of ``u``
 
-.. function:: boost::optional<boost::rational<long>> get_numeric_value(code_point u)
+.. function:: optional<fraction> get_numeric_value(code_point u)
 
     :returns: the *Numeric_Value* property of ``u``, if present; none otherwise
 

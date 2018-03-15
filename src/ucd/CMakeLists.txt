@@ -18,3 +18,4 @@ add_custom_command (
     COMMENT "Translating UCD")
 
 add_library (ogonek_ucd STATIC ${ucd_gen_SRC})
+target_link_libraries(ogonek_ucd range-v3)

@@ -25,4 +25,10 @@
     out; it is likely to change signficantly or to be removed before the next
     release.
 
+.. |boost| replace:: This feature is only available if the ``OGONEK_USE_BOOST``
+    macro is set.
+
+.. |std17| replace:: This feature is only available when compiling with C++17
+    support.
+
 .. vim:ft=rst:

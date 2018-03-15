@@ -17,10 +17,14 @@
 #ifndef OGONEK_CONCEPTS_ENCODING_HPP
 #define OGONEK_CONCEPTS_ENCODING_HPP
 
-#include <ogonek/types.h++>
-#include <ogonek/concepts/core.h++>
+#include <ogonek/types/core.h++>
 #include <ogonek/error_fwd.h++>
 
+#include <range/v3/range_concepts.hpp>
+#include <range/v3/utility/concepts.hpp>
+#include <range/v3/utility/functional.hpp>
+
+#include <iterator>
 #include <array>
 #include <type_traits>
 

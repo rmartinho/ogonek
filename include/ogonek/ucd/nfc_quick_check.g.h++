@@ -26,7 +26,7 @@ namespace ogonek {
         inline namespace abiv0 {
             struct nfc_quick_check_properties {
                 code_point start;
-                detail::trinary value;
+                tribool value;
             };
 
             extern OGONEK_PUBLIC nfc_quick_check_properties const* nfc_quick_check_data;

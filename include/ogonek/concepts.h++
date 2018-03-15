@@ -9,12 +9,12 @@
 // You should have received a copy of the CC0 Public Domain Dedication along with this software.
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-#ifndef OGONEK_TYPES_HPP
-#define OGONEK_TYPES_HPP
+#ifndef OGONEK_CONCEPTS_HPP
+#define OGONEK_CONCEPTS_HPP
 
-#include <ogonek/types/core.h++>
-#include <ogonek/types/optional.h++>
-#include <ogonek/types/tribool.h++>
-#include <ogonek/types/fraction.h++>
+#include <ogonek/concepts/core.h++>
+#include <ogonek/concepts/encoding.h++>
+#include <ogonek/concepts/normalization.h++>
+#include <ogonek/concepts/segmentation.h++>
 
-#endif // OGONEK_TYPES_HPP
+#endif // OGONEK_CONCEPTS_HPP
